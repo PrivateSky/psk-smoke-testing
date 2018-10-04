@@ -1,9 +1,11 @@
 var path = require("path");
 process.env.PRIVATESKY_TMP = path.normalize(__dirname + "/../../../tmp");
-require("../../../engine/launcher");
+
+require("../../../builds/devel/pskruntime")
+
 var assert = require("double-check").assert;
 
-$$.requireLibrary("testSwarms");
+$$.loadLibrary("testSwarms");
 
 function runCode(callback){
     $$.swarm.start("testSwarms.simpleSwarm").begin(1,2,callback);
