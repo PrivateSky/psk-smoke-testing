@@ -1,7 +1,7 @@
 var path = require("path");
 process.env.PRIVATESKY_TMP = path.normalize(__dirname + "/../../../tmp");
 
-require("../../../builds/devel/pskruntime");
+require("../../../psknode/bundles/pskruntime");
 require("callflow");
 require("launcher");
 var assert = require('double-check').assert;
