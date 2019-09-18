@@ -1,7 +1,7 @@
 const path = require('path');
 
 const tir = require(path.resolve(path.join(__dirname, "../../psknode/tests/util/tir.js")));
-const assert = require('double-check').assert;
+const assert = require('../../modules/double-check').assert;
 
 const domain = 'local';
 const agent = 'exampleAgent';
