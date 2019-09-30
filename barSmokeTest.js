@@ -8,23 +8,29 @@ const Archive = bar.Archive;
 const ArchiveConfigurator = bar.ArchiveConfigurator;
 const fs = require("fs");
 const crypto = require("crypto");
+const path = require("path");
 
-const folderPath = "fld";
-const filePath = "fld/a.txt";
-let savePath = "dot";
+let folderPath;
+let filePath;
+let savePath;
 
 
-const folders = ["fld"];
-const files = [
-    "fld/a.txt", "fld/b.txt", "fld/c.txt"
-];
-
+let folders;
+let files;
 const text = ["asta e un text?", "ana are mere", "hahahaha"];
-
 
 $$.flows.describe("barTest", {
     start: function (callback) {
         this.callback = callback;
+
+        double_check.ensureFilesExist(folders, files, text, (err) => {
+            assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
+            this.createArchive();
+        });
+
+    },
+
+    createArchive: function () {
         this.archiveConfigurator = new ArchiveConfigurator();
         this.archiveConfigurator.setStorageProvider("FileBrickStorage", savePath);
         this.archiveConfigurator.setFsAdapter("FsAdapter");
@@ -32,10 +38,7 @@ $$.flows.describe("barTest", {
         this.archiveConfigurator.setMapEncryptionKey(crypto.randomBytes(32));
         this.archive = new Archive(this.archiveConfigurator);
 
-        double_check.ensureFilesExist(folders, files, text, (err) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
-            this.addFolder();
-        });
+        this.addFolder();
     },
 
     addFolder: function () {
@@ -49,10 +52,8 @@ $$.flows.describe("barTest", {
 
     deleteFile: function () {
         this.archive.deleteFile(filePath, (err) => {
-            if (err) {
-                throw err;
-            }
             assert.true(err === null || typeof err === "undefined", `Failed to delete file ${filePath}`);
+
             this.createNewHierarchy();
         });
     },
@@ -63,6 +64,7 @@ $$.flows.describe("barTest", {
 
             double_check.computeFoldersHashes(folderPath, (err, initialHashes) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
+
                 this.extractFolder(initialHashes);
             });
         });
@@ -100,7 +102,17 @@ $$.flows.describe("barTest", {
     }
 });
 
+double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
 
-assert.callback("Bar smoke test", (callback) => {
-$$.flows.start("barTest", "start", callback);
-}, 3000);
+    folderPath = path.join(testFolder, "fld");
+    filePath = path.join(testFolder, "fld/a.txt");
+    savePath = path.join(testFolder, "dot");
+
+
+    folders = ["fld"].map(folder => path.join(testFolder, folder));
+    files = ["fld/a.txt", "fld/b.txt", "fld/c.txt"].map(file => path.join(testFolder, file));
+
+    assert.callback("Bar smoke test", (callback) => {
+        $$.flows.start("barTest", "start", callback);
+    }, 3000);
+});
