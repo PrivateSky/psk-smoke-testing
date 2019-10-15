@@ -72,7 +72,7 @@ $$.flows.describe("barTest", {
 
     extractFolder: function (initialHashes) {
         this.initialHashes = initialHashes;
-        this.archive.extractFolder(savePath, (err) => {
+        this.archive.extractFolder((err) => {
             assert.true(err === null || typeof err === "undefined", `Failed to extract folder from file ${savePath}`);
 
             double_check.computeFoldersHashes(folderPath, (err, newHashes) => {
@@ -87,7 +87,7 @@ $$.flows.describe("barTest", {
 
     createNewArchive: function () {
         const archive = new Archive(this.archiveConfigurator);
-        archive.extractFolder(savePath, (err) => {
+        archive.extractFolder((err) => {
             assert.true(err === null || typeof err === "undefined", `Failed to extract folder from file ${savePath}`);
 
             double_check.computeFoldersHashes(folderPath, (err, newHashes) => {
