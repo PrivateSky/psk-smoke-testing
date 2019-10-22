@@ -1,5 +1,5 @@
 require("../../../psknode/bundles/pskruntime");
-var assert = require("double-check").assert;
+var assert = require("../../../modules/double-check").assert;
 
 var f = $$.flow.describe("FlowExample", {
     private: {

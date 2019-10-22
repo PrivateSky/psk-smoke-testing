@@ -1,7 +1,7 @@
 require("../../psknode/bundles/pskruntime");
 
 const beesHealer = require("swarmutils").beesHealer;
-const assert = require("double-check").assert;
+const assert = require("../../modules/double-check").assert;
 
 const f = $$.swarms.describe("simpleSwarm", {
     private:{

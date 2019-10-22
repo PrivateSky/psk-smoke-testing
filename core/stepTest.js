@@ -1,6 +1,6 @@
 require("../../../psknode/bundles/pskruntime");
 require("callflow");
-const assert = require("double-check").assert;
+const assert = require("../../../modules/double-check").assert;
 
 const f = $$.swarm.describe("stepExample", {
     private: {
