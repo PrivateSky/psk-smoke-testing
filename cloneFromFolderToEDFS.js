@@ -76,7 +76,6 @@ $$.flows.describe("BarClone", {
         this.archiveConfigurator.setStorageProvider("FolderBrickStorage", savePath);
         this.archiveConfigurator.setFsAdapter("FsAdapter");
         this.archiveConfigurator.setBufferSize(2);
-        // this.archiveConfigurator.setMapEncryptionKey(crypto.randomBytes(32));
         this.archive = new Archive(this.archiveConfigurator);
 
         this.edfsBrickStorage = createEdfsBrickStorage(this.url);
