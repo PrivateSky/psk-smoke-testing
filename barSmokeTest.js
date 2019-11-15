@@ -1,6 +1,9 @@
 require("../../psknode/bundles/pskruntime");
 require("../../psknode/bundles/psknode");
+require("../../psknode/bundles/virtualMQ");
 require("callflow");
+require("edfs-brick-storage");
+const VirtualMQ = require("virtualmq");
 const bar = require('bar');
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
@@ -19,23 +22,57 @@ let folders;
 let files;
 const text = ["asta e un text?", "ana are mere", "hahahaha"];
 
+let PORT = 9091;
+const tempFolder = "../../tmp";
+
 $$.flows.describe("barTest", {
     start: function (callback) {
         this.callback = callback;
 
         double_check.ensureFilesExist(folders, files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
-            this.createArchive();
+
+            double_check.computeFoldersHashes(folderPath, (err, initialHashes) => {
+                assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
+
+                this.initialHashes = initialHashes;
+                this.createServer((err, server, url) => {
+                    assert.true(err === null || typeof err === "undefined", "Failed to create server.");
+
+                    this.server = server;
+                    this.url = url;
+                    this.createArchive();
+                });
+            });
+
         });
 
     },
 
+    createServer: function (callback) {
+        let server = VirtualMQ.createVirtualMQ(PORT, tempFolder, undefined, (err, res) => {
+            if (err) {
+                console.log("Failed to create VirtualMQ server on port ", PORT);
+                console.log("Trying again...");
+                if (PORT > 0 && PORT < 50000) {
+                    PORT++;
+                    this.createServer(callback);
+                } else {
+                    throw err;
+                }
+            } else {
+                console.log("Server ready and available on port ", PORT);
+                let url = `http://127.0.0.1:${PORT}`;
+                callback(undefined, server, url);
+            }
+        });
+    },
+
     createArchive: function () {
         this.archiveConfigurator = new ArchiveConfigurator();
-        this.archiveConfigurator.setStorageProvider("FileBrickStorage", savePath);
+        this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", this.url);
         this.archiveConfigurator.setFsAdapter("FsAdapter");
         this.archiveConfigurator.setBufferSize(2);
-        // this.archiveConfigurator.setMapEncryptionKey(crypto.randomBytes(32));
         this.archive = new Archive(this.archiveConfigurator);
 
         this.addFolder();
@@ -46,48 +83,12 @@ $$.flows.describe("barTest", {
             assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
 
             double_check.deleteFoldersSync(folderPath);
-            this.deleteFile();
+            this.extractFolder();
         });
     },
 
-    deleteFile: function () {
-        this.archive.deleteFile(filePath, (err) => {
-            assert.true(err === null || typeof err === "undefined", `Failed to delete file ${filePath}`);
-
-            this.createNewHierarchy();
-        });
-    },
-
-    createNewHierarchy: function () {
-        double_check.ensureFilesExist(folders, files.slice(1), text.slice(1), (err) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
-
-            double_check.computeFoldersHashes(folderPath, (err, initialHashes) => {
-                assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
-
-                this.extractFolder(initialHashes);
-            });
-        });
-    },
-
-    extractFolder: function (initialHashes) {
-        this.initialHashes = initialHashes;
+    extractFolder: function () {
         this.archive.extractFolder((err) => {
-            assert.true(err === null || typeof err === "undefined", `Failed to extract folder from file ${savePath}`);
-
-            double_check.computeFoldersHashes(folderPath, (err, newHashes) => {
-                assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
-                assert.hashesAreEqual(initialHashes, newHashes, "The extracted files are not te same as the initial ones");
-
-                double_check.deleteFoldersSync(folderPath);
-                this.createNewArchive();
-            });
-        });
-    },
-
-    createNewArchive: function () {
-        const archive = new Archive(this.archiveConfigurator);
-        archive.extractFolder((err) => {
             assert.true(err === null || typeof err === "undefined", `Failed to extract folder from file ${savePath}`);
 
             double_check.computeFoldersHashes(folderPath, (err, newHashes) => {
@@ -95,7 +96,6 @@ $$.flows.describe("barTest", {
                 assert.hashesAreEqual(this.initialHashes, newHashes, "The extracted files are not te same as the initial ones");
 
                 double_check.deleteFoldersSync(folderPath);
-                fs.unlinkSync(savePath);
                 this.callback();
             });
         });
