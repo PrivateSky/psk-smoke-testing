@@ -9,29 +9,6 @@ const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
 let PORT = 9090;
 
-
-function EDFS(url) {
-    this.attachAlias = (fileName, alias, callback) => {
-        $$.remote.doHttpPost(url + "/EDFS/addAlias/" + fileName, alias, callback);
-    };
-
-    this.writeToAlias = (alias, data, callback) => {
-        $$.remote.doHttpPost(url + "/EDFS/alias/" + alias, data, callback);
-    };
-
-    this.readFromAlias = (alias, callback) => {
-        $$.remote.doHttpGet(url + "/EDFS/alias/" + alias, callback);
-    };
-
-    this.writeFile = (fileName, data, callback) => {
-        $$.remote.doHttpPost(url + "/EDFS/" + fileName, data, callback);
-    };
-
-    this.readFile = (fileName, callback) => {
-        $$.remote.doHttpGet(url + "/EDFS/" + fileName, callback);
-    };
-}
-
 function createServer(port, tempFolder, callback) {
     let server = VirtualMQ.createVirtualMQ(port, tempFolder, undefined, (err, res) => {
         if (err) {
@@ -59,7 +36,8 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
 
         createServer(PORT, path.join(testFolder, "tmp"),(err, server, url) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
-            const edfs = new EDFS(url);
+            const edfs = require("edfs").createEDFSClient(url);
+            console.log("EDFSClient", edfs);
             const initialData = "first text";
             const addData = "second text";
             const alias = "testAlias";
@@ -84,6 +62,9 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                                 assert.true(err === null || typeof err === "undefined", "Failed to write data to alias");
 
                                 edfs.readFromAlias(alias, (err, buffer) => {
+                                    if (err) {
+                                        throw err;
+                                    }
                                     assert.true(err === null || typeof err === "undefined", "Failed read from alias");
 
                                     assert.equal(addData, buffer.toString(), "Unexpected read data");
