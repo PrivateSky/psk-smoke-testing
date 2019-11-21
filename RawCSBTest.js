@@ -42,7 +42,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity from security context.");
 
-            createServer(9090, path.join(testFolder, "tmp"), (err, server) => {
+            createServer(9097, path.join(testFolder, "tmp"), (err, server) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
                 fs.writeFileSync(filePath, fileData);

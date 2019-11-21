@@ -7,7 +7,7 @@ const VirtualMQ = require("virtualmq");
 const path = require("path");
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
-let PORT = 9090;
+let PORT = 9099;
 
 function createServer(port, tempFolder, callback) {
     let server = VirtualMQ.createVirtualMQ(port, tempFolder, undefined, (err, res) => {
@@ -18,7 +18,6 @@ function createServer(port, tempFolder, callback) {
                 port++;
                 createServer(callback);
             } else {
-                console.log("about to throw error");
                 throw err;
             }
         } else {
