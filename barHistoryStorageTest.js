@@ -48,7 +48,7 @@ const agentAlias = "Smoky";
 let PORT = 9090;
 const tempFolder = "../../tmp";
 
-$$.flows.describe("BarClone", {
+$$.flows.describe("BarStorage", {
     start: function (callback) {
         this.callback = callback;
         this.createServer((err, server, url) => {
@@ -91,15 +91,9 @@ $$.flows.describe("BarClone", {
             assert.true(!err, "Failed to create blockchain");
 
             blockchain1.startTransactionAs("agent", "Constitution", "addAgent", agentAlias, "PublicKey");
-            this.createBlockchain((err, blockchain2) => {
-                assert.true(!err, "Failed to create blockchain");
-
-                let agent = blockchain2.lookup("Agent", agentAlias);
-                assert.equal(agent, null);
-                agent = blockchain1.lookup("Agent", agentAlias);
-                assert.equal(agent.publicKey, "PublicKey");
-                this.callback();
-            });
+            const agent = blockchain1.lookup("Agent", agentAlias);
+            assert.equal(agent.publicKey, "PublicKey");
+            this.callback();
         });
     },
 
@@ -113,6 +107,6 @@ $$.flows.describe("BarClone", {
     }
 });
 
-assert.callback("Bar clone test", (callback) => {
-    $$.flows.start("BarClone", "start", callback);
+assert.callback("Bar history storage test", (callback) => {
+    $$.flows.start("BarStorage", "start", callback);
 }, 2000);
