@@ -19,8 +19,8 @@ let barPath;
 
 let folders;
 
-let PORT = 9091;
-const tempFolder = "../../tmp";
+let PORT = 9191;
+let tempFolder;
 
 const VirtualMQ = require("virtualmq");
 
@@ -79,9 +79,7 @@ $$.flows.describe("AddFile", {
     },
 
     addFile: function () {
-        console.log("About to add file");
         this.archive.addFile(filePath, barPath, (err, mapDigest) => {
-            console.log("add file cb");
             assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
 
             double_check.deleteFoldersSync(folderPath);
@@ -111,7 +109,7 @@ $$.flows.describe("AddFile", {
 });
 
 double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
-
+    tempFolder = path.join(testFolder, "tmp");
     folderPath = path.join(testFolder, "fld");
     barPath = "myFile";
     folders = [folderPath];
