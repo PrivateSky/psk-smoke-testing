@@ -26,7 +26,7 @@ assert.callback('Revive swarm test', (callback) => {
             return;
         }
 
-        const swarm = $$.swarmsInstancesManager.revive_swarm(JSON.parse(JSON.stringify(res)));
+        const swarm = $$.swarmEngine.revive_swarm(JSON.parse(JSON.stringify(res)));
 
         assert.equal(swarm.result, 3, "Revitalisation failed");
         callback();
