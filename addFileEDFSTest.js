@@ -1,16 +1,18 @@
 require("../../psknode/bundles/pskruntime");
 require("../../psknode/bundles/psknode");
 require("../../psknode/bundles/virtualMQ");
+require("../../psknode/bundles/edfsBar");
 
 require("callflow");
-require("edfs-brick-storage");
 const bar = require('bar');
+const createEDFSBrickStorage = require("edfs-brick-storage").createEDFSBrickStorage;
+const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
 const Archive = bar.Archive;
 const ArchiveConfigurator = bar.ArchiveConfigurator;
-const fs = require("fs");
-const crypto = require("crypto");
+ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
+ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", createEDFSBrickStorage);
 const path = require("path");
 
 let folderPath;
@@ -116,5 +118,5 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     filePath = path.join(testFolder, "fld", "a.txt");
     assert.callback("AddFileEDFSTest", (callback) => {
         $$.flows.start("AddFile", "start", callback);
-    }, 2000);
+    }, 1000);
 });

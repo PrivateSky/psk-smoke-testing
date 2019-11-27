@@ -1,12 +1,18 @@
 require("../../psknode/bundles/pskruntime");
 require("../../psknode/bundles/psknode");
 require("../../psknode/bundles/virtualMQ");
-require("psk-http-client");
-require("edfs-brick-storage");
-const VirtualMQ = require("virtualmq");
-const path = require("path");
+require("../../psknode/bundles/edfsBar");
+
+const bar = require('bar');
+const createEDFSBrickStorage = require("edfs-brick-storage").createEDFSBrickStorage;
+const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
+const ArchiveConfigurator = bar.ArchiveConfigurator;
+ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
+ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", createEDFSBrickStorage);
+const VirtualMQ = require("virtualmq");
+const path = require("path");
 let PORT = 9099;
 
 function createServer(port, tempFolder, callback) {

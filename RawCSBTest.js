@@ -2,6 +2,7 @@ require("../../psknode/bundles/pskruntime");
 require("../../psknode/bundles/psknode");
 require("../../psknode/bundles/consoleTools");
 require("../../psknode/bundles/virtualMQ");
+require("../../psknode/bundles/edfsBar");
 
 const path = require("path");
 const fs = require("fs");
@@ -53,7 +54,6 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                     rawCSB.readFile("a.txt", (err, data) => {
                         assert.true(err === null || typeof err === "undefined", "Failed read file from CSB.");
                         assert.true(fileData === data.toString(), "Invalid read data");
-
 
                         server.close(err => {
                             assert.true(err === null || typeof err === "undefined", "Failed to close server");
