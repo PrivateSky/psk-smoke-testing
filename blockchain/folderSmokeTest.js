@@ -33,14 +33,17 @@ function mainTest(err, storageFolder) {
         let worldStateCache = bm.createWorldStateCache("fs", storageFolder);
         let historyStorage = bm.createHistoryStorage("fs", storageFolder);
         let consensusAlgorithm = bm.createConsensusAlgorithm("direct");
-        bm.createBlockchain(worldStateCache, historyStorage, consensusAlgorithm,signatureProvider, false, true);
+
+        bm.createBlockchain(worldStateCache, historyStorage, consensusAlgorithm, signatureProvider, false, true);
         $$.blockchain.start(function (err, res) {
             assert.false(err, 'Failed to start blockchain');
             let agent = $$.blockchain.lookup("Agent", agentAlias);
             $$.fixMe("If we uncomment the next line,it fails. investigate and fix this!");
             //$$.transactions.start("Constitution", "addAgent", agentAlias+"WithC", "withoutPK");
             assert.equal(agent.publicKey, "withoutPK");
-            done();
+            $$.blockchain.onceAllCommitted(() => {
+                done();
+            });
         })
     }
 
@@ -51,23 +54,31 @@ function mainTest(err, storageFolder) {
         bm.createBlockchain(worldStateCache, historyStorage, consensusAlgorithm, signatureProvider,false, true);
         $$.blockchain.start(function (err, res) {
             $$.blockchain.startTransactionAs("agent","Constitution", "addAgent", agentAlias+"WithoutC", "withoutPK");
-            let agent = $$.blockchain.lookup("Agent", agentAlias);
-            assert.equal(agent.publicKey, "withoutPK");
-            done();
+            $$.blockchain.onceAllCommitted(() => {
+
+                let agent = $$.blockchain.lookup("Agent", agentAlias);
+                assert.equal(agent.publicKey, "withoutPK");
+                done();
+            });
         })
     }
 
     assert.callback("PK values should be persisted", function (done) {
         $$.blockchain.start(function (err) {
-            assert.isNull(err, 'Failed to start blockchain');
+            if(err) {
+                throw err;
+            }
+            // assert.isNull(err, 'Failed to start blockchain');
             $$.blockchain.startTransactionAs("agent","Constitution", "addAgent", "superMan", "withoutPK");
             $$.blockchain.startTransactionAs("agent","Constitution", "addAgent", agentAlias, "withoutPK");
             $$.blockchain.startTransactionAs("agent","Constitution", "addAgent", agentAlias+"XXX", "withoutPK");
 
-            restartBlockchainFromCache(function () {
-                restartBlockchainWithoutCache(done)
+            $$.blockchain.onceAllCommitted(() => {
+                restartBlockchainFromCache(() => {
+                    restartBlockchainWithoutCache(done);
+                });
             });
         });
-    }, 3000)
+    })
 }
 
