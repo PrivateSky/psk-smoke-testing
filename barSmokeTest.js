@@ -44,7 +44,7 @@ $$.flows.describe("barTest", {
 
                     this.server = server;
                     this.url = url;
-                    this.createArchive();
+                    this.addFolder();
                 });
             });
 
@@ -71,27 +71,30 @@ $$.flows.describe("barTest", {
         });
     },
 
-    createArchive: function () {
-        this.archiveConfigurator = new ArchiveConfigurator();
-        this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", this.url);
-        this.archiveConfigurator.setFsAdapter("FsAdapter");
-        this.archiveConfigurator.setBufferSize(2);
-        this.archive = new Archive(this.archiveConfigurator);
-
-        this.addFolder();
+    createArchiveConfigurator: function () {
+        const archiveConfigurator = new ArchiveConfigurator();
+        archiveConfigurator.setStorageProvider("EDFSBrickStorage", this.url);
+        archiveConfigurator.setFsAdapter("FsAdapter");
+        archiveConfigurator.setBufferSize(2);
+        return archiveConfigurator;
     },
 
     addFolder: function () {
-        this.archive.addFolder(folderPath, (err, mapDigest) => {
+        const archive = new Archive(this.createArchiveConfigurator());
+        archive.addFolder(folderPath, (err, mapDigest) => {
             assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
-
+            assert.true(mapDigest !== null && typeof mapDigest !== "undefined", "Failed to add folder.");
             double_check.deleteFoldersSync(folderPath);
-            this.extractFolder();
+            this.extractFolder(mapDigest);
         });
     },
 
-    extractFolder: function () {
-        this.archive.extractFolder((err) => {
+
+    extractFolder: function (mapDigest) {
+        const archiveConfig = this.createArchiveConfigurator();
+        archiveConfig.setMapDigest(mapDigest);
+        const archive = new Archive(archiveConfig);
+        archive.extractFolder(folderPath, folderPath,(err) => {
             assert.true(err === null || typeof err === "undefined", `Failed to extract folder from file ${savePath}`);
 
             double_check.computeFoldersHashes(folderPath, (err, newHashes) => {

@@ -1,16 +1,19 @@
 require("../../psknode/bundles/pskruntime");
 require("../../psknode/bundles/psknode");
 require("../../psknode/bundles/virtualMQ");
+require("../../psknode/bundles/edfsBar");
 
 require("callflow");
 const bar = require('bar');
-const createEdfsBrickStorage = require("edfs-brick-storage").createEDFSBrickStorage;
+const createEDFSBrickStorage = require("edfs-brick-storage").createEDFSBrickStorage;
+const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
 const Archive = bar.Archive;
 const ArchiveConfigurator = bar.ArchiveConfigurator;
-const fs = require("fs");
-const crypto = require("crypto");
+ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", createEDFSBrickStorage);
+ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
+
 const path = require("path");
 
 let folderPath;
@@ -78,7 +81,7 @@ $$.flows.describe("BarClone", {
         this.archiveConfigurator.setBufferSize(2);
         this.archive = new Archive(this.archiveConfigurator);
 
-        this.edfsBrickStorage = createEdfsBrickStorage(this.url);
+        this.edfsBrickStorage = createEDFSBrickStorage(this.url);
         this.addFolder();
     },
 
