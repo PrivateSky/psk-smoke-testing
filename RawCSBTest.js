@@ -7,7 +7,7 @@ require("../../psknode/bundles/edfsBar");
 const path = require("path");
 const fs = require("fs");
 $$.securityContext = require("psk-security-context").createSecurityContext();
-const RawCSB = require("csb").RawCSB;
+const RawCSB = require("edfs").RawCSB;
 const rawCSB = new RawCSB();
 
 const double_check = require("../../modules/double-check");

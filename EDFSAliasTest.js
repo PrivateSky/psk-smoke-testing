@@ -41,7 +41,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
 
         createServer(PORT, path.join(testFolder, "tmp"),(err, server, url) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
-            const edfs = require("edfs").createEDFSClient(url);
+            const edfs = require("edfs-middleware").createEDFSClient(url);
             const initialData = "first text";
             const addData = "second text";
             const alias = "testAlias";
