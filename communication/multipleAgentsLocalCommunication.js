@@ -44,6 +44,7 @@ assert.callback(
                 for (let d = 0; d < utils.deployedDomains; d++) {
                     utils.setupInteractions(d, noOfAgentsPerDomain);
                 }
+
                 setInterval(() => {
                     console.log(`communicationWorking ${communicationWorking} swarms:${swarmCounter}`);
                     if (communicationWorking === noOfAgentsPerDomain - 1) {
@@ -56,6 +57,7 @@ assert.callback(
                         tir.tearDown(0);
                     }
                 }, 500);
+
                 for (let i = 0; i < interactions[0].length - 1; i++) {
                     console.log(`Test communication between pskAgent_${i} and pskAgent_${i + 1}`);
                     const nextAgent = 'pskAgent_' + (i + 1);
