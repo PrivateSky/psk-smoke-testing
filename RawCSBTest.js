@@ -7,8 +7,9 @@ require("../../psknode/bundles/edfsBar");
 const path = require("path");
 const fs = require("fs");
 $$.securityContext = require("psk-security-context").createSecurityContext();
-const RawCSB = require("edfs").RawCSB;
-const rawCSB = new RawCSB();
+const edfsModule = require("edfs");
+const edfsCommStrategy = edfsModule.createCommunicationStrategy("direct");
+const edfs = edfsModule.createEDFS(edfsCommStrategy);
 
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
@@ -46,25 +47,37 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
             createServer(9097, path.join(testFolder, "tmp"), (err, server) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
-                fs.writeFileSync(filePath, fileData);
-                rawCSB.writeFile(filePath, "a.txt", (err, barMapDigest) => {
-                    assert.true(err === null || typeof err === "undefined", "Failed to write file in CSB");
-                    assert.true(barMapDigest !== null && typeof barMapDigest !== "undefined", "Bar map digest is null or undefined");
+                edfs.createCSB((err, rawCSB) => {
+                    if (err) {
+                        throw err;
+                    }
 
-                    rawCSB.readFile("a.txt", (err, data) => {
-                        assert.true(err === null || typeof err === "undefined", "Failed read file from CSB.");
-                        assert.true(fileData === data.toString(), "Invalid read data");
+                    rawCSB.start(err => {
+                        if (err) {
+                            throw err;
+                        }
 
-                        server.close(err => {
-                            assert.true(err === null || typeof err === "undefined", "Failed to close server");
+                        rawCSB.writeFile("a.txt", fileData, (err, barMapDigest) => {
+                            if (err) {
+                                throw err;
+                            }
+                            assert.true(err === null || typeof err === "undefined", "Failed to write file in CSB");
+                            assert.true(barMapDigest !== null && typeof barMapDigest !== "undefined", "Bar map digest is null or undefined");
 
-                            callback();
+                            rawCSB.readFile("a.txt", (err, data) => {
+                                assert.true(err === null || typeof err === "undefined", "Failed read file from CSB.");
+                                assert.true(fileData === data.toString(), "Invalid read data");
+
+                                server.close(err => {
+                                    assert.true(err === null || typeof err === "undefined", "Failed to close server");
+
+                                    callback();
+                                });
+                            });
                         });
                     });
-
                 });
             });
-
         });
     }, 2000);
 });
