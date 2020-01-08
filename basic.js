@@ -1,28 +1,28 @@
-const path = require('path');
+require('../../psknode/bundles/pskruntime');
+require('../../psknode/bundles/virtualMQ');
 
-const tir = require(path.resolve(path.join(__dirname, "../../psknode/tests/util/tir.js")));
+const tir = require("../../psknode/tests/util/tir.js");
 const assert = require('../../modules/double-check').assert;
 
-const domain = 'local';
-const agent = 'exampleAgent';
-const agents = [agent];
+const domain = "local";
 
-const swarm = {
-    echo: {
-        say: function(input) {
-            this.return('Echo ' + input);
-        }
-    }
-};
+// assert.callback("Basic Test", (finished) => {
+//     const localDomain = tir.addDomain(domain, ["system", "specialAgent"]);
+//
+//     localDomain.swarms.describe("echo", {
+//         say: function (message) {
+//             this.return(null, 'Echo ' + message);
+//         }
+//     });
+//
+//     tir.launch(6000, () => {
+//         $$.interactions.startSwarmAs(`${domain}/agent/system`, "echo", "say", "Hello")
+//             .onReturn((err, result) => {
+//                  assert.equal("Echo Hello", result);
+//                  finished();
+//                  tir.tearDown(0);
+//             })
+//     });
+// }, 6000);
 
-assert.callback('Basic Test', (finished) => {
-    tir.addDomain(domain, agents, swarm);
-
-    tir.launch(3000, () => {
-        tir.interact(domain, agent).startSwarm("echo", "say", "Hello").onReturn(result => {
-            assert.equal("Echo Hello", result);
-            finished();
-            tir.tearDown(0);
-        });
-    });
-}, 2000);
+tir.createConstitutionFromSources(['/home/stefancosmin/psk/privatesky-swarm-engine/libraries/superSwarm', '/home/stefancosmin/psk/privatesky-swarm-engine/libraries/basicTestSwarms'], '/tmp/tir-KjfVkr');
