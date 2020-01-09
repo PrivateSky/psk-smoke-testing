@@ -6,10 +6,11 @@ require("../../psknode/bundles/edfsBar");
 
 const path = require("path");
 const fs = require("fs");
+const brickStorageStrategyName = "http";
 $$.securityContext = require("psk-security-context").createSecurityContext();
 const edfsModule = require("edfs");
-const edfsCommStrategy = edfsModule.createCommunicationStrategy("direct");
-const edfs = edfsModule.createEDFS(edfsCommStrategy);
+const edfs = edfsModule.attach(brickStorageStrategyName);
+$$.brickTransportStrategiesRegistry.add(brickStorageStrategyName, edfsModule.createHTTPBrickTransportStrategy("http://127.0.0.1:9097"));
 
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
