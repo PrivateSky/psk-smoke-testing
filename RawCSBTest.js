@@ -45,7 +45,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity from security context.");
 
-            createServer(9097, path.join(testFolder, "tmp"), (err, server) => {
+            createServer(9097, "tmp", (err, server) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
                 edfs.createCSB((err, rawCSB) => {
@@ -53,19 +53,19 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                         throw err;
                     }
 
-                    rawCSB.start(err => {
+                    rawCSB.writeFile("a.txt", fileData, (err, barMapDigest) => {
                         if (err) {
                             throw err;
                         }
+                        assert.true(err === null || typeof err === "undefined", "Failed to write file in CSB");
+                        assert.true(barMapDigest !== null && typeof barMapDigest !== "undefined", "Bar map digest is null or undefined");
 
-                        rawCSB.writeFile("a.txt", fileData, (err, barMapDigest) => {
+                        edfs.loadCSB(rawCSB.getSeed(), (err, newRawCSB) => {
                             if (err) {
                                 throw err;
                             }
-                            assert.true(err === null || typeof err === "undefined", "Failed to write file in CSB");
-                            assert.true(barMapDigest !== null && typeof barMapDigest !== "undefined", "Bar map digest is null or undefined");
 
-                            rawCSB.readFile("a.txt", (err, data) => {
+                            newRawCSB.readFile("a.txt", (err, data) => {
                                 assert.true(err === null || typeof err === "undefined", "Failed read file from CSB.");
                                 assert.true(fileData === data.toString(), "Invalid read data");
 
