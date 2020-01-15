@@ -28,6 +28,11 @@ assert.callback("Basic Test", (finished) => {
                     assert.false(err, 'Failed getting constitution files from bar');
                     assert.equal(constitutionBundles.length, 1, 'Bar does not contain any files');
 
+                    (function cleanupBuildsFolder() {
+                        const fs = require('fs');
+                        fs.rmdirSync('./builds', {recursive: true});
+                    })();
+
                     finished();
                     tir.tearDown(0);
                 })
