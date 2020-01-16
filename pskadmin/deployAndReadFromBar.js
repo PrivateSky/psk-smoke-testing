@@ -1,4 +1,6 @@
 require('../../../psknode/bundles/pskruntime');
+require('../../../psknode/bundles/psknode');
+require('../../../psknode/bundles/edfsBar');
 require('../../../psknode/bundles/virtualMQ');
 
 const tir = require("../../../psknode/tests/util/tir.js");
