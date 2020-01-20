@@ -8,7 +8,7 @@ const assert = require('../../../modules/double-check').assert;
 
 const domain = "local";
 
-assert.callback("Basic Test", (finished) => {
+assert.callback("Deploy and read from CSB", (finished) => {
     const localDomain = tir.addDomain(domain, ["system", "specialAgent"]);
 
     tir.launch(6000, (err, vmqPort) => {

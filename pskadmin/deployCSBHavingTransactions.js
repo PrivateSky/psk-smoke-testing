@@ -7,8 +7,9 @@ const tir = require("../../../psknode/tests/util/tir.js");
 const assert = require('../../../modules/double-check').assert;
 
 const domain = "local";
+const numberOfDomains = 7;
 
-assert.callback("Basic Test", (finished) => {
+assert.callback("Deploy CSB that has transactions", (finished) => {
     const localDomain = tir.addDomain(domain, ["system", "specialAgent"]);
 
     tir.launch(59000, (err, vmqPort) => {
@@ -52,7 +53,6 @@ assert.callback("Basic Test", (finished) => {
 
 
     function createSomeDomains(csb, callback) {
-        const numberOfDomains = 10;
         let commitsLeft = numberOfDomains;
 
         for (let i = 0; i < numberOfDomains; i++) {
@@ -78,7 +78,7 @@ assert.callback("Basic Test", (finished) => {
     function checkEnoughBlocks(csb, callback) {
         csb.listFiles('blocks', (err, files) => {
             assert.false(err, 'Could not list files from csb');
-            assert.equal(files.length, 13, 'Not all blocks were written');
+            assert.equal(files.length, numberOfDomains + 3, 'Not all blocks were written');
 
             callback();
         });
