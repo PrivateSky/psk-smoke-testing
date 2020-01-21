@@ -15,22 +15,22 @@ assert.callback("Deploy CSB that has transactions", (finished) => {
     tir.launch(59000, (err, vmqPort) => {
         assert.false(err, 'Failed launching TIR');
 
-        const pskadmin = require('../../../modules/pskadmin');
+        const pskdomain = require('../../../modules/pskdomain');
         const vmqAddress = `http://127.0.0.1:${vmqPort}`;
 
-        pskadmin.ensureEnvironmentIsReady(vmqAddress);
+        pskdomain.ensureEnvironmentIsReady(vmqAddress);
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.false(err, 'Could not generate identity');
 
-            pskadmin.createConstitutionFromSources('../../../libraries/basicTestSwarms', (err, constitutionPath) => {
+            pskdomain.createConstitutionFromSources('../../../libraries/basicTestSwarms', (err, constitutionPath) => {
                 assert.false(err, 'Failed creating constitution');
 
-                pskadmin.deployConstitutionCSB(constitutionPath, (err, seedBuffer) => {
+                pskdomain.deployConstitutionCSB(constitutionPath, (err, seedBuffer) => {
                     assert.false(err, 'Failed deploying constitution' + err);
 
                     const seed = seedBuffer.toString();
 
-                    pskadmin.loadCSB(seed, (err, csb) => {
+                    pskdomain.loadCSB(seed, (err, csb) => {
                         if (err) {
                             throw err;
                         }
@@ -39,6 +39,12 @@ assert.callback("Deploy CSB that has transactions", (finished) => {
                             if (err) throw err;
 
                             checkEnoughBlocks(csb, () => {
+
+                                (function cleanupBuildsFolder() {
+                                    const fs = require('fs');
+                                    fs.rmdirSync('./builds', {recursive: true});
+                                })();
+
                                 finished();
                                 tir.tearDown(0);
                             })

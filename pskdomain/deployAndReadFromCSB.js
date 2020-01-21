@@ -14,22 +14,22 @@ assert.callback("Deploy and read from CSB", (finished) => {
     tir.launch(6000, (err, vmqPort) => {
         assert.false(err, 'Failed launching TIR');
 
-        const pskadmin = require('../../../modules/pskadmin');
+        const pskdomain = require('../../../modules/pskdomain');
         const vmqAddress = `http://127.0.0.1:${vmqPort}`;
 
-        pskadmin.ensureEnvironmentIsReady(vmqAddress);
+        pskdomain.ensureEnvironmentIsReady(vmqAddress);
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.false(err, 'Could not generate identity');
 
-            pskadmin.createConstitutionFromSources('../../../libraries/basicTestSwarms', (err, constitutionPath) => {
+            pskdomain.createConstitutionFromSources('../../../libraries/basicTestSwarms', (err, constitutionPath) => {
                 assert.false(err, 'Failed creating constitution');
 
-                pskadmin.deployConstitutionCSB(constitutionPath, (err, seedBuffer) => {
+                pskdomain.deployConstitutionCSB(constitutionPath, (err, seedBuffer) => {
                     assert.false(err, 'Failed deploying constitution');
 
                     const seed = seedBuffer.toString();
 
-                    pskadmin.getConstitutionFilesFromCSB(seed, (err, constitutionBundles) => {
+                    pskdomain.getConstitutionFilesFromCSB(seed, (err, constitutionBundles) => {
                         assert.false(err, 'Failed getting constitution files from bar');
                         assert.equal(constitutionBundles.length, 1, 'Bar does not contain any files');
 

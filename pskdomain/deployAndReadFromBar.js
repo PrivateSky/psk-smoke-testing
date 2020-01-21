@@ -14,19 +14,19 @@ assert.callback("Deploy and read from bar", (finished) => {
     tir.launch(6000, (err, vmqPort) => {
         assert.false(err, 'Failed launching TIR');
 
-        const pskadmin = require('../../../modules/pskadmin');
+        const pskdomain = require('../../../modules/pskdomain');
 
-        pskadmin.ensureEnvironmentIsReady(`http://127.0.0.1:${vmqPort}`);
+        pskdomain.ensureEnvironmentIsReady(`http://127.0.0.1:${vmqPort}`);
 
-        pskadmin.createConstitutionFromSources('../../../libraries/basicTestSwarms', (err, constitutionPath) => {
+        pskdomain.createConstitutionFromSources('../../../libraries/basicTestSwarms', (err, constitutionPath) => {
             assert.false(err, 'Failed creating constitution');
 
-            pskadmin.deployConstitutionBar(constitutionPath, (err, seedBuffer) => {
+            pskdomain.deployConstitutionBar(constitutionPath, (err, seedBuffer) => {
                 assert.false(err, 'Failed deploying constitution');
 
                 const seed = seedBuffer.toString();
 
-                pskadmin.getConstitutionFilesFromBar(seed, (err, constitutionBundles) => {
+                pskdomain.getConstitutionFilesFromBar(seed, (err, constitutionBundles) => {
                     assert.false(err, 'Failed getting constitution files from bar');
                     assert.equal(constitutionBundles.length, 1, 'Bar does not contain any files');
 
