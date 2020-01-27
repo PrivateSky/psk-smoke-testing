@@ -1,15 +1,15 @@
+require('../../../psknode/bundles/testsRuntime');
 require('../../../psknode/bundles/pskruntime');
 require('../../../psknode/bundles/psknode');
 require('../../../psknode/bundles/edfsBar');
 require('../../../psknode/bundles/virtualMQ');
 
 const tir = require("../../../psknode/tests/util/tir.js");
-const assert = require('../../../modules/double-check').assert;
+const assert = require('double-check').assert;
 
 const domain = "local";
 
 assert.callback("Deploy and read from CSB", (finished) => {
-    const localDomain = tir.addDomain(domain, ["system", "specialAgent"]);
 
     tir.launch(6000, (err, vmqPort) => {
         assert.false(err, 'Failed launching TIR');
