@@ -1,5 +1,5 @@
+require('../../../psknode/bundles/testsRuntime');
 require('../../../psknode/bundles/pskruntime');
-require('../../../psknode/bundles/psknode');
 require('../../../psknode/bundles/edfsBar');
 require('../../../psknode/bundles/virtualMQ');
 
