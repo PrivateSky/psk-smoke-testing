@@ -1,18 +1,18 @@
+require('../../psknode/bundles/testsRuntime');
 require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/psknode");
 require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
 
 const bm = require("blockchain");
 const bar = require('bar');
-const createEDFSBrickStorage = require("edfs-brick-storage").createEDFSBrickStorage;
+require('edfs');
+const EDFSBrickStorage = require("edfs-brick-storage");
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
-const Archive = bar.Archive;
 const ArchiveConfigurator = bar.ArchiveConfigurator;
 ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
-ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", createEDFSBrickStorage);
+ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", EDFSBrickStorage.create);
 const VirtualMQ = require("virtualmq");
 
 $$.asset.describe("Agent", {
@@ -87,8 +87,8 @@ $$.flows.describe("BarStorage", {
         this.archiveConfigurator = new ArchiveConfigurator();
         this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", this.url);
         this.archiveConfigurator.setFsAdapter("FsAdapter");
-        this.archiveConfigurator.setBufferSize(2);
-        this.archive = new Archive(this.archiveConfigurator);
+        this.archiveConfigurator.setBufferSize(65535);
+        this.archive = bar.createArchive(this.archiveConfigurator);
 
         this.createBlockchain((err, blockchain1) => {
             assert.true(!err, "Failed to create blockchain");

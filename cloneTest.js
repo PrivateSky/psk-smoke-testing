@@ -1,9 +1,9 @@
+require('../../psknode/bundles/testsRuntime');
 require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/testsRuntime");
 require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
-
 require("callflow");
+
 const double_check = require("double-check");
 const assert = double_check.assert;
 const EDFS = require("edfs");

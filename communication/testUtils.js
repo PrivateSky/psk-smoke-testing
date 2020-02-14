@@ -1,3 +1,7 @@
+require("../../../psknode/bundles/testsRuntime");
+require("../../../psknode/bundles/pskruntime");
+require('../../../psknode/bundles/virtualMQ');
+
 const tir = require('../../../psknode/tests/util/tir');
 
 exports.intervalSize;

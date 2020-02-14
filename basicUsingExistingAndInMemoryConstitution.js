@@ -1,6 +1,8 @@
 const path = require('path');
-require('../../psknode/bundles/pskruntime');
-require('../../psknode/bundles/virtualMQ');
+require('../../psknode/bundles/testsRuntime');
+require("../../psknode/bundles/pskruntime");
+require("../../psknode/bundles/virtualMQ");
+require("callflow");
 
 const tir = require("../../psknode/tests/util/tir.js");
 const assert = require('../../modules/double-check').assert;

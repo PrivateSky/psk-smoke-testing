@@ -1,3 +1,6 @@
+require("../../../psknode/bundles/testsRuntime");
+require("../../../psknode/bundles/pskruntime");
+
 const tir = require('./../../../psknode/tests/util/tir');
 const assert = require('../../../modules/double-check').assert;
 const domain = 'local';

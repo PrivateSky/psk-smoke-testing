@@ -1,8 +1,8 @@
+require('../../psknode/bundles/testsRuntime');
 require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/psknode");
-require("../../psknode/bundles/consoleTools");
 require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
+require("callflow");
 
 const path = require("path");
 const fs = require("fs");
@@ -10,7 +10,7 @@ const brickStorageStrategyName = "http";
 $$.securityContext = require("psk-security-context").createSecurityContext();
 const edfsModule = require("edfs");
 const edfs = edfsModule.attach(brickStorageStrategyName);
-$$.brickTransportStrategiesRegistry.add(brickStorageStrategyName, edfsModule.createHTTPBrickTransportStrategy("http://127.0.0.1:9097"));
+$$.brickTransportStrategiesRegistry.add(brickStorageStrategyName, new edfsModule.HTTPBrickTransportStrategy("http://127.0.0.1:9097"));
 
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;

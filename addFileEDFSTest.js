@@ -1,9 +1,8 @@
+require('../../psknode/bundles/testsRuntime');
 require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/psknode");
 require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
 
-require("callflow");
 const bar = require('bar');
 const createEDFSBrickStorage = require("edfs-brick-storage").createEDFSBrickStorage;
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;

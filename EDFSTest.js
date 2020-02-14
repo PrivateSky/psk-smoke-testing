@@ -1,7 +1,8 @@
+require('../../psknode/bundles/testsRuntime');
 require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/psknode");
 require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
+require("callflow");
 
 const EDFS = require("edfs");
 const createEDFSBrickStorage = require("edfs-brick-storage").create;
@@ -36,7 +37,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
 
     const fileData = "ana are mere";
     const brickTransportStrategyName = "http";
-    $$.brickTransportStrategiesRegistry.add(brickTransportStrategyName, EDFS.createHTTPBrickTransportStrategy("http://localhost:9097"));
+    $$.brickTransportStrategiesRegistry.add(brickTransportStrategyName, new EDFS.HTTPBrickTransportStrategy("http://localhost:9097"));
     const edfs = EDFS.attach(brickTransportStrategyName);
     assert.callback("TestRawCSB", (callback) => {
         createServer(9097, "tmp", (err, server) => {
