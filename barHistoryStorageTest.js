@@ -5,7 +5,7 @@ require("../../psknode/bundles/edfsBar");
 
 const bm = require("blockchain");
 const bar = require('bar');
-require('edfs');
+const EDFS = require('edfs');
 const EDFSBrickStorage = require("edfs-brick-storage");
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("../../modules/double-check");
@@ -84,8 +84,13 @@ $$.flows.describe("BarStorage", {
     },
 
     createArchive: function () {
+        const transportStrategy = new EDFS.HTTPBrickTransportStrategy(this.url);
+        const transportStrategyAlias = `${this.url}`;
+        $$.brickTransportStrategiesRegistry.add(transportStrategyAlias, transportStrategy);
+
         this.archiveConfigurator = new ArchiveConfigurator();
         this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", this.url);
+        this.archiveConfigurator.setSeedEndpoint(this.url);
         this.archiveConfigurator.setFsAdapter("FsAdapter");
         this.archiveConfigurator.setBufferSize(65535);
         this.archive = bar.createArchive(this.archiveConfigurator);

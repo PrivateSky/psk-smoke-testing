@@ -4,7 +4,7 @@ require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
 
 const bar = require('bar');
-const createEDFSBrickStorage = require("edfs-brick-storage").createEDFSBrickStorage;
+const createEDFSBrickStorage = require("edfs-brick-storage").create;
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
@@ -70,11 +70,17 @@ $$.flows.describe("AddFile", {
     },
 
     createArchive: function () {
+        const EDFS = require('edfs');
+        const transportStrategy = new EDFS.HTTPBrickTransportStrategy(this.url);
+        const transportStrategyAlias = `${this.url}`;
+        $$.brickTransportStrategiesRegistry.add(transportStrategyAlias, transportStrategy);
+
         this.archiveConfigurator = new ArchiveConfigurator();
         this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", this.url);
+        this.archiveConfigurator.setSeedEndpoint(this.url);
         this.archiveConfigurator.setFsAdapter("FsAdapter");
-        this.archiveConfigurator.setBufferSize(256);
-        this.archive = new Archive(this.archiveConfigurator);
+        this.archiveConfigurator.setBufferSize(65535);
+        this.archive = bar.createArchive(this.archiveConfigurator);
 
         this.addFile();
     },
@@ -89,7 +95,7 @@ $$.flows.describe("AddFile", {
     },
 
     extractFile: function () {
-        const archive = new Archive(this.archiveConfigurator);
+        const archive = bar.createArchive(this.archiveConfigurator);
         archive.extractFile(filePath, barPath, (err) => {
             assert.true(err === null || typeof err === "undefined", `Failed to extract file ${filePath}`);
 
