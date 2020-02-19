@@ -1,6 +1,5 @@
 require('../../../psknode/bundles/testsRuntime');
 require('../../../psknode/bundles/pskruntime');
-require('../../../psknode/bundles/psknode');
 require('../../../psknode/bundles/edfsBar');
 require('../../../psknode/bundles/virtualMQ');
 
@@ -31,7 +30,7 @@ assert.callback("Deploy and read from CSB", (finished) => {
 
                     pskdomain.getConstitutionFilesFromCSB(seed, (err, constitutionBundles) => {
                         assert.false(err, 'Failed getting constitution files from bar');
-                        assert.equal(constitutionBundles.length, 1, 'Bar does not contain any files');
+                        assert.equal(Object.keys(constitutionBundles).length, 1, 'Bar does not contain any files');
 
                         (function cleanupBuildsFolder() {
                             const fs = require('fs');

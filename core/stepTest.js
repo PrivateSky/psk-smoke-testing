@@ -1,8 +1,10 @@
+require("../../../psknode/bundles/testsRuntime");
 require("../../../psknode/bundles/pskruntime");
-require("callflow");
+require("callflow").initialise();
+
 const assert = require("../../../modules/double-check").assert;
 
-const f = $$.swarm.describe("stepExample", {
+const f = $$.flow.describe("stepExample", {
     private: {
         a1: "int",
         a2: "int"

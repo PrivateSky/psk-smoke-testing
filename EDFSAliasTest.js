@@ -1,16 +1,16 @@
+require('../../psknode/bundles/testsRuntime');
 require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/psknode");
 require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
 
 const bar = require('bar');
-const createEDFSBrickStorage = require("edfs-brick-storage").createEDFSBrickStorage;
+const EDFSBrickStorage = require("edfs-brick-storage");
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
 const ArchiveConfigurator = bar.ArchiveConfigurator;
 ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
-ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", createEDFSBrickStorage);
+ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", EDFSBrickStorage.create);
 const VirtualMQ = require("virtualmq");
 const path = require("path");
 let PORT = 9099;

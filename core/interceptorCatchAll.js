@@ -1,4 +1,7 @@
+require("../../../psknode/bundles/testsRuntime");
 require("../../../psknode/bundles/pskruntime");
+require("callflow").initialise();
+
 const assert = require("../../../modules/double-check").assert;
 
 const f = $$.flow.describe("FlowExample", {

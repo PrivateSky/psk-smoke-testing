@@ -1,12 +1,12 @@
+require('../../psknode/bundles/testsRuntime');
 require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/psknode");
 require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
 
 const VirtualMQ = require("virtualmq");
 const bar = require('bar');
 
-const createEDFSBrickStorage = require("edfs-brick-storage").createEDFSBrickStorage;
+const createEDFSBrickStorage = require("edfs-brick-storage").create;
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("../../modules/double-check");
 const assert = double_check.assert;
@@ -72,15 +72,24 @@ $$.flows.describe("barTest", {
     },
 
     createArchiveConfigurator: function () {
+        const EDFS = require('edfs');
+        const transportStrategyAlias = `${this.url}`;
+
+        if(!$$.brickTransportStrategiesRegistry.has(transportStrategyAlias)) {
+            const transportStrategy = new EDFS.HTTPBrickTransportStrategy(this.url);
+            $$.brickTransportStrategiesRegistry.add(transportStrategyAlias, transportStrategy);
+        }
+
         const archiveConfigurator = new ArchiveConfigurator();
         archiveConfigurator.setStorageProvider("EDFSBrickStorage", this.url);
+        archiveConfigurator.setSeedEndpoint(this.url);
         archiveConfigurator.setFsAdapter("FsAdapter");
-        archiveConfigurator.setBufferSize(2);
+        archiveConfigurator.setBufferSize(65535);
         return archiveConfigurator;
     },
 
     addFolder: function () {
-        const archive = new Archive(this.createArchiveConfigurator());
+        const archive = bar.createArchive(this.createArchiveConfigurator());
         archive.addFolder(folderPath, (err, mapDigest) => {
             assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
             assert.true(mapDigest !== null && typeof mapDigest !== "undefined", "Failed to add folder.");
@@ -93,7 +102,7 @@ $$.flows.describe("barTest", {
     extractFolder: function (mapDigest) {
         const archiveConfig = this.createArchiveConfigurator();
         archiveConfig.setMapDigest(mapDigest);
-        const archive = new Archive(archiveConfig);
+        const archive = bar.createArchive(archiveConfig);
         archive.extractFolder(folderPath, folderPath,(err) => {
             assert.true(err === null || typeof err === "undefined", `Failed to extract folder from file ${savePath}`);
 

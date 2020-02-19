@@ -1,7 +1,7 @@
 const assert = require('../../../modules/double-check').assert;
+require('../../../psknode/bundles/testsRuntime');
 require('../../../psknode/bundles/pskruntime');
-require('../../../psknode/bundles/psknode');
-
+require('callflow').initialise();
 const bm = require('blockchain');
 
 require('../../../modules/blockchain/tests/testUtil/simplestConstitution');

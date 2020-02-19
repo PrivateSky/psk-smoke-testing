@@ -1,5 +1,6 @@
+require('../../../psknode/bundles/testsRuntime');
 require('../../../psknode/bundles/pskruntime');
-require('../../../psknode/bundles/psknode');
+require('callflow').initialise();
 
 let doubleCheck = require('../../../modules/double-check');
 const assert = doubleCheck.assert;

@@ -3,13 +3,11 @@ require('../../../psknode/bundles/pskruntime');
 require('../../../psknode/bundles/edfsBar');
 require('../../../psknode/bundles/virtualMQ');
 
-require('callflow');
-
 const tir = require("../../../psknode/tests/util/tir.js");
 const assert = require('double-check').assert;
 
 const domain = "local";
-const numberOfDomains = 1;
+const numberOfDomains = 7;
 
 assert.callback("Deploy CSB that has transactions", (finished) => {
     const localDomain = tir.addDomain(domain, ["system", "specialAgent"]);
@@ -42,7 +40,7 @@ assert.callback("Deploy CSB that has transactions", (finished) => {
 
                             checkEnoughBlocks(csb, () => {
 
-                                console.log('AM AJUNS LA FINAL');
+                                console.log('Finishing...');
                                 (function cleanupBuildsFolder() {
                                     const fs = require('fs');
                                     fs.rmdirSync('./builds', {recursive: true});
