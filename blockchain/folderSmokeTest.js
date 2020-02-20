@@ -2,7 +2,7 @@ require('../../../psknode/bundles/testsRuntime');
 require('../../../psknode/bundles/pskruntime');
 require('callflow').initialise();
 
-let doubleCheck = require('../../../modules/double-check');
+let doubleCheck = require('double-check');
 const assert = doubleCheck.assert;
 const bm = require('blockchain');
 

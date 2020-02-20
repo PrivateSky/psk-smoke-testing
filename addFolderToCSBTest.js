@@ -3,7 +3,7 @@ require("../../psknode/bundles/pskruntime");
 require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
 
-const double_check = require("../../modules/double-check");
+const double_check = require("double-check");
 const assert = double_check.assert;
 const brickStorageStrategyName = "http";
 const edfsModule = require("edfs");
@@ -25,7 +25,7 @@ $$.flows.describe("AddFolderToCSB", {
         this.callback = callback;
         $$.securityContext = require("psk-security-context").createSecurityContext();
         this.edfs = edfsModule.attach(brickStorageStrategyName);
-        $$.brickTransportStrategiesRegistry.add(brickStorageStrategyName, edfsModule.createHTTPBrickTransportStrategy("http://127.0.0.1:9094"));
+        $$.brickTransportStrategiesRegistry.add(brickStorageStrategyName, new edfsModule.HTTPBrickTransportStrategy("http://127.0.0.1:9094"));
 
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");

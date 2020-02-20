@@ -8,7 +8,7 @@ const bar = require('bar');
 
 const createEDFSBrickStorage = require("edfs-brick-storage").create;
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
-const double_check = require("../../modules/double-check");
+const double_check = require("double-check");
 const assert = double_check.assert;
 const Archive = bar.Archive;
 const ArchiveConfigurator = bar.ArchiveConfigurator;

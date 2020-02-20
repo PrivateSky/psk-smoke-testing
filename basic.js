@@ -4,7 +4,7 @@ require("../../psknode/bundles/virtualMQ");
 
 
 const tir = require("../../psknode/tests/util/tir.js");
-const assert = require('../../modules/double-check').assert;
+const assert = require('double-check').assert;
 
 const domain = "local";
 
@@ -26,4 +26,3 @@ assert.callback("Basic Test", (finished) => {
             })
     });
 }, 6000);
-

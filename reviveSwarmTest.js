@@ -3,7 +3,7 @@ require("../../psknode/bundles/pskruntime");
 require("callflow").initialise();
 
 const beesHealer = require("swarmutils").beesHealer;
-const assert = require("../../modules/double-check").assert;
+const assert = require("double-check").assert;
 
 const f = $$.swarms.describe("simpleSwarm", {
     private:{
