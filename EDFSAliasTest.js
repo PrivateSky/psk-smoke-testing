@@ -6,7 +6,7 @@ require("../../psknode/bundles/edfsBar");
 const bar = require('bar');
 const EDFSBrickStorage = require("edfs-brick-storage");
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
-const double_check = require("../../modules/double-check");
+const double_check = require("double-check");
 const assert = double_check.assert;
 const ArchiveConfigurator = bar.ArchiveConfigurator;
 ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);

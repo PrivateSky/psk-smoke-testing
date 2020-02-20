@@ -2,12 +2,11 @@ require('../../psknode/bundles/testsRuntime');
 require("../../psknode/bundles/pskruntime");
 require("../../psknode/bundles/virtualMQ");
 require("../../psknode/bundles/edfsBar");
-require("callflow");
 
 const EDFS = require("edfs");
 const createEDFSBrickStorage = require("edfs-brick-storage").create;
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
-const double_check = require("../../modules/double-check");
+const double_check = require("double-check");
 const assert = double_check.assert;
 
 const VirtualMQ = require("virtualmq");

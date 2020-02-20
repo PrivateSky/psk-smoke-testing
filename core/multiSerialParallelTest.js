@@ -2,7 +2,7 @@ require("../../../psknode/bundles/testsRuntime");
 require("../../../psknode/bundles/pskruntime");
 require("callflow").initialise();
 
-var assert = require("../../../modules/double-check").assert;
+var assert = require("double-check").assert;
 
 var worker = $$.flow.describe("worker", {
     makeSerialTask:function(value, bag, callback){
