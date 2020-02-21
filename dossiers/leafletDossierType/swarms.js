@@ -1,6 +1,8 @@
-$$.swarms.describe("echo",{
-    say: function(input){
-        this.return("Echo "+ input);
+$$.swarms.describe("transactionHandler",{
+    start: function(identity, transactionName, methodName, ...args){
+        $$.blockchain.startTransactionAs(identity,transactionName, methodName, ...args);
     }
 });
+
+
 console.log("Loading swarm echo description");

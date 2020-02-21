@@ -42,8 +42,9 @@ function loadCSBAndStartTesting(err, seed, testFinishCallback) {
         if (err) {
             throw err;
         }
-
-        csb.startTransaction("echo", "say").onReturn((err, res) => {
+        const productUID = 1234;
+        const description = "simpleDescription";
+        csb.startTransaction("leaflets", "create", productUID, description).onReturn((err, res) => {
             //... do asserts
             //assert.isNull(err, "swarm finished with errors");
             testFinishCallback();
