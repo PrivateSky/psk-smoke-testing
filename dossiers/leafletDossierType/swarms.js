@@ -7,5 +7,4 @@ $$.swarms.describe("transactionHandler",{
     }
 });
 
-
-console.log("Loading swarm echo description");
+console.log("Loading swarm types");

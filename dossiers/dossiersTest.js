@@ -21,7 +21,6 @@ function prepareCSB(endpoint, callback) {
         if (err) {
             throw err;
         }
-        console.log("Added files...")
         //bar.addFile...
         tir.buildConstitution(DOMAIN_CONSTITUTION_FOLDER, bar, (err) => {
             if (err) {
@@ -45,13 +44,17 @@ function loadCSBAndStartTesting(err, seed, testFinishCallback) {
         const productUID = 1234;
         const description = "simple description";
         csb.startTransaction("leaflets", "create", productUID, description).onReturn((err, res) => {
-            //... do asserts
             assert.isNull(err, "transaction failed");
             assert.notNull(res);
-            console.log("One finished");
+            assert.equal(res.productUID, productUID);
+            assert.equal(res.description, description);
+
             const newDescription = "new description";
-            csb.startTransaction("leaflets", "actualize", productUID, newDescription).onReturn((err, res)=>{
+            csb.startTransaction("leaflets", "update", productUID, newDescription).onReturn((err, res)=>{
                 assert.isNull(err, "transaction failed");
+                assert.equal(res.productUID, productUID);
+                assert.equal(res.description, newDescription);
+
                 testFinishCallback();
                 tir.tearDown();
             });
