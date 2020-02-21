@@ -43,12 +43,18 @@ function loadCSBAndStartTesting(err, seed, testFinishCallback) {
             throw err;
         }
         const productUID = 1234;
-        const description = "simpleDescription";
+        const description = "simple description";
         csb.startTransaction("leaflets", "create", productUID, description).onReturn((err, res) => {
             //... do asserts
-            //assert.isNull(err, "swarm finished with errors");
-            testFinishCallback();
-            tir.tearDown();
+            assert.isNull(err, "transaction failed");
+            assert.notNull(res);
+            console.log("One finished");
+            const newDescription = "new description";
+            csb.startTransaction("leaflets", "actualize", productUID, newDescription).onReturn((err, res)=>{
+                assert.isNull(err, "transaction failed");
+                testFinishCallback();
+                tir.tearDown();
+            });
         });
     });
 }
