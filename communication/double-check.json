@@ -1,3 +1,3 @@
 {
-  "ignore": ["testUtils.js"]
+  "ignore": ["testUtils.js", "constitution"]
 }

@@ -49,7 +49,7 @@ function mainTest(err, storageFolder) {
     }
 
     function restartBlockchainWithoutCache(done) {
-        let worldStateCache = bm.createWorldStateCache("none");
+        let worldStateCache = bm.createWorldStateCache("memory");
         let historyStorage = bm.createHistoryStorage("fs", storageFolder);
         let consensusAlgorithm = bm.createConsensusAlgorithm("direct");
         bm.createBlockchain(worldStateCache, historyStorage, consensusAlgorithm, signatureProvider,false, true);

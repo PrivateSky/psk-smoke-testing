@@ -4,14 +4,11 @@ require('../../../psknode/bundles/virtualMQ');
 
 const tir = require('../../../psknode/tests/util/tir');
 
-exports.intervalSize;
 exports.noOfDomains;
 exports.noOfAgentsPerDomain;
 exports.deployedDomains = 0;
 exports.domainNameBase = 'pskDomain';
 exports.agentNameBase = 'pskAgent';
-exports.interactions = {};
-exports.swarms = {};
 
 // ----------------- domain and agents setup ------------------------
 
@@ -23,9 +20,12 @@ module.exports.constructAgentName = function(sufix) {
   return `${this.agentNameBase}_${sufix}`;
 };
 
+module.exports.constructFullAgentName = function(domaiSufix, agentSufix) {
+  return `${module.exports.constructDomainName(domaiSufix)}/agent/${module.exports.constructAgentName(agentSufix)}`
+};
+
 module.exports.setupDomain = function(noOfAgents) {
   var agents = [];
-  this.interactions[this.deployedDomains] = [];
 
   while (noOfAgents > 0) {
     noOfAgents--;
@@ -35,22 +35,13 @@ module.exports.setupDomain = function(noOfAgents) {
   tir.addDomain(this.constructDomainName(this.deployedDomains), agents, this.swarms);
   this.deployedDomains++;
 };
-
-module.exports.setupInteractions = function(domainIndex, noOfAgents) {
-  for (let i = 0; i < noOfAgents; i++) {
-    this.interactions[domainIndex].push(
-      tir.interact(this.constructDomainName(domainIndex), this.constructAgentName(i))
-    );
-  }
-};
 //--------------------------------------------------------------------
 
 module.exports.initDefaults = function(swarms) {
   this.initData(60000, 1, 1, swarms);
 };
 
-module.exports.initData = function(intervalSize, noOfDomains, noOfAgentsPerDomain, swarms) {
-  this.intervalSize = intervalSize;
+module.exports.initData = function(noOfDomains, noOfAgentsPerDomain, swarms) {
   this.noOfDomains = noOfDomains;
   this.noOfAgentsPerDomain = noOfAgentsPerDomain;
   this.swarms = swarms;
