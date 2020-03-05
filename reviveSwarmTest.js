@@ -5,6 +5,9 @@ require("callflow").initialise();
 const beesHealer = require("swarmutils").beesHealer;
 const assert = require("double-check").assert;
 
+const swarmEngine = require("swarm-engine");
+swarmEngine.initialise();
+
 const f = $$.swarms.describe("simpleSwarm", {
     private:{
         a1:"int",
