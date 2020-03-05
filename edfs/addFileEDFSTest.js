@@ -1,7 +1,7 @@
-require('../../psknode/bundles/testsRuntime');
-require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/virtualMQ");
-require("../../psknode/bundles/edfsBar");
+require('../../../psknode/bundles/testsRuntime');
+require("../../../psknode/bundles/pskruntime");
+require("../../../psknode/bundles/virtualMQ");
+require("../../../psknode/bundles/edfsBar");
 
 const bar = require('bar');
 const createEDFSBrickStorage = require("edfs-brick-storage").create;
@@ -14,18 +14,17 @@ ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
 ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", createEDFSBrickStorage);
 const path = require("path");
 
+const tir = require("../../../psknode/tests/util/tir.js");
+
 let folderPath;
 let filePath;
 let barPath;
 
 let folders;
 
-let PORT = 9191;
 let tempFolder;
 
-const VirtualMQ = require("virtualmq");
-
-const text = ["asta e un text", "asta e un alt text", "ana are mere"];
+const text = ["first text", "second fragment", "third"];
 
 $$.flows.describe("AddFile", {
     start: function (callback) {
@@ -38,11 +37,10 @@ $$.flows.describe("AddFile", {
                 assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
 
                 this.initialHash = initialHash;
-                this.createServer((err, server, url) => {
+                tir.launchVirtualMQNode((err, port) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                    this.server = server;
-                    this.url = url;
+                    this.port = port;
                     this.createArchive();
                 });
             });
@@ -50,34 +48,16 @@ $$.flows.describe("AddFile", {
 
     },
 
-    createServer: function (callback) {
-        let server = VirtualMQ.createVirtualMQ(PORT, tempFolder, undefined, (err, res) => {
-            if (err) {
-                console.log("Failed to create VirtualMQ server on port ", PORT);
-                console.log("Trying again...");
-                if (PORT > 0 && PORT < 50000) {
-                    PORT++;
-                    this.createServer(callback);
-                } else {
-                    throw err;
-                }
-            } else {
-                console.log("Server ready and available on port ", PORT);
-                let url = `http://127.0.0.1:${PORT}`;
-                callback(undefined, server, url);
-            }
-        });
-    },
-
     createArchive: function () {
         const EDFS = require('edfs');
-        const transportStrategy = new EDFS.HTTPBrickTransportStrategy(this.url);
-        const transportStrategyAlias = `${this.url}`;
+        const endpoint = `http://localhost:${this.port}`;
+        const transportStrategy = new EDFS.HTTPBrickTransportStrategy(endpoint);
+        const transportStrategyAlias = "justAnAlias";
         $$.brickTransportStrategiesRegistry.add(transportStrategyAlias, transportStrategy);
 
         this.archiveConfigurator = new ArchiveConfigurator();
-        this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", this.url);
-        this.archiveConfigurator.setSeedEndpoint(this.url);
+        this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", transportStrategyAlias);
+        this.archiveConfigurator.setSeedEndpoint(endpoint);
         this.archiveConfigurator.setFsAdapter("FsAdapter");
         this.archiveConfigurator.setBufferSize(65535);
         this.archive = bar.createArchive(this.archiveConfigurator);
@@ -105,11 +85,8 @@ $$.flows.describe("AddFile", {
 
                 double_check.deleteFoldersSync([folderPath]);
 
-                this.server.close((err) => {
-                    assert.true(err === null || typeof err === "undefined", "Failed to close server.");
-
-                    this.callback();
-                });
+                this.callback();
+                tir.tearDown();
             });
         });
     }

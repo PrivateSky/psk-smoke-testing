@@ -49,15 +49,23 @@ function loadCSBAndStartTesting(err, seed, testFinishCallback) {
             assert.equal(res.productUID, productUID);
             assert.equal(res.description, description);
 
-            const newDescription = "new description";
-            csb.startTransaction("leaflets", "update", productUID, newDescription).onReturn((err, res)=>{
+            csb.startTransaction("leaflets", "create", "3124", "description").onReturn((err, res) => {
                 assert.isNull(err, "transaction failed");
-                assert.equal(res.productUID, productUID);
-                assert.equal(res.description, newDescription);
+                assert.notNull(res);
+                assert.equal(res.productUID, "3124");
+                assert.equal(res.description, "description");
 
-                testFinishCallback();
-                tir.tearDown();
+                const newDescription = "new description";
+                csb.startTransaction("leaflets", "update", productUID, newDescription).onReturn((err, res)=>{
+                    assert.isNull(err, "transaction failed");
+                    assert.equal(res.productUID, productUID);
+                    assert.equal(res.description, newDescription);
+
+                    testFinishCallback();
+                    tir.tearDown();
+                });
             });
+
         });
     });
 }
