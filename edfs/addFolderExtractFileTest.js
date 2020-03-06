@@ -60,7 +60,6 @@ $$.flows.describe("AddFolderToCSB", {
         this.bar.extractFile(filePath, "fld/a.txt", (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to extract file.");
             this.callback();
-            tir.tearDown(0);
         });
     }
 });

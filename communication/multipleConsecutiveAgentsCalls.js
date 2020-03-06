@@ -34,7 +34,6 @@ assert.callback(
                 );*/
                 if (testLoopsCompleted == noOfAgentsPerDomain) {
                     finished();
-                    tir.tearDown(0);
                 }
             }, 500);
             for (let i = 0; i < noOfAgentsPerDomain; i++) {

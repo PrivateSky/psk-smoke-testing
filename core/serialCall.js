@@ -21,7 +21,6 @@ assert.callback(
 					console.log(result);
 					assert.true(result.join('') === 'abc');
 					finished();
-					tir.tearDown(0);
 				});
 		});
 	},

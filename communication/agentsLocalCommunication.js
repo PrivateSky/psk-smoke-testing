@@ -28,7 +28,6 @@ assert.callback(
                     assert.false(err, 'Should not have an error running as agent "system1" ');
                     assert.true(result === noOfAgentsPerDomain, `Agentii n-au comunicat!`);
                     finished();
-                    tir.tearDown(0);
                 });
             });
 

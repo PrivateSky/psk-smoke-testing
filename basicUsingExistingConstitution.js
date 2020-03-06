@@ -17,7 +17,6 @@ assert.callback("Basic Test", (finished) => {
             .onReturn((err, result) => {
                 assert.equal("Echo Hello", result);
                 finished();
-                tir.tearDown(0);
             })
     });
 }, 6000);

@@ -36,7 +36,6 @@ assert.callback(
                             `There was issues exchanging swarms!`
                         );
                         finished();
-                        tir.tearDown(0);
                     }
                 }, 500);
 

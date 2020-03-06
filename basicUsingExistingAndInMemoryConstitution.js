@@ -28,7 +28,6 @@ assert.callback("Basic Test", (finished) => {
                         assert.equal("SuperEcho Hello", result);
 
                         finished();
-                        tir.tearDown(0);
                     })
             })
     });

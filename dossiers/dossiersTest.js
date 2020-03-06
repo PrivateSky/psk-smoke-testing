@@ -62,7 +62,6 @@ function loadCSBAndStartTesting(err, seed, testFinishCallback) {
                     assert.equal(res.description, newDescription);
 
                     testFinishCallback();
-                    tir.tearDown();
                 });
             });
 

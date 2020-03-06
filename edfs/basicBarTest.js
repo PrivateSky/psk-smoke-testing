@@ -37,7 +37,6 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                     assert.true(fileData === data.toString(), "Invalid read data");
 
                     callback();
-                    tir.tearDown(0);
                 });
             });
         });

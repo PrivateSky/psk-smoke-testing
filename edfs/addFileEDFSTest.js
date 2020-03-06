@@ -86,7 +86,6 @@ $$.flows.describe("AddFile", {
                 double_check.deleteFoldersSync([folderPath]);
 
                 this.callback();
-                tir.tearDown();
             });
         });
     }
