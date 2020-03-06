@@ -1,15 +1,15 @@
-require('../../psknode/bundles/testsRuntime');
-require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/virtualMQ");
-require("../../psknode/bundles/edfsBar");
+require('../../../psknode/bundles/testsRuntime');
+require("../../../psknode/bundles/pskruntime");
+require("../../../psknode/bundles/virtualMQ");
+require("../../../psknode/bundles/edfsBar");
 require("callflow");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
 const EDFS = require("edfs");
-const brickTransportStrategyName = EDFS.HTTPBrickTransportStrategy.prototype.HTTP_BRICK_TRANSPORT_STRATEGY;
+const tir = require("../../../psknode/tests/util/tir");
+const brickTransportStrategyName = "justAnAlias";
 
-const fs = require("fs");
 const path = require("path");
 
 let folderPath;
@@ -17,14 +17,8 @@ let filePath;
 let savePath;
 let cloneStoragePath;
 
-
 let folders;
 let files;
-
-let PORT = 9192;
-const tempFolder = "../../tmp";
-
-const VirtualMQ = require("virtualmq");
 
 const text = ["asta e un text", "asta e un alt text", "ana are mere"];
 
@@ -40,39 +34,20 @@ $$.flows.describe("BarClone", {
                 assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
 
                 this.initialHashes = initialHashes;
-                this.createServer((err, server, url) => {
+                tir.launchVirtualMQNode((err, port) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                    this.server = server;
-                    this.url = url;
-                    $$.brickTransportStrategiesRegistry.add(brickTransportStrategyName, new EDFS.HTTPBrickTransportStrategy(url));
+                    const endpoint=`http://localhost:${port}`;
+                    $$.brickTransportStrategiesRegistry.add(brickTransportStrategyName, new EDFS.HTTPBrickTransportStrategy(endpoint));
                     this.edfsBrickStorage = require("edfs-brick-storage").create(brickTransportStrategyName);
                     this.edfs = EDFS.attach(brickTransportStrategyName);
                     this.archive  = this.edfs.createBar();
+
                     this.addFolder();
                 });
             });
         });
 
-    },
-
-    createServer: function (callback) {
-        let server = VirtualMQ.createVirtualMQ(PORT, tempFolder, undefined, (err, res) => {
-            if (err) {
-                console.log("Failed to create VirtualMQ server on port ", PORT);
-                console.log("Trying again...");
-                if (PORT > 0 && PORT < 50000) {
-                    PORT++;
-                    this.createServer(callback);
-                } else {
-                    throw err;
-                }
-            } else {
-                console.log("Server ready and available on port ", PORT);
-                let url = `http://127.0.0.1:${PORT}`;
-                callback(undefined, server, url);
-            }
-        });
     },
 
     addFolder: function () {

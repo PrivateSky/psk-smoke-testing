@@ -1,7 +1,6 @@
-require('../../psknode/bundles/testsRuntime');
-require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/virtualMQ");
-require("../../psknode/bundles/edfsBar");
+require('../../../psknode/bundles/testsRuntime');
+require("../../../psknode/bundles/pskruntime");
+require("../../../psknode/bundles/edfsBar");
 
 const bm = require("blockchain");
 const bar = require('bar');
@@ -13,7 +12,6 @@ const assert = double_check.assert;
 const ArchiveConfigurator = bar.ArchiveConfigurator;
 ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
 ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", EDFSBrickStorage.create);
-const VirtualMQ = require("virtualmq");
 
 $$.asset.describe("Agent", {
     public: {
@@ -28,7 +26,6 @@ $$.asset.describe("Agent", {
         this.securityParadigm.constitutional();
     }
 });
-
 
 $$.transaction.describe("Constitution", {
     addAgent: function (alias, publicKey) {
@@ -46,51 +43,29 @@ $$.transaction.describe("Constitution", {
     }
 });
 
+const tir = require("../../../psknode/tests/util/tir");
 const agentAlias = "Smoky";
-
-let PORT = 9090;
-const tempFolder = "../../tmp";
 
 $$.flows.describe("BarStorage", {
     start: function (callback) {
         this.callback = callback;
-        this.createServer((err, server, url) => {
+        tir.launchVirtualMQNode((err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-            this.server = server;
-            this.url = url;
+            this.port = port;
             this.createArchive();
         });
     },
 
-    createServer: function (callback) {
-        let server = VirtualMQ.createVirtualMQ(PORT, tempFolder, undefined, (err, res) => {
-            if (err) {
-                console.log("Failed to create VirtualMQ server on port ", PORT);
-                console.log("Trying again...");
-                if (PORT > 0 && PORT < 50000) {
-                    PORT++;
-                    this.createServer(callback);
-                } else {
-                    console.log("about to throw error");
-                    throw err;
-                }
-            } else {
-                console.log("Server ready and available on port ", PORT);
-                let url = `http://127.0.0.1:${PORT}`;
-                callback(undefined, server, url);
-            }
-        });
-    },
-
     createArchive: function () {
-        const transportStrategy = new EDFS.HTTPBrickTransportStrategy(this.url);
-        const transportStrategyAlias = `${this.url}`;
+        const endpoint = `http://localhost:${this.port}`;
+        const transportStrategy = new EDFS.HTTPBrickTransportStrategy(endpoint);
+        const transportStrategyAlias = "justAnAlias";
         $$.brickTransportStrategiesRegistry.add(transportStrategyAlias, transportStrategy);
 
         this.archiveConfigurator = new ArchiveConfigurator();
-        this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", this.url);
-        this.archiveConfigurator.setSeedEndpoint(this.url);
+        this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", transportStrategy);
+        this.archiveConfigurator.setSeedEndpoint(endpoint);
         this.archiveConfigurator.setFsAdapter("FsAdapter");
         this.archiveConfigurator.setBufferSize(65535);
         this.archive = bar.createArchive(this.archiveConfigurator);
@@ -111,7 +86,7 @@ $$.flows.describe("BarStorage", {
         let consensusAlgorithm = bm.createConsensusAlgorithm("direct");
         let signatureProvider = bm.createSignatureProvider("permissive");
         let blockchain = bm.createABlockchain(worldStateCache, historyStorage, consensusAlgorithm, signatureProvider);
-        blockchain.start(onResult)
+        blockchain.start(onResult);
     }
 });
 

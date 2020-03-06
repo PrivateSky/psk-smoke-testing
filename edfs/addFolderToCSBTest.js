@@ -1,22 +1,17 @@
-require('../../psknode/bundles/testsRuntime');
-require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/virtualMQ");
-require("../../psknode/bundles/edfsBar");
+require('../../../psknode/bundles/testsRuntime');
+require("../../../psknode/bundles/pskruntime");
+require("../../../psknode/bundles/virtualMQ");
+require("../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
-const brickStorageStrategyName = "http";
+const brickStorageStrategyName = "justAnAlias";
 const edfsModule = require("edfs");
+const tir = require("../../../psknode/tests/util/tir");
+
 let folderPath;
-let filePath;
 
-let folders;
 let files;
-
-let PORT = 9094;
-const tempFolder = "../../tmp";
-
-const VirtualMQ = require("virtualmq");
 
 const text = ["asta e un text", "asta e un alt text", "ana are mere"];
 
@@ -25,39 +20,18 @@ $$.flows.describe("AddFolderToCSB", {
         this.callback = callback;
         $$.securityContext = require("psk-security-context").createSecurityContext();
         this.edfs = edfsModule.attach(brickStorageStrategyName);
-        $$.brickTransportStrategiesRegistry.add(brickStorageStrategyName, new edfsModule.HTTPBrickTransportStrategy("http://127.0.0.1:9094"));
 
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
-            this.createServer((err, server, url) => {
+            tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                this.server = server;
-                this.url = url;
+                $$.brickTransportStrategiesRegistry.add(brickStorageStrategyName, new edfsModule.HTTPBrickTransportStrategy(`http://localhost:${port}`));
                 this.createCSB();
             });
         });
 
-    },
-
-    createServer: function (callback) {
-        let server = VirtualMQ.createVirtualMQ(PORT, tempFolder, undefined, (err, res) => {
-            if (err) {
-                console.log("Failed to create VirtualMQ server on port ", PORT);
-                console.log("Trying again...");
-                if (PORT > 0 && PORT < 50000) {
-                    PORT++;
-                    this.createServer(callback);
-                } else {
-                    throw err;
-                }
-            } else {
-                console.log("Server ready and available on port ", PORT);
-                let url = `http://127.0.0.1:${PORT}`;
-                callback(undefined, server, url);
-            }
-        });
     },
 
     createCSB: function () {

@@ -1,47 +1,27 @@
-require('../../psknode/bundles/testsRuntime');
-require("../../psknode/bundles/pskruntime");
-require("../../psknode/bundles/virtualMQ");
-require("../../psknode/bundles/edfsBar");
+require('../../../psknode/bundles/testsRuntime');
+require("../../../psknode/bundles/pskruntime");
+require("../../../psknode/bundles/virtualMQ");
+require("../../../psknode/bundles/edfsBar");
 
 const bar = require('bar');
 const EDFSBrickStorage = require("edfs-brick-storage");
 const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("double-check");
 const assert = double_check.assert;
+const tir = require("../../../psknode/tests/util/tir");
+
 const ArchiveConfigurator = bar.ArchiveConfigurator;
 ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
 ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", EDFSBrickStorage.create);
-const VirtualMQ = require("virtualmq");
-const path = require("path");
-let PORT = 9099;
-
-function createServer(port, tempFolder, callback) {
-    let server = VirtualMQ.createVirtualMQ(port, tempFolder, undefined, (err, res) => {
-        if (err) {
-            console.log("Failed to create VirtualMQ server on port ", port);
-            console.log("Trying again...");
-            if (port > 0 && port < 50000) {
-                port++;
-                createServer(callback);
-            } else {
-                throw err;
-            }
-        } else {
-            console.log("Server ready and available on port ", port);
-            let url = `http://127.0.0.1:${port}`;
-            callback(undefined, server, url);
-        }
-    });
-}
 
 double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     assert.true(err === null || typeof err === "undefined", "Failed to create test folder.");
 
     assert.callback("EDFSAliasTest", (callback) => {
 
-        createServer(PORT, path.join(testFolder, "tmp"),(err, server, url) => {
+        tir.launchVirtualMQNode(testFolder,(err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
-            const edfs = require("edfs-middleware").createEDFSClient(url);
+            const edfs = require("edfs-middleware").createEDFSClient(`http://localhost:${port}`);
             const initialData = "first text";
             const addData = "second text";
             const alias = "testAlias";
@@ -54,6 +34,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to attach alias.");
 
                     edfs.readFromAlias(alias, (err, readData) => {
+                        //assert.disableCleanings();
                         assert.true(err === null || typeof err === "undefined", "Failed to read data from alias");
 
                         assert.equal(initialData, readData.toString(), "Unexpected data");
