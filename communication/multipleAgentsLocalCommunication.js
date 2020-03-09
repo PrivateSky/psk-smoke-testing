@@ -7,7 +7,7 @@ const assert = require('double-check').assert;
 const testUtils = require('./testUtils');
 
 const args = process.argv.slice(2);
-const intervalSize = 90000;
+const intervalSize = 30000;
 const noOfDomains = 1;
 const noOfAgentsPerDomain = args[0] || 20;
 const agentThrowingErrorIndex = args[1] || 300;
@@ -27,7 +27,7 @@ assert.callback(
                     swarmCounter++;
                 }
 
-                setInterval(() => {
+                let intervalHandler = setInterval(() => {
                     console.log(`communicationWorking ${communicationWorking} swarms:${swarmCounter}`);
                     if (communicationWorking === noOfAgentsPerDomain - 1) {
                         console.log(`SWARMS STARTED ${swarmCounter}`);
@@ -35,6 +35,7 @@ assert.callback(
                             communicationWorking === noOfAgentsPerDomain - 1,
                             `There was issues exchanging swarms!`
                         );
+                        clearInterval(intervalHandler);
                         finished();
                     }
                 }, 500);
