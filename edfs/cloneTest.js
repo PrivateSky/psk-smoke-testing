@@ -25,8 +25,6 @@ const text = ["asta e un text", "asta e un alt text", "ana are mere"];
 $$.flows.describe("BarClone", {
     start: function (callback) {
         this.callback = callback;
-
-        this.edfsBrickStorage = require("edfs-brick-storage").create(brickTransportStrategyName);
         double_check.ensureFilesExist(folders, files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
@@ -38,9 +36,8 @@ $$.flows.describe("BarClone", {
                     assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
                     const endpoint=`http://localhost:${port}`;
-                    $$.brickTransportStrategiesRegistry.add(brickTransportStrategyName, new EDFS.HTTPBrickTransportStrategy(endpoint));
-                    this.edfsBrickStorage = require("edfs-brick-storage").create(brickTransportStrategyName);
-                    this.edfs = EDFS.attach(brickTransportStrategyName);
+                    this.edfsBrickStorage = require("edfs-brick-storage").create(endpoint);
+                    this.edfs = EDFS.attachToEndpoint(endpoint);
                     this.archive  = this.edfs.createBar();
 
                     this.addFolder();

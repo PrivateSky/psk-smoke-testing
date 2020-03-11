@@ -18,9 +18,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
         tir.launchVirtualMQNode(10, testFolder, (err, serverPort) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
-            const brickTransportStrategyName = "testStrategy";
-            $$.brickTransportStrategiesRegistry.add(brickTransportStrategyName, new EDFS.HTTPBrickTransportStrategy("http://localhost:"+serverPort));
-            const edfs = EDFS.attach(brickTransportStrategyName);
+            const edfs = EDFS.attachToEndpoint("http://localhost:" + serverPort);
 
             const bar = edfs.createBar();
 

@@ -30,8 +30,7 @@ $$.flows.describe("AddFolderToCSB", {
 
                 this.port = port;
                 const endpoint = `http://localhost:${port}`;
-                this.edfs = EDFS.attach(brickTransportStrategyName);
-                $$.brickTransportStrategiesRegistry.add(brickTransportStrategyName, new EDFS.HTTPBrickTransportStrategy(endpoint));
+                this.edfs = EDFS.attachToEndpoint(endpoint);
                 this.createBAR();
             });
         });
