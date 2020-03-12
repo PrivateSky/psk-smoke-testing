@@ -51,31 +51,22 @@ $$.flows.describe("AddFile", {
     createArchive: function () {
         const EDFS = require('edfs');
         const endpoint = `http://localhost:${this.port}`;
-        const transportStrategy = new EDFS.HTTPBrickTransportStrategy(endpoint);
-        const transportStrategyAlias = "justAnAlias";
-        $$.brickTransportStrategiesRegistry.add(transportStrategyAlias, transportStrategy);
-
-        this.archiveConfigurator = new ArchiveConfigurator();
-        this.archiveConfigurator.setStorageProvider("EDFSBrickStorage", transportStrategyAlias);
-        this.archiveConfigurator.setSeedEndpoint(endpoint);
-        this.archiveConfigurator.setFsAdapter("FsAdapter");
-        this.archiveConfigurator.setBufferSize(65535);
-        this.archive = bar.createArchive(this.archiveConfigurator);
+        this.edfs = EDFS.attachToEndpoint(endpoint);
+        this.archive = this.edfs.createBar();
 
         this.addFile();
     },
 
     addFile: function () {
         this.archive.addFile(filePath, barPath, (err, mapDigest) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
-
+            assert.true(err === null || typeof err === "undefined", "Failed to add file.");
             double_check.deleteFoldersSync(folderPath);
-            this.extractFile();
+            this.extractFile(this.archive.getSeed());
         });
     },
 
-    extractFile: function () {
-        const archive = bar.createArchive(this.archiveConfigurator);
+    extractFile: function (seed) {
+        const archive = this.edfs.loadBar(seed);
         archive.extractFile(filePath, barPath, (err) => {
             assert.true(err === null || typeof err === "undefined", `Failed to extract file ${filePath}`);
 

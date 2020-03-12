@@ -3,18 +3,11 @@ require("../../../psknode/bundles/pskruntime");
 require("../../../psknode/bundles/virtualMQ");
 require("../../../psknode/bundles/edfsBar");
 
-const VirtualMQ = require("virtualmq");
 const bar = require('bar');
 
-const createEDFSBrickStorage = require("edfs-brick-storage").create;
-const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("double-check");
 const assert = double_check.assert;
 const tir = require("../../../psknode/tests/util/tir");
-
-const ArchiveConfigurator = bar.ArchiveConfigurator;
-ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
-ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", createEDFSBrickStorage);
 const path = require("path");
 
 let folderPath;
@@ -40,7 +33,7 @@ $$.flows.describe("barTest", {
                     assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
                     this.port = port;
-                    this.addFolder();
+                    this.createArchive();
                 });
             });
 
@@ -48,40 +41,26 @@ $$.flows.describe("barTest", {
 
     },
 
-    createArchiveConfigurator: function () {
+    createArchive: function () {
         const EDFS = require('edfs');
         const endpoint = `http://localhost:${this.port}`;
-        const transportStrategyAlias = "justAnAlias";
-
-        if(!$$.brickTransportStrategiesRegistry.has(transportStrategyAlias)) {
-            const transportStrategy = new EDFS.HTTPBrickTransportStrategy(endpoint);
-            $$.brickTransportStrategiesRegistry.add(transportStrategyAlias, transportStrategy);
-        }
-
-        const archiveConfigurator = new ArchiveConfigurator();
-
-        archiveConfigurator.setStorageProvider("EDFSBrickStorage", transportStrategyAlias);
-        archiveConfigurator.setSeedEndpoint(endpoint);
-        archiveConfigurator.setFsAdapter("FsAdapter");
-        archiveConfigurator.setBufferSize(65535);
-        return archiveConfigurator;
+        this.edfs = EDFS.attachToEndpoint(endpoint);
+        this.addFolder();
     },
 
     addFolder: function () {
-        const archive = bar.createArchive(this.createArchiveConfigurator());
-        archive.addFolder(folderPath, (err, mapDigest) => {
+        const archive = this.edfs.createBar();
+        archive.addFolder(folderPath, folderPath, (err, mapDigest) => {
             assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
             assert.true(mapDigest !== null && typeof mapDigest !== "undefined", "Failed to add folder.");
             double_check.deleteFoldersSync(folderPath);
-            this.extractFolder(mapDigest);
+            this.extractFolder(archive.getSeed());
         });
     },
 
 
-    extractFolder: function (mapDigest) {
-        const archiveConfig = this.createArchiveConfigurator();
-        archiveConfig.setMapDigest(mapDigest);
-        const archive = bar.createArchive(archiveConfig);
+    extractFolder: function (seed) {
+        const archive = this.edfs.loadBar(seed);
         archive.extractFolder(folderPath, folderPath,(err) => {
             assert.true(err === null || typeof err === "undefined", `Failed to extract folder from file ${savePath}`);
 

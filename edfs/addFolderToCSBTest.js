@@ -19,15 +19,14 @@ $$.flows.describe("AddFolderToCSB", {
     start: function (callback) {
         this.callback = callback;
         $$.securityContext = require("psk-security-context").createSecurityContext();
-        this.edfs = edfsModule.attach(brickStorageStrategyName);
 
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
             tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
-
-                $$.brickTransportStrategiesRegistry.add(brickStorageStrategyName, new edfsModule.HTTPBrickTransportStrategy(`http://localhost:${port}`));
+                const endpoint = `http://localhost:${port}`;
+                this.edfs = edfsModule.attachToEndpoint(endpoint);
                 this.createCSB();
             });
         });
@@ -38,24 +37,20 @@ $$.flows.describe("AddFolderToCSB", {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
 
-            this.edfs.createCSB((err, rawCSB) => {
-                assert.true(err === null || typeof err === "undefined", "Failed to create CSB.");
-
-                this.rawCSB = rawCSB;
-                this.addFolder();
-            });
+            this.rawDossier = this.edfs.createCSB();
+            this.addFolder();
         });
     },
 
     addFolder: function () {
-        this.rawCSB.addFolder(folderPath, folderPath, (err, mapDigest) => {
+        this.rawDossier.addFolder(folderPath, folderPath, (err, mapDigest) => {
             assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
             this.loadCSBFromEDFS();
         });
     },
 
     loadCSBFromEDFS: function () {
-        this.edfs.loadCSB(this.rawCSB.getSeed(), (err, newRawCSB) => {
+        this.edfs.bootCSB(this.rawDossier.getSeed(), (err, newRawCSB) => {
             assert.true(err === null || typeof err === "undefined", "Failed to load CSB.");
 
             this.listFiles(newRawCSB);
