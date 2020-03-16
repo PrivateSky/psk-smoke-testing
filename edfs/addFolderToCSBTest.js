@@ -61,6 +61,15 @@ $$.flows.describe("AddFolderToCSB", {
             assert.true(err === null || typeof err === "undefined", "Failed to list files.");
             assert.arraysMatch(files, CSBFiles, "Unexpected file list");
 
+            this.listFolders(rawCSB);
+        });
+    },
+
+    listFolders: function (rawCSB) {
+        rawCSB.listFolders(folderPath, (err, folders) => {
+            assert.true(err === null || typeof err === "undefined", "Failed to list files.");
+            assert.arraysMatch([folderPath], folders, "Unexpected folder list");
+
             this.callback();
         });
     }
@@ -74,6 +83,6 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
 
     assert.callback("Add folder to CSB test", (callback) => {
         $$.flows.start("AddFolderToCSB", "start", callback);
-    }, 3000
+    }, 6000
     );
 });
