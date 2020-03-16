@@ -70,5 +70,5 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     filePath = path.join(testFolder, "test.txt");
     assert.callback("Add folder to CSB test", (callback) => {
         $$.flows.start("AddFolderToCSB", "start", callback);
-    }, 2000);
+    }, 3000);
 });

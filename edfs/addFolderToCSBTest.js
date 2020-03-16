@@ -5,7 +5,6 @@ require("../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
-const brickStorageStrategyName = "justAnAlias";
 const edfsModule = require("edfs");
 const tir = require("../../../psknode/tests/util/tir");
 
@@ -44,17 +43,17 @@ $$.flows.describe("AddFolderToCSB", {
 
     addFolder: function () {
         this.rawDossier.addFolder(folderPath, folderPath, (err, mapDigest) => {
+            if (err) {
+                throw err;
+            }
             assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
             this.loadCSBFromEDFS();
         });
     },
 
     loadCSBFromEDFS: function () {
-        this.edfs.bootCSB(this.rawDossier.getSeed(), (err, newRawCSB) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to load CSB.");
-
-            this.listFiles(newRawCSB);
-        });
+        const newRawCSB = this.edfs.loadBar(this.rawDossier.getSeed());
+        this.listFiles(newRawCSB);
     },
 
     listFiles: function (rawCSB) {
@@ -75,5 +74,6 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
 
     assert.callback("Add folder to CSB test", (callback) => {
         $$.flows.start("AddFolderToCSB", "start", callback);
-    }, 2000);
+    }, 3000
+    );
 });

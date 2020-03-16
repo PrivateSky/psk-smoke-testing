@@ -90,5 +90,5 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     filePath = path.join(testFolder, "fld", "a.txt");
     assert.callback("AddFileEDFSTest", (callback) => {
         $$.flows.start("AddFile", "start", callback);
-    }, 1000);
+    }, 3000);
 });
