@@ -19,4 +19,4 @@ assert.callback("Basic Test", (finished) => {
                  finished();
             })
     });
-}, 6000);
+}, 10000);
