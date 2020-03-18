@@ -1,5 +1,6 @@
 const DOMAIN_CONSTITUTION_FOLDER = "./leafletDossierType";
 require("../../../psknode/bundles/testsRuntime");
+require("../../../psknode/bundles/pskruntime");
 
 const tir = require("../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
