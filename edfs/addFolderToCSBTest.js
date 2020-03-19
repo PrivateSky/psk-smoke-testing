@@ -42,7 +42,7 @@ $$.flows.describe("AddFolderToCSB", {
     },
 
     addFolder: function () {
-        this.rawDossier.addFolder(folderPath, folderPath, (err, mapDigest) => {
+         this.rawDossier.addFolder(folderPath, folderPath, 0, (err, mapDigest) => {
             if (err) {
                 throw err;
             }
