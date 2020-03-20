@@ -59,7 +59,7 @@ $$.flows.describe("AddRawFile", {
     },
 
     addFile: function (fsFilePath, barPath, callback) {
-        this.bar.addFile(fsFilePath, barPath, {isEncrypted: false}, (err, mapDigest) => {
+        this.bar.addFile(fsFilePath, barPath, {encrypt: false}, (err, mapDigest) => {
             if (err) {
                 return callback(err);
             }
