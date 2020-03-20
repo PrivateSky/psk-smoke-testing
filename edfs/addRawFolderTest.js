@@ -58,7 +58,7 @@ $$.flows.describe("AddRawFolder", {
     },
 
     addFolder: function (fsFolderPath, barPath, callback) {
-        this.bar.addFolder(fsFolderPath, barPath, false, (err, mapDigest) => {
+        this.bar.addFolder(fsFolderPath, barPath, {isEncrypted: false}, (err, mapDigest) => {
             if (err) {
                 return callback(err);
             }
