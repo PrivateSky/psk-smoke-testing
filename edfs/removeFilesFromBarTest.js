@@ -75,7 +75,7 @@ $$.flows.describe("RemoveFilesFromBar", {
     },
 
     removeFile: function (file, callback) {
-        this.archive.remove(file, callback);
+        this.archive.delete(file, callback);
     }
 });
 
