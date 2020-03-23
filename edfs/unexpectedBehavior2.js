@@ -13,21 +13,21 @@ assert.callback("We should be able to get a seed of a bar before finish writing?
 
 		const EDFS = require("edfs");
 		let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-
-		let raw_dossier = edfs.createCSB();
-		raw_dossier.mount("/", "test", edfs.createCSB().getSeed(), (err)=>{
-			assert.true(typeof err === "undefined");
-			raw_dossier.writeFile("just_a_path", "some_content", 0,function(err){
+		let ref = edfs.createCSB();
+		ref.writeFile("simplefile", "withcontent", 0,()=>{
+			let raw_dossier = edfs.createCSB();
+			raw_dossier.mount("/", "test", ref.getSeed(), (err)=>{
 				assert.true(typeof err === "undefined");
-				let dossier = require("dossier");
-				dossier.load(raw_dossier.getSeed(), "baubau", (err, handler)=>{
-					if(err){
-						throw err;
-					}
-					console.log("bau");
+				raw_dossier.writeFile("just_a_path", "some_content", 0,function(err){
+					assert.true(typeof err === "undefined");
+					let raw_dossier_reloaded = edfs.loadRawDossier(raw_dossier.getSeed());
+					raw_dossier_reloaded.listFiles("/test", (err, files)=>{
+						assert.true(typeof err === "undefined");
+						assert.true(files.length==1);
+						testFinishCallback();
+					});
 				});
 			});
 		});
-
 	});
 }, 5000);
