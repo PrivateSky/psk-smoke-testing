@@ -45,13 +45,20 @@ $$.flows.describe("AddRawFolder", {
                     throw err;
                 }
 
-                this.addFolder(folderPath, "fld2", (err, controlHash) => {
+                this.bar.delete("/", (err) => {
                     if (err) {
                         throw err;
                     }
 
-                    assert.true(initialHash === controlHash);
-                    this.callback();
+
+                    this.addFolder(folderPath, "fld2", (err, controlHash) => {
+                        if (err) {
+                            throw err;
+                        }
+
+                        assert.true(initialHash === controlHash);
+                        this.callback();
+                    });
                 });
             });
         });

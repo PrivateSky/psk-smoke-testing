@@ -14,7 +14,10 @@ assert.callback("We should be able to get a seed of a bar before finish writing?
         const EDFS = require("edfs");
         let edfs = EDFS.attachToEndpoint(EDFS_HOST);
         let ref = edfs.createCSB();
-        ref.addFile("./unexpectedBehavir.js", "justAfile", {encrypt: false, depth: 0}, () => {
+        ref.writeFile("justAfile", "data", {encrypt: false, depth: 0}, (err) => {
+            if (err) {
+                throw err;
+            }
             let raw_dossier = edfs.createCSB();
             raw_dossier.mount("/", "test", ref.getSeed(), (err) => {
                 assert.true(typeof err === "undefined");
@@ -22,12 +25,16 @@ assert.callback("We should be able to get a seed of a bar before finish writing?
                     assert.true(typeof err === "undefined");
 
                     raw_dossier.listFiles("/test", (err, files) => {
+                        if (err) {
+                            throw err;
+                        }
                         assert.true(typeof err === "undefined");
                         assert.true(files.length === 1);
                         testFinishCallback();
                     });
                 });
             });
+
         });
     });
 }, 5000);
