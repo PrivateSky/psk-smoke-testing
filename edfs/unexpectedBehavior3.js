@@ -14,14 +14,14 @@ assert.callback("We should be able to get a seed of a bar before finish writing?
         const EDFS = require("edfs");
         let edfs = EDFS.attachToEndpoint(EDFS_HOST);
         let ref = edfs.createCSB();
-        ref.writeFile("justAfile", "data", {encrypt: false, depth: 0}, (err) => {
+        ref.writeFile("justAfile", "data", {encrypt: false}, (err) => {
             if (err) {
                 throw err;
             }
             let raw_dossier = edfs.createCSB();
             raw_dossier.mount("/", "test", ref.getSeed(), (err) => {
                 assert.true(typeof err === "undefined");
-                raw_dossier.writeFile("just_a_path", "some_1content", {depth: 0}, function (err) {
+                raw_dossier.writeFile("just_a_path", "some_1content", function (err) {
                     assert.true(typeof err === "undefined");
 
                     raw_dossier.listFiles("/test", (err, files) => {
