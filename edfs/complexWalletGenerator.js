@@ -48,7 +48,7 @@ function generateWallet(endpoint, webappFolder, callback) {
 			wallet.listFiles("/app/assets", function(err, files){
 				console.log(files);
 			});
-			wallet.readFile("/app/assets/js/index.html", function (err, content) {
+			wallet.readFile("/app/assets/js/index.js", function (err, content) {
 				if (err) {
 					throw  err;
 				}
