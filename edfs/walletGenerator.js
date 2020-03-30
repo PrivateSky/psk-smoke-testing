@@ -16,7 +16,7 @@ assert.callback("Wallet generator", (testFinishCallback) => {
 			const fs = require("fs");
 			const webAppFolder = folder + "\\web";
 			fs.mkdirSync(webAppFolder, {recursive: true});
-			fs.writeFileSync(webAppFolder + "\\index.html", "Hello World!");
+			fs.writeFileSync(webAppFolder + "/index.html", "Hello World!");
 			generateWallet(EDFS_HOST, webAppFolder, testFinishCallback);
 		});
 	});
@@ -29,7 +29,7 @@ function generateWallet(endpoint, webappFolder, callback) {
 
 	let walletTemplate = edfs.createCSB();
 
-	walletTemplate.addFolder("../../../psknode/bundles", "/", {encrypt: true, depth: 0}, (err) => {
+	walletTemplate.addFolder("../../../psknode/bundles", "/", (err) => {
 		if (err) {
 			throw err;
 		}
@@ -40,7 +40,7 @@ function generateWallet(endpoint, webappFolder, callback) {
 				throw err;
 			}
 		});
-		wallet.addFolder(webappFolder, "app", {encrypt: true, depth: 0}, function (err) {
+		wallet.addFolder(webappFolder, "app", function (err) {
 			if (err) {
 				throw err;
 			}
@@ -50,9 +50,7 @@ function generateWallet(endpoint, webappFolder, callback) {
 					throw  err;
 				}
 
-				console.log("File Content", content.toString());
 				const seed = wallet.getSeed();
-				console.log("Wallet seed", seed);
 				if (callback) {
 					callback(seed);
 				}
