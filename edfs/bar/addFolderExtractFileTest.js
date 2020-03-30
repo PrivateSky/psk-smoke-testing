@@ -1,22 +1,23 @@
-require('../../../psknode/bundles/testsRuntime');
-require("../../../psknode/bundles/pskruntime");
-require("../../../psknode/bundles/virtualMQ");
-require("../../../psknode/bundles/edfsBar");
+require('../../../../psknode/bundles/testsRuntime');
+require("../../../../psknode/bundles/pskruntime");
+require("../../../../psknode/bundles/virtualMQ");
+require("../../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
 const EDFS = require("edfs");
+const brickTransportStrategyName = "justAnAlias";
 
 let folderPath;
 let filePath;
 
 let files;
 
-const tir = require("../../../psknode/tests/util/tir.js");
+const tir = require("../../../../psknode/tests/util/tir.js");
 
 const text = ["first", "second", "third"];
 
-$$.flows.describe("AddRawFolder", {
+$$.flows.describe("AddFolderToCSB", {
     start: function (callback) {
         this.callback = callback;
         $$.securityContext = require("psk-security-context").createSecurityContext();
@@ -40,37 +41,24 @@ $$.flows.describe("AddRawFolder", {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
             this.bar = this.edfs.createBar();
-            this.addFolder(folderPath, "fld1", (err, initialHash) => {
-                if (err) {
-                    throw err;
-                }
-
-                this.bar.delete("/", (err) => {
-                    if (err) {
-                        throw err;
-                    }
-
-
-                    this.addFolder(folderPath, "fld2", (err, controlHash) => {
-                        if (err) {
-                            throw err;
-                        }
-
-                        assert.true(initialHash === controlHash);
-                        this.callback();
-                    });
-                });
-            });
+            this.addFolder();
         });
     },
 
-    addFolder: function (fsFolderPath, barPath, callback) {
-        this.bar.addFolder(fsFolderPath, barPath, {encrypt: false}, (err, mapDigest) => {
+    addFolder: function () {
+        this.bar.addFolder(folderPath, "fld", (err, mapDigest) => {
             if (err) {
-                return callback(err);
+                throw err;
             }
+            assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
+            this.extractFile();
+        });
+    },
 
-            this.bar.getFolderHash(barPath, callback)
+    extractFile: function () {
+        this.bar.extractFile(filePath, "fld/a.txt", (err) => {
+            assert.true(err === null || typeof err === "undefined", "Failed to extract file.");
+            this.callback();
         });
     }
 });
@@ -80,7 +68,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     folderPath = path.join(testFolder, "fld");
     files = ["fld/a.txt", "fld/b.txt", "fld/c.txt"].map(file => path.join(testFolder, file));
     filePath = path.join(testFolder, "test.txt");
-    assert.callback("Add raw folder to bar test", (callback) => {
-        $$.flows.start("AddRawFolder", "start", callback);
+    assert.callback("Add folder to CSB test", (callback) => {
+        $$.flows.start("AddFolderToCSB", "start", callback);
     }, 3000);
 });

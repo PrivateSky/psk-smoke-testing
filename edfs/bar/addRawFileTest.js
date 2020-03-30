@@ -1,20 +1,23 @@
-require('../../../psknode/bundles/testsRuntime');
-require("../../../psknode/bundles/pskruntime");
-require("../../../psknode/bundles/virtualMQ");
-require("../../../psknode/bundles/edfsBar");
+require('../../../../psknode/bundles/testsRuntime');
+require("../../../../psknode/bundles/pskruntime");
+require("../../../../psknode/bundles/virtualMQ");
+require("../../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
-const edfsModule = require("edfs");
-const tir = require("../../../psknode/tests/util/tir");
+const EDFS = require("edfs");
 
 let folderPath;
+let filePath;
+let extractionPath;
 
 let files;
 
+const tir = require("../../../../psknode/tests/util/tir.js");
+
 const text = ["first", "second", "third"];
 
-$$.flows.describe("RemoveFilesFromBar", {
+$$.flows.describe("AddRawFile", {
     start: function (callback) {
         this.callback = callback;
         $$.securityContext = require("psk-security-context").createSecurityContext();
@@ -24,8 +27,10 @@ $$.flows.describe("RemoveFilesFromBar", {
 
             tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
+
+                this.port = port;
                 const endpoint = `http://localhost:${port}`;
-                this.edfs = edfsModule.attachToEndpoint(endpoint);
+                this.edfs = EDFS.attachToEndpoint(endpoint);
                 this.createBAR();
             });
         });
@@ -35,58 +40,42 @@ $$.flows.describe("RemoveFilesFromBar", {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-
-            this.archive = this.edfs.createBar();
-            this.addFolder();
-        });
-    },
-
-    addFolder: function () {
-        this.archive.addFolder(folderPath, folderPath, (err, mapDigest) => {
-            if (err) {
-                throw err;
-            }
-            assert.true(err === null || typeof err === "undefined", "Failed to add folder.");
-            this.listFiles((err, initialFiles) => {
+            this.bar = this.edfs.createBar();
+            this.addFile(filePath, "fld/a.txt", (err, initialHash) => {
                 if (err) {
                     throw err;
                 }
 
-                this.removeFile(files[0], (err) => {
-                    if (err) {
-                        throw err;
-                    }
-                });
-
-                this.listFiles((err, filesAfterRemoval) => {
+                this.addFile(filePath, "fld/b.txt", (err, controlHash) => {
                     if (err) {
                         throw err;
                     }
 
-                    assert.arraysMatch(initialFiles.slice(1), filesAfterRemoval);
+                    assert.true(initialHash === controlHash);
                     this.callback();
                 });
             });
         });
     },
 
-    listFiles: function (callback) {
-        this.archive.listFiles(folderPath, callback);
-    },
+    addFile: function (fsFilePath, barPath, callback) {
+        this.bar.addFile(fsFilePath, barPath, {encrypt: false}, (err, mapDigest) => {
+            if (err) {
+                return callback(err);
+            }
 
-    removeFile: function (file, callback) {
-        this.archive.delete(file, callback);
+            this.bar.getFileHash(barPath, callback);
+        });
     }
 });
 
 double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
-
     const path = require("path");
     folderPath = path.join(testFolder, "fld");
     files = ["fld/a.txt", "fld/b.txt", "fld/c.txt"].map(file => path.join(testFolder, file));
-
-    assert.callback("Remove files from bar test", (callback) => {
-            $$.flows.start("RemoveFilesFromBar", "start", callback);
-        }, 6000
-    );
+    filePath = path.join(testFolder, "fld/a.txt");
+    extractionPath = path.join(testFolder, "test.txt");
+    assert.callback("Add raw file to bar test", (callback) => {
+        $$.flows.start("AddRawFile", "start", callback);
+    }, 3000);
 });

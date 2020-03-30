@@ -1,7 +1,7 @@
-require("../../../psknode/bundles/testsRuntime");
-require("../../../psknode/bundles/pskruntime");
+require("../../../../psknode/bundles/testsRuntime");
+require("../../../../psknode/bundles/pskruntime");
 
-const tir = require("../../../psknode/tests/util/tir");
+const tir = require("../../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
 
 assert.callback("List mounted dossiers test", (testFinishCallback) => {

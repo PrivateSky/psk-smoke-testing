@@ -1,7 +1,7 @@
-require('../../../psknode/bundles/testsRuntime');
-require("../../../psknode/bundles/pskruntime");
-require("../../../psknode/bundles/virtualMQ");
-require("../../../psknode/bundles/edfsBar");
+require('../../../../psknode/bundles/testsRuntime');
+require("../../../../psknode/bundles/pskruntime");
+require("../../../../psknode/bundles/virtualMQ");
+require("../../../../psknode/bundles/edfsBar");
 
 const bar = require('bar');
 const createEDFSBrickStorage = require("edfs-brick-storage").create;
@@ -14,7 +14,7 @@ ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
 ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", createEDFSBrickStorage);
 const path = require("path");
 
-const tir = require("../../../psknode/tests/util/tir.js");
+const tir = require("../../../../psknode/tests/util/tir.js");
 
 let folderPath;
 let filePath;
@@ -59,8 +59,12 @@ $$.flows.describe("AddFile", {
 
     addFile: function () {
         this.archive.addFile(filePath, barPath, (err, mapDigest) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to add file.");
-            double_check.deleteFoldersSync(folderPath);
+            if(err){
+                throw err;
+            }
+            let fs = require("fs");
+            //double_check.deleteFoldersSync(folderPath);
+            fs.rmdirSync(folderPath, {recursive: true, maxRetries: 10});
             this.extractFile(this.archive.getSeed());
         });
     },
@@ -68,7 +72,9 @@ $$.flows.describe("AddFile", {
     extractFile: function (seed) {
         const archive = this.edfs.loadBar(seed);
         archive.extractFile(filePath, barPath, (err) => {
-            assert.true(err === null || typeof err === "undefined", `Failed to extract file ${filePath}`);
+            if(err){
+                throw err;
+            }
 
             double_check.computeFileHash(filePath, (err, newHash) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
@@ -82,7 +88,7 @@ $$.flows.describe("AddFile", {
     }
 });
 
-double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
+double_check.createTestFolder("Extract file from bar", (err, testFolder) => {
     tempFolder = path.join(testFolder, "tmp");
     folderPath = path.join(testFolder, "fld");
     barPath = "myFile";

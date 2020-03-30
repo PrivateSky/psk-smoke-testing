@@ -1,13 +1,13 @@
-require('../../../psknode/bundles/testsRuntime');
-require("../../../psknode/bundles/pskruntime");
-require("../../../psknode/bundles/virtualMQ");
-require("../../../psknode/bundles/edfsBar");
+require('../../../../psknode/bundles/testsRuntime');
+require("../../../../psknode/bundles/pskruntime");
+require("../../../../psknode/bundles/virtualMQ");
+require("../../../../psknode/bundles/edfsBar");
 
 const EDFS = require("edfs");
 const double_check = require("double-check");
 const assert = double_check.assert;
 
-const tir = require("../../../psknode/tests/util/tir.js");
+const tir = require("../../../../psknode/tests/util/tir.js");
 
 double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     assert.true(err === null || typeof err === "undefined", "Failed to create test folder");

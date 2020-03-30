@@ -81,7 +81,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     folderPath = path.join(testFolder, "fld");
     files = ["fld/a.txt", "fld/b.txt", "fld/c.txt"].map(file => path.join(testFolder, file));
 
-    assert.callback("Add folder to CSB test", (callback) => {
+    assert.callback("Add folder to RawDossier test", (callback) => {
         $$.flows.start("AddFolderToCSB", "start", callback);
     }, 6000
     );
