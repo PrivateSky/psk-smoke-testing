@@ -42,7 +42,7 @@ $$.flows.describe("AddFolderToCSB", {
     },
 
     addFolder: function () {
-         this.rawDossier.addFolder(folderPath, folderPath, {depth:0}, (err, mapDigest) => {
+        this.rawDossier.addFolder(folderPath, folderPath, (err, mapDigest) => {
             if (err) {
                 throw err;
             }
@@ -59,7 +59,9 @@ $$.flows.describe("AddFolderToCSB", {
     listFiles: function (rawCSB) {
         rawCSB.listFiles(folderPath, (err, CSBFiles) => {
             assert.true(err === null || typeof err === "undefined", "Failed to list files.");
-            assert.arraysMatch(files, CSBFiles, "Unexpected file list");
+            CSBFiles.sort();
+            const path = require("path");
+            assert.arraysMatch(files.map(file => path.basename(file)).sort(), CSBFiles, "Unexpected file list");
 
             this.listFolders(rawCSB);
         });
@@ -82,7 +84,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     files = ["fld/a.txt", "fld/b.txt", "fld/c.txt"].map(file => path.join(testFolder, file));
 
     assert.callback("Add folder to RawDossier test", (callback) => {
-        $$.flows.start("AddFolderToCSB", "start", callback);
-    }, 6000
+            $$.flows.start("AddFolderToCSB", "start", callback);
+        }, 6000
     );
 });
