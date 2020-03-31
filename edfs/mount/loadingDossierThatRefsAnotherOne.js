@@ -13,9 +13,9 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
 
 		const EDFS = require("edfs");
 		let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-		let ref = edfs.createCSB();
+		let ref = edfs.createRawDossier();
 		ref.addFolder("../../../psknode/bundles", "/", {encrypt: true, depth: 0}, () => {
-			let raw_dossier = edfs.createCSB();
+			let raw_dossier = edfs.createRawDossier();
 
 			const fileContent = "$$.transactions.describe('echo', {\n" +
 				"\t\tsay: function (message) {\n" +

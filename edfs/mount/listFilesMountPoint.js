@@ -13,10 +13,10 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
 
 		const EDFS = require("edfs");
 		let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-		let ref = edfs.createCSB();
+		let ref = edfs.createRawDossier();
 		const fileName = 'simpleFile';
 		ref.writeFile(fileName, "withcontent", 0, () => {
-			let raw_dossier = edfs.createCSB();
+			let raw_dossier = edfs.createRawDossier();
 			raw_dossier.mount("/", "test", ref.getSeed(), (err) => {
 				if (err) {
 					throw err;

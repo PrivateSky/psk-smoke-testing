@@ -29,13 +29,13 @@ function generateWallet(endpoint, webappFolder, callback) {
 	const EDFS = require("edfs");
 	let edfs = EDFS.attachToEndpoint(endpoint);
 
-	let walletTemplate = edfs.createCSB();
+	let walletTemplate = edfs.createRawDossier();
 
 	walletTemplate.addFolder("../../../psknode/bundles", "/", {encrypt: true, depth: 0}, (err) => {
 		if (err) {
 			throw err;
 		}
-		let wallet = edfs.createCSB();
+		let wallet = edfs.createRawDossier();
 		wallet.mount("/", "constitution", walletTemplate.getSeed(), function (err) {
 			if (err) {
 				throw err;

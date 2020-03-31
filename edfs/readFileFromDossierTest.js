@@ -14,13 +14,13 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
         const EDFS = require("edfs");
         const edfs = EDFS.attachToEndpoint(EDFS_HOST);
 
-        const dossier = edfs.createCSB();
+        const dossier = edfs.createRawDossier();
         dossier.writeFile("just_a_path", "some_content", (err) => {
             if (err) {
                 throw err;
             }
 
-            const newDossier = edfs.createCSB();
+            const newDossier = edfs.createRawDossier();
             newDossier.writeFile("testFile", "testContent", (err) => {
                 assert.true(typeof err === "undefined");
 

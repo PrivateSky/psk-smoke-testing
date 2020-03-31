@@ -13,7 +13,7 @@ assert.callback("rawDossier restore test", (testFinishCallback) => {
 
 		const EDFS = require("edfs");
 		let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-		let ref = edfs.createCSB();
+		let ref = edfs.createRawDossier();
 		ref.addFolder("../../../psknode/bundles", "/constitution",(err)=>{
 			if(err){
 				throw err;
