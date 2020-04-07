@@ -14,7 +14,10 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
 		const EDFS = require("edfs");
 		let edfs = EDFS.attachToEndpoint(EDFS_HOST);
 		let ref = edfs.createRawDossier();
-		ref.addFolder("../../../psknode/bundles", "/", {encrypt: true, depth: 0}, () => {
+		ref.addFolder("../../../../psknode/bundles", "/", (err) => {
+			if (err) {
+				throw err;
+			}
 			let raw_dossier = edfs.createRawDossier();
 
 			const fileContent = "$$.transactions.describe('echo', {\n" +
@@ -28,9 +31,9 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
 					throw err;
 				}
 				raw_dossier.mount("/", "constitution", ref.getSeed(), (err) => {
-					assert.true(typeof err === "undefined");
+					assert.true(typeof err === "undefined" || err === null);
 					raw_dossier.writeFile("just_a_file", "fileContent", function (err) {
-						assert.true(typeof err === "undefined");
+						assert.true(typeof err === "undefined" || err === null);
 						const dossier = require("dossier");
 						dossier.load(raw_dossier.getSeed(), "test", (err, handler) => {
 							if (err) {
