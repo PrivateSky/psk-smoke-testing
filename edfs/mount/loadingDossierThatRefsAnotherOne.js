@@ -30,9 +30,12 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
 				if(err){
 					throw err;
 				}
-				raw_dossier.mount("/", "constitution", ref.getSeed(), (err) => {
+				raw_dossier.mount("/code", "constitution", ref.getSeed(), (err) => {
 					assert.true(typeof err === "undefined" || err === null);
 					raw_dossier.writeFile("just_a_file", "fileContent", function (err) {
+						if (err) {
+							throw err;
+						}
 						assert.true(typeof err === "undefined" || err === null);
 						const dossier = require("dossier");
 						dossier.load(raw_dossier.getSeed(), "test", (err, handler) => {
