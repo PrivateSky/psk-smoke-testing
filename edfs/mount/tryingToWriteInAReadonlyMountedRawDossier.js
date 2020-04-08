@@ -4,7 +4,7 @@ require("../../../../psknode/bundles/pskruntime");
 const tir = require("../../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
 
-assert.callback("Trying to mount in a non-empty folder test", (testFinishCallback) => {
+assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishCallback) => {
     tir.launchVirtualMQNode(function (err, port) {
         if (err) {
             throw err;
@@ -21,12 +21,13 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
                 throw err;
             }
             let raw_dossier = edfs.createRawDossier();
-            raw_dossier.writeFile(folderName + "/randomPath", "content", (err)=>{
+            raw_dossier.mount(folderName, "test", ref.getSeed(), true,(err) => {
                 if (err) {
                     throw err;
                 }
-                raw_dossier.mount(folderName, "test", ref.getSeed(), (err) => {
-                    assert.true(err && err.message === "Tried to mount in a non-empty folder");
+
+                raw_dossier.writeFile(folderName + "/test/anotherFile", "some data", {ignoreMounts: false}, (err)=>{
+                    assert.true(err && err.message === "Tried to write in a readonly mounted RawDossier");
                     testFinishCallback();
                 });
             });
