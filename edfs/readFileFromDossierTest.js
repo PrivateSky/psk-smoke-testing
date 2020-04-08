@@ -25,10 +25,13 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
                 assert.true(typeof err === "undefined");
 
 
-                dossier.mount("/", "constitution", newDossier.getSeed(), (err) => {
+                dossier.mount("/code", "constitution", newDossier.getSeed(), (err) => {
                     assert.true(typeof err === "undefined");
 
-                    dossier.readFile("/constitution/testFile", (err, data) => {
+                    dossier.readFile("/code/constitution/testFile", (err, data) => {
+                        if (err) {
+                            throw err;
+                        }
                         assert.true(typeof err === "undefined");
                         assert.true(data.toString() === "testContent");
                         testFinishCallback();
