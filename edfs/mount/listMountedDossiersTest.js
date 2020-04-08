@@ -13,8 +13,8 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
 
         const EDFS = require("edfs");
         let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        const mountingPoints = [{path: "/", name: "dir", seed: edfs.createRawDossier().getSeed()}, {
-            path: "/dir",
+        const mountingPoints = [{path: "/temp", name: "dir", seed: edfs.createRawDossier().getSeed()}, {
+            path: "/folder",
             name: "test",
             seed: edfs.createRawDossier().getSeed()
         }, {path: "/test", name: "folder", seed: edfs.createRawDossier().getSeed()}];
