@@ -1,6 +1,6 @@
 require('../../../../psknode/bundles/testsRuntime');
 require("../../../../psknode/bundles/pskruntime");
-require("../../../../psknode/bundles/virtualMQ");
+require("../../../../psknode/bundles/pskWebServer");
 require("../../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
