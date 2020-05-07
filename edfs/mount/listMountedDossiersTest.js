@@ -31,7 +31,7 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
 
         function __mount(index) {
             let mount = mountingPoints[index];
-            raw_dossier.mount(mount.path, mount.name, mount.seed, (err) => {
+            raw_dossier.mount(mount.path + "/" + mount.name, mount.seed, (err) => {
                 if (err) {
                     throw err;
                 }
@@ -45,12 +45,13 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
         }
 
         function startTest() {
-            raw_dossier.listMountedDossiers("/", (err, mountedDossiers) => {
+            raw_dossier.listMountedDossiers("/temp", (err, mountedDossiers) => {
                 if (err) {
                     throw err;
                 }
 
-                assert.true(mountedDossiers.length === mountingPoints.length);
+                console.log("mounted dossiers", mountedDossiers);
+                assert.true(mountedDossiers.length === 1);
                 testFinishCallback();
             });
         }

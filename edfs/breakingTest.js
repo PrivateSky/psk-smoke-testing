@@ -35,7 +35,7 @@ function generateWallet(endpoint, webappFolder, callback) {
 			throw err;
 		}
 
-		app.mount("/", "code", appTemplate.getSeed(), function(err){
+		app.mount("/code", appTemplate.getSeed(), function(err){
 			if(err){
 				throw err;
 			}
@@ -43,11 +43,11 @@ function generateWallet(endpoint, webappFolder, callback) {
 				if(err){
 					throw err;
 				}
-				wallet.mount("/", "code", walletTemplate.getSeed(), function(err){
+				wallet.mount("/code", walletTemplate.getSeed(), function(err){
 					if(err){
 						throw err;
 					}
-					wallet.mount("/apps", "profile-app", app.getSeed(),  function(err){
+					wallet.mount("/apps/profile-app", app.getSeed(),  function(err){
 						if(err){
 							throw err;
 						}

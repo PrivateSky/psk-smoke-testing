@@ -21,11 +21,11 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
                 throw err;
             }
             let raw_dossier = edfs.createRawDossier();
-            raw_dossier.writeFile(folderName + "/randomPath", "content", (err)=>{
+            raw_dossier.writeFile(folderName + "/randomPath", "content", (err) => {
                 if (err) {
                     throw err;
                 }
-                raw_dossier.mount(folderName, "test", ref.getSeed(), (err) => {
+                raw_dossier.mount(folderName + "/test", ref.getSeed(), (err) => {
                     assert.true(err && err.message === "Tried to mount in a non-empty folder");
                     testFinishCallback();
                 });

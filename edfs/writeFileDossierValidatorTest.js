@@ -44,7 +44,7 @@ assert.callback("Write file validation in dossier test ", (testFinishCallback) =
                 assert.true(typeof err === "undefined");
 
 
-                dossier.mount("/code", "constitution", newDossier.getSeed(), (err) => {
+                dossier.mount("/code/constitution", newDossier.getSeed(), (err) => {
                     assert.true(typeof err === "undefined");
 
                     dossier.readFile("/code/constitution/testFile", (err, data) => {

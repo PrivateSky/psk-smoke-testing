@@ -36,7 +36,7 @@ function generateWallet(endpoint, webappFolder, callback) {
 			throw err;
 		}
 		let wallet = edfs.createRawDossier();
-		wallet.mount("/", "constitution", walletTemplate.getSeed(), function (err) {
+		wallet.mount("/constitution", walletTemplate.getSeed(), function (err) {
 			if (err) {
 				throw err;
 			}
