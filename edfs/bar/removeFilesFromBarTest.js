@@ -58,11 +58,12 @@ $$.flows.describe("RemoveFilesFromBar", {
 					}
 				});
 
-				this.listFiles((err, filesAfterRemoval) => {
+				this.listFiles( (err, filesAfterRemoval) => {
 					if (err) {
 						throw err;
 					}
 
+					console.log("files after remove", filesAfterRemoval, initialFiles);
 					assert.arraysMatch(initialFiles.slice(1), filesAfterRemoval);
 					this.callback();
 				});
