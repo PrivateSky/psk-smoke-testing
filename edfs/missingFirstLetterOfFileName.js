@@ -14,9 +14,14 @@ assert.callback("Missing first letter from file name", (testFinishCallback) => {
 		const EDFS = require("edfs");
 		let edfs = EDFS.attachToEndpoint(EDFS_HOST);
 		let ref = edfs.createRawDossier();
-		ref.addFolder("..//..", "/app", {encrypt: true, depth: 0},(err)=>{
-			assert.true(typeof err === "undefined");
-			testFinishCallback();
-		});
+        ref.load((err) => {
+            if (err) {
+                throw err;
+            }
+            ref.addFolder("..//..", "/app", {encrypt: true, depth: 0},(err)=>{
+                assert.true(typeof err === "undefined");
+                testFinishCallback();
+            });
+        })
 	});
 }, 5000);

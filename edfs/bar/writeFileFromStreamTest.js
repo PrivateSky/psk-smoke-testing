@@ -37,22 +37,33 @@ $$.flows.describe('WriteFileFromStream', {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
             this.bar = this.edfs.createBar();
 
-            const fileStream = fs.createReadStream(filePath);
-            this.bar.writeFile(barPath, fileStream, (err, data) => {
-                assert.true(err === null || typeof err === "undefined", "Failed to write file.");
-                this.readFile();
+            this.bar.load((err) => {
+                if (err) {
+                    throw err;
+                }
+
+                const fileStream = fs.createReadStream(filePath);
+                this.bar.writeFile(barPath, fileStream, (err, data) => {
+                    assert.true(err === null || typeof err === "undefined", "Failed to write file.");
+                    this.readFile();
+                })
             })
+
         });
     },
 
     readFile: function () {
-        const newBar = this.edfs.loadBar(this.bar.getSeed());
-        newBar.readFile(barPath, (err, data) => {
-            const dataCrc = crc32.unsigned(data);
-            assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
-            assert.equal(1024 * 1024, data.length, "Failed asserting data length.");
-            assert.equal(expectedCrc, dataCrc, "Failed asserting data integrity.");
-            this.callback();
+        this.edfs.loadBar(this.bar.getSeed(), (err, newBar) => {
+            if (err) {
+                throw err;
+            }
+            newBar.readFile(barPath, (err, data) => {
+                const dataCrc = crc32.unsigned(data);
+                assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
+                assert.equal(1024 * 1024, data.length, "Failed asserting data length.");
+                assert.equal(expectedCrc, dataCrc, "Failed asserting data integrity.");
+                this.callback();
+            });
         });
     }
 });

@@ -54,7 +54,13 @@ $$.flows.describe("AddFile", {
         this.edfs = EDFS.attachToEndpoint(endpoint);
         this.archive = this.edfs.createBar();
 
-        this.addFile();
+        this.archive.load((err) => {
+            if (err) {
+                throw err;
+            }
+
+            this.addFile();
+        })
     },
 
     addFile: function () {
@@ -70,21 +76,26 @@ $$.flows.describe("AddFile", {
     },
 
     extractFile: function (seed) {
-        const archive = this.edfs.loadBar(seed);
-        archive.extractFile(filePath, barPath, (err) => {
-            if(err){
+        this.edfs.loadBar(seed, (err, archive) => {
+            if (err) {
                 throw err;
             }
 
-            double_check.computeFileHash(filePath, (err, newHash) => {
-                assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
-                assert.true(this.initialHash === newHash, "The extracted file is not te same as the initial one");
+            archive.extractFile(filePath, barPath, (err) => {
+                if(err){
+                    throw err;
+                }
 
-                double_check.deleteFoldersSync([folderPath]);
+                double_check.computeFileHash(filePath, (err, newHash) => {
+                    assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
+                    assert.true(this.initialHash === newHash, "The extracted file is not te same as the initial one");
 
-                this.callback();
+                    double_check.deleteFoldersSync([folderPath]);
+
+                    this.callback();
+                });
             });
-        });
+        })
     }
 });
 

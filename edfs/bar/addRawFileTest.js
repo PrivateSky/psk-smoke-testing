@@ -41,20 +41,28 @@ $$.flows.describe("AddRawFile", {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
             this.bar = this.edfs.createBar();
-            this.addFile(filePath, "fld/a.txt", (err, initialHash) => {
+            this.bar.load((err) => {
                 if (err) {
                     throw err;
                 }
 
-                this.addFile(filePath, "fld/b.txt", (err, controlHash) => {
+                this.addFile(filePath, "fld/a.txt", (err, initialHash) => {
                     if (err) {
                         throw err;
                     }
 
-                    assert.true(initialHash === controlHash);
-                    this.callback();
+
+                    this.addFile(filePath, "fld/b.txt", (err, controlHash) => {
+                        if (err) {
+                            throw err;
+                        }
+
+                        assert.true(initialHash === controlHash);
+                        this.callback();
+                    })
+
                 });
-            });
+            })
         });
     },
 

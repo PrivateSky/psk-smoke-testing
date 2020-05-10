@@ -37,7 +37,12 @@ $$.flows.describe("RemoveFilesFromBar", {
 			assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
 
 			this.archive = this.edfs.createBar();
-			this.addFolder();
+            this.archive.load((err) => {
+                if (err) {
+                    throw err;
+                }
+                this.addFolder();
+            })
 		});
 	},
 

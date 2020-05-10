@@ -15,11 +15,16 @@ assert.callback("We should be able to get a seed of a bar before finish writing?
         let edfs = EDFS.attachToEndpoint(EDFS_HOST);
 
         let bar = edfs.createBar();
-        console.log("Early seed read", bar.getSeed());
-        bar.writeFile("just_a_path", "some_content", function (err) {
-            assert.true(typeof err === "undefined");
+        bar.load((err) => {
+            if (err) {
+                throw err;
+            }
+            console.log("Early seed read", bar.getSeed());
+            bar.writeFile("just_a_path", "some_content", function (err) {
+                assert.true(typeof err === "undefined");
 
-            testFinishCallback();
-        });
+                testFinishCallback();
+            });
+        })
     });
 }, 5000);

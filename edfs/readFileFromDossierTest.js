@@ -15,39 +15,51 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
         const edfs = EDFS.attachToEndpoint(EDFS_HOST);
 
         const dossier = edfs.createRawDossier();
-        dossier.writeFile("just_a_path", "some_content", (err) => {
+        dossier.load((err) => {
             if (err) {
                 throw err;
             }
 
-            console.log("write finished");
-            const newDossier = edfs.createRawDossier();
-            newDossier.writeFile("testFile", "testContent", (err) => {
-                console.log("second finished");
+            dossier.writeFile("just_a_path", "some_content", (err) => {
+                if (err) {
+                    throw err;
+                }
 
-                assert.true(typeof err === "undefined");
-
-
-                dossier.mount("/code/constitution", newDossier.getSeed(), (err) => {
+                console.log("write finished");
+                const newDossier = edfs.createRawDossier();
+                newDossier.load((err) => {
                     if (err) {
                         throw err;
                     }
-                    assert.true(typeof err === "undefined");
-                    console.log("mount finished");
 
-                    dossier.readFile("/code/constitution/testFile", (err, data) => {
-                        if (err) {
-                            throw err;
-                        }
+                    newDossier.writeFile("testFile", "testContent", (err) => {
+                        console.log("second finished");
 
-                        console.log("read file finished", data.toString());
                         assert.true(typeof err === "undefined");
-                        assert.true(data.toString() === "testContent");
-                        testFinishCallback();
+
+                        dossier.mount("/code/constitution", newDossier.getSeed(), (err) => {
+                            if (err) {
+                                throw err;
+                            }
+                            assert.true(typeof err === "undefined");
+                            console.log("mount finished");
+
+                            dossier.readFile("/code/constitution/testFile", (err, data) => {
+                                if (err) {
+                                    throw err;
+                                }
+
+                                console.log("read file finished", data.toString());
+                                assert.true(typeof err === "undefined");
+                                assert.true(data.toString() === "testContent");
+                                testFinishCallback();
+                            });
+                        });
                     });
-                });
+                })
+
             });
 
-        });
+        })
     });
 }, 5000);

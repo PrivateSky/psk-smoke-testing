@@ -41,7 +41,12 @@ $$.flows.describe("AddFolderToCSB", {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
             this.bar = this.edfs.createBar();
-            this.addFolder();
+            this.bar.load((err) => {
+                if (err) {
+                    throw err;
+                }
+                this.addFolder();
+            })
         });
     },
 

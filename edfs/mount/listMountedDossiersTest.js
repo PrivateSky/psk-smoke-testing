@@ -20,13 +20,19 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
         }, {path: "/test", name: "folder", seed: edfs.createRawDossier().getSeed()}];
 
         let raw_dossier = edfs.createRawDossier();
-        raw_dossier.writeFile("testFile", "testContent", (err) => {
+        raw_dossier.load((err) => {
             if (err) {
                 throw err;
             }
 
-            __mount(0);
-        });
+            raw_dossier.writeFile("testFile", "testContent", (err) => {
+                if (err) {
+                    throw err;
+                }
+
+                __mount(0);
+            });
+        })
 
 
         function __mount(index) {

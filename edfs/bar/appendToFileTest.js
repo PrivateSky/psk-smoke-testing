@@ -13,8 +13,10 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     assert.true(err === null || typeof err === "undefined", "Failed to create test folder");
 
     const fileData = "Lorem Ipsum is simply dummy text";
+    const dataToAppend = 'Some more text';
+    const expectedFileData = `${fileData}${dataToAppend}`;
 
-    assert.callback("BasicBarFunctionality", (callback) => {
+    assert.callback("AppendToFileTest", (callback) => {
         tir.launchVirtualMQNode(10, testFolder, (err, serverPort) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
@@ -34,17 +36,25 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to write file in BAR");
                     assert.true(barMapDigest !== null && typeof barMapDigest !== "undefined", "Bar map digest is null or undefined");
 
-                    edfs.loadBar(bar.getSeed(), (err, newBar) => {
+                    bar.appendToFile('a.txt', dataToAppend, (err) => {
                         if (err) {
                             throw err;
                         }
-                        newBar.readFile("a.txt", (err, data) => {
-                            assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
-                            assert.true(fileData === data.toString(), "Invalid read data");
 
-                            callback();
+                        edfs.loadBar(bar.getSeed(), (err, newBar) => {
+                            if (err) {
+                                throw err;
+                            }
+                            newBar.readFile("a.txt", (err, data) => {
+                                console.log(data.toString());
+                                assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
+                                assert.true(expectedFileData === data.toString(), "Invalid read data");
+
+                                callback();
+                            });
                         });
                     })
+
                 });
             })
         });

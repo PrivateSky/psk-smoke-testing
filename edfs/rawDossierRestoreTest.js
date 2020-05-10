@@ -14,19 +14,30 @@ assert.callback("rawDossier restore test", (testFinishCallback) => {
 		const EDFS = require("edfs");
 		let edfs = EDFS.attachToEndpoint(EDFS_HOST);
 		let ref = edfs.createRawDossier();
-		ref.addFolder("../../../psknode/bundles", "/constitution",(err)=>{
-			if(err){
-				throw err;
-			}
 
-			let ref2 = edfs.loadRawDossier(ref.getSeed());
-			ref2.readFile("/constitution/edfsBar.js", function(err, content){
-				if(err){
-					throw err;
-				}
-				assert.true(content !== "");
-				testFinishCallback();
-			});
-		});
+        ref.load((err) => {
+            if (err) {
+                throw err;
+            }
+
+            ref.addFolder("../../../psknode/bundles", "/constitution",(err)=>{
+                if(err){
+                    throw err;
+                }
+
+                edfs.loadRawDossier(ref.getSeed(), (err, ref2) => {
+                    if (err) {
+                        throw err;
+                    }
+                    ref2.readFile("/constitution/edfsBar.js", function(err, content){
+                        if(err){
+                            throw err;
+                        }
+                        assert.true(content !== "");
+                        testFinishCallback();
+                    });
+                });
+            });
+        })
 	});
 }, 5000);

@@ -16,7 +16,7 @@ const tir = require("../../../../psknode/tests/util/tir.js");
 
 const text = ["first", "second", "third"];
 
-$$.flows.describe("AddRawFolder", {
+$$.flows.describe("AddRawFiles", {
     start: function (callback) {
         this.callback = callback;
         $$.securityContext = require("psk-security-context").createSecurityContext();
@@ -45,38 +45,26 @@ $$.flows.describe("AddRawFolder", {
                     throw err;
                 }
 
-                this.addFolder(folderPath, "fld1", (err, initialHash) => {
+                this.bar.addFiles(files, 'filesFolder', (err, result) => {
                     if (err) {
                         throw err;
                     }
-
-                    this.bar.delete("/", (err) => {
-                        if (err) {
-                            throw err;
-                        }
-
-
-                        this.addFolder(folderPath, "fld2", (err, controlHash) => {
-                            if (err) {
-                                throw err;
-                            }
-
-                            assert.true(initialHash === controlHash);
-                            this.callback();
-                        });
-                    });
-                });
+                    this.runAssertions();
+                })
             })
         });
     },
-
-    addFolder: function (fsFolderPath, barPath, callback) {
-        this.bar.addFolder(fsFolderPath, barPath, {encrypt: false}, (err, mapDigest) => {
+    runAssertions: function () {
+        this.bar.listFiles('filesFolder', (err, files) => {
             if (err) {
-                return callback(err);
+                throw err;
             }
 
-            this.bar.getFolderHash(barPath, callback)
+            assert.true(files.length === 3);
+            assert.true(files.indexOf('a.txt') !== -1);
+            assert.true(files.indexOf('b.txt') !== -1);
+            assert.true(files.indexOf('c.txt') !== -1);
+            this.callback();
         });
     }
 });
@@ -86,7 +74,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     folderPath = path.join(testFolder, "fld");
     files = ["fld/a.txt", "fld/b.txt", "fld/c.txt"].map(file => path.join(testFolder, file));
     filePath = path.join(testFolder, "test.txt");
-    assert.callback("Add raw folder to bar test", (callback) => {
-        $$.flows.start("AddRawFolder", "start", callback);
+    assert.callback("Add raw files to bar test", (callback) => {
+        $$.flows.start("AddRawFiles", "start", callback);
     }, 3000);
 });

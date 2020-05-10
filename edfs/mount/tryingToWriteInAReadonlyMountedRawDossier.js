@@ -16,22 +16,32 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
         let ref = edfs.createRawDossier();
         const fileName = 'simpleFile';
         const folderName = "/dir";
-        ref.writeFile(fileName, "withcontent", (err) => {
+        ref.load((err) => {
             if (err) {
                 throw err;
             }
-            let raw_dossier = edfs.createRawDossier();
-            raw_dossier.mount(folderName + "/test", ref.getSeed(), (err) => {
+            ref.writeFile(fileName, "withcontent", (err) => {
                 if (err) {
                     throw err;
                 }
+                let raw_dossier = edfs.createRawDossier();
+                raw_dossier.load((err) => {
+                    if (err) {
+                        throw err;
+                    }
+                    raw_dossier.mount(folderName + "/test", ref.getSeed(), (err) => {
+                        if (err) {
+                            throw err;
+                        }
 
-                raw_dossier.writeFile(folderName + "/test/anotherFile", "some data", {ignoreMounts: false}, (err) => {
-                    assert.true(typeof err === "undefined");
-                    testFinishCallback();
-                });
+                        raw_dossier.writeFile(folderName + "/test/anotherFile", "some data", {ignoreMounts: false}, (err) => {
+                            assert.true(typeof err === "undefined");
+                            testFinishCallback();
+                        });
+                    });
+                })
+
             });
-
-        });
+        })
     });
 }, 5000);

@@ -37,7 +37,13 @@ $$.flows.describe("AddFolderToCSB", {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
 
             this.rawDossier = this.edfs.createRawDossier();
-            this.addFolder();
+            this.rawDossier.load((err) => {
+                if (err) {
+                    throw err;
+                }
+
+                this.addFolder();
+            })
         });
     },
 
@@ -52,8 +58,12 @@ $$.flows.describe("AddFolderToCSB", {
     },
 
     loadCSBFromEDFS: function () {
-        const newRawCSB = this.edfs.loadBar(this.rawDossier.getSeed());
-        this.listFiles(newRawCSB);
+        this.edfs.loadBar(this.rawDossier.getSeed(), (err, newRawCSB) => {
+            if (err) {
+                throw err;
+            }
+            this.listFiles(newRawCSB);
+        });
     },
 
     listFiles: function (rawCSB) {
