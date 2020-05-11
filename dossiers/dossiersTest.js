@@ -18,18 +18,21 @@ function prepareCSB(endpoint, callback) {
     let edfs = EDFS.attachToEndpoint(endpoint);
     let bar = edfs.createBar();
 
-    bar.addFiles(dossierTypeScripts, "/" + EDFS.constants.CSB.CODE_FOLDER + "/" + EDFS.constants.CSB.CONSTITUTION_FOLDER, (err) => {
-        if (err) {
-            throw err;
-        }
-        //bar.addFile...
-        tir.buildConstitution(DOMAIN_CONSTITUTION_FOLDER, bar, (err) => {
+    bar.load((err) => {
+        bar.addFiles(dossierTypeScripts, "/" + EDFS.constants.CSB.CODE_FOLDER + "/" + EDFS.constants.CSB.CONSTITUTION_FOLDER, (err) => {
             if (err) {
                 throw err;
             }
-            callback(undefined, bar.getSeed().toString());
+            //bar.addFile...
+            tir.buildConstitution(DOMAIN_CONSTITUTION_FOLDER, bar, (err) => {
+                if (err) {
+                    throw err;
+                }
+                callback(undefined, bar.getSeed().toString());
+            });
         });
-    });
+    })
+
 }
 
 function loadCSBAndStartTesting(err, seed, testFinishCallback) {
