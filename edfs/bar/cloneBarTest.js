@@ -89,11 +89,12 @@ $$.flows.describe("CloneBarTest", {
                 if (err) {
                     throw err;
                 }
+                console.log(files);
 
                 assert.true(files.length === 3);
-                assert.true(files.indexOf('/fld1/a.txt') !== -1);
-                assert.true(files.indexOf('/fld1/b.txt') !== -1);
-                assert.true(files.indexOf('/fld1/c.txt') !== -1);
+                assert.true(files.indexOf('fld1/a.txt') !== -1);
+                assert.true(files.indexOf('fld1/b.txt') !== -1);
+                assert.true(files.indexOf('fld1/c.txt') !== -1);
 
                 bar.readFile('/fld1/a.txt', (err, data) => {
                     if (err) {

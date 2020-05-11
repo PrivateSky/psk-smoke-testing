@@ -32,19 +32,21 @@ $$.flows.describe("TestFlow", {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
 
             this.rawDossier = this.edfs.createRawDossier();
-            this.rawDossier.writeFile(pskPath.join("/", rootFolderName, filename), fileContent, (err) => {
-                if (err) {
-                    throw err;
-                }
-
-                this.rawDossier.writeFile(pskPath.join("/", rootFolderName, subFolder, filename), fileContent, (err) => {
+            this.rawDossier.load((err) => {
+                this.rawDossier.writeFile(pskPath.join("/", rootFolderName, filename), fileContent, (err) => {
                     if (err) {
                         throw err;
                     }
 
-                    this.listFiles(this.rawDossier);
+                    this.rawDossier.writeFile(pskPath.join("/", rootFolderName, subFolder, filename), fileContent, (err) => {
+                        if (err) {
+                            throw err;
+                        }
+
+                        this.listFiles(this.rawDossier);
+                    });
                 });
-            });
+            })
         });
     },
 
