@@ -42,20 +42,19 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                             assert.true(typeof err === "undefined");
                             edfs.loadRawDossier(raw_dossier.getSeed(), (err, raw_dossier_reloaded) => {
                                 raw_dossier_reloaded.listFiles("/code/test", (err, files) => {
-                                    console.log("files in code/test", files);
                                     if (err) {
                                         throw err;
                                     }
                                     assert.true(typeof err === "undefined");
                                     assert.true(files.length === 1);
-                                    assert.true(files[0] === "/" + fileName);
-                                    testFinishCallback();
+                        	    assert.true(files[0] === fileName);
+                        	    testFinishCallback();
                                 });
                             });
                         });
                     });
                 });
-            })
-        })
+            });
+        });
     });
 }, 5000);
