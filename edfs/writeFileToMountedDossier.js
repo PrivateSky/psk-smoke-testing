@@ -30,27 +30,40 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
                     if (err) {
                         throw err;
                     }
-                    ref.mount('/dossier', newDossier.getSeed(), (err) => {
+
+                    newDossier.writeFile("/tempFile", "", (err) => {
                         if (err) {
                             throw err;
                         }
 
-                        edfs.loadRawDossier(ref.getSeed(), (err, ref2) => {
+                        ref.mount('/dossier', newDossier.getSeed(), (err) => {
                             if (err) {
                                 throw err;
                             }
-                            ref2.writeFile("/dossier/file.txt", 'some text for a file inside a mounted dossier', function (err) {
+
+                            edfs.loadRawDossier(ref.getSeed(), (err, ref2) => {
                                 if (err) {
                                     throw err;
                                 }
-
-                                newDossier.readFile('file.txt', (err, content) => {
+                                ref2.writeFile("/dossier/file.txt", 'some text for a file inside a mounted dossier', {ignoreMounts: false, encrypt:true}, function (err) {
                                     if (err) {
                                         throw err;
                                     }
 
-                                    assert.true(content === 'some text for a file inside a mounted dossier');
-                                    testFinishCallback();
+                                    newDossier.load((err) => {
+                                        if (err) {
+                                            throw err;
+                                        }
+
+                                        newDossier.readFile('/file.txt', (err, content) => {
+                                            if (err) {
+                                                throw err;
+                                            }
+
+                                            assert.true(content.toString() === 'some text for a file inside a mounted dossier');
+                                            testFinishCallback();
+                                        });
+                                    });
                                 });
                             });
                         });
