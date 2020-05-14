@@ -22,9 +22,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
 
             const edfs = EDFS.attachToEndpoint("http://localhost:" + serverPort);
 
-            const bar = edfs.createBar();
-
-            bar.load((err) => {
+            edfs.createBar((err, bar) => {
                 if (err) {
                     throw err;
                 }

@@ -16,9 +16,7 @@ dossierTypeScripts.push("../../../psknode/bundles/" + "blockchain.js");
 function prepareCSB(endpoint, callback) {
     const EDFS = require("edfs");
     let edfs = EDFS.attachToEndpoint(endpoint);
-    let bar = edfs.createBar();
-
-    bar.load((err) => {
+    edfs.createBar((err, bar) => {
         bar.addFiles(dossierTypeScripts, "/" + EDFS.constants.CSB.CODE_FOLDER + "/" + EDFS.constants.CSB.CONSTITUTION_FOLDER, (err) => {
             if (err) {
                 throw err;

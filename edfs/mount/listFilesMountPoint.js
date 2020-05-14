@@ -13,8 +13,7 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
 
         const EDFS = require("edfs");
         let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        let ref = edfs.createRawDossier();
-        ref.load((err) => {
+        edfs.createRawDossier((err, ref) => {
             if (err) {
                 throw err;
             }
@@ -24,8 +23,7 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                     throw err;
                 }
 
-                let raw_dossier = edfs.createRawDossier();
-                raw_dossier.load((err) => {
+                edfs.createRawDossier((err, raw_dossier) => {
 
                     if (err) {
                         throw err;
@@ -47,8 +45,8 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                                     }
                                     assert.true(typeof err === "undefined");
                                     assert.true(files.length === 1);
-                        	    assert.true(files[0] === fileName);
-                        	    testFinishCallback();
+                                    assert.true(files[0] === fileName);
+                                    testFinishCallback();
                                 });
                             });
                         });

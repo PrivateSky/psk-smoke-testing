@@ -36,13 +36,14 @@ $$.flows.describe("RemoveFilesFromBar", {
 		$$.securityContext.generateIdentity((err, agentId) => {
 			assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
 
-			this.archive = this.edfs.createBar();
-            this.archive.load((err) => {
-                if (err) {
-                    throw err;
-                }
-                this.addFolder();
-            })
+			this.edfs.createBar((err, bar) => {
+				if (err) {
+					throw err;
+				}
+
+				this.archive = bar;
+				this.addFolder();
+			});
 		});
 	},
 

@@ -25,51 +25,47 @@ function generateWallet(endpoint, webappFolder, callback) {
     const fs = require("fs");
     const EDFS = require("edfs");
     let edfs = EDFS.attachToEndpoint(endpoint);
-    let walletTemplate = edfs.createRawDossier();
-    let appTemplate = edfs.createRawDossier();
-    let app = edfs.createRawDossier();
-    const wallet = edfs.createRawDossier();
 
-    appTemplate.load((err) => {
+    edfs.createRawDossier((err, appTemplate) => {
         if (err) {
             throw err;
         }
 
-        appTemplate.writeFile("/index.html", "profile-app index content", function(err) {
+        appTemplate.writeFile("/index.html", "profile-app index content", function (err) {
             if (err) {
                 throw err;
             }
 
-            app.load((err) => {
+            edfs.createRawDossier((err, app) => {
                 if (err) {
                     throw err;
                 }
 
-                app.mount("/code", appTemplate.getSeed(), function(err){
-                    if(err){
+                app.mount("/code", appTemplate.getSeed(), function (err) {
+                    if (err) {
                         throw err;
                     }
 
-                    walletTemplate.load((err) => {
+                    edfs.createRawDossier((err, walletTemplate) => {
                         if (err) {
                             throw err;
                         }
 
-                        walletTemplate.writeFile("/index.html", "wallet index content", function(err){
-                            if(err){
+                        walletTemplate.writeFile("/index.html", "wallet index content", function (err) {
+                            if (err) {
                                 throw err;
                             }
 
-                            wallet.load((err) => {
+                            edfs.createRawDossier((err, wallet) => {
                                 if (err) {
                                     throw err;
                                 }
-                                wallet.mount("/code", walletTemplate.getSeed(), function(err){
-                                    if(err){
+                                wallet.mount("/code", walletTemplate.getSeed(), function (err) {
+                                    if (err) {
                                         throw err;
                                     }
-                                    wallet.mount("/apps/profile-app", app.getSeed(),  function(err){
-                                        if(err){
+                                    wallet.mount("/apps/profile-app", app.getSeed(), function (err) {
+                                        if (err) {
                                             throw err;
                                         }
 
@@ -78,8 +74,8 @@ function generateWallet(endpoint, webappFolder, callback) {
                                                 throw err;
                                             }
 
-                                            doi.readFile("/apps/profile-app/code/index.html", function(err, content){
-                                                if(err){
+                                            doi.readFile("/apps/profile-app/code/index.html", function (err, content) {
+                                                if (err) {
                                                     throw err;
                                                 }
                                                 console.log(content.toString());

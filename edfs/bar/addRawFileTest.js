@@ -40,12 +40,12 @@ $$.flows.describe("AddRawFile", {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            this.bar = this.edfs.createBar();
-            this.bar.load((err) => {
+            this.edfs.createBar((err, bar) => {
                 if (err) {
                     throw err;
                 }
 
+                this.bar = bar;
                 this.addFile(filePath, "fld/a.txt", (err, initialHash) => {
                     if (err) {
                         throw err;

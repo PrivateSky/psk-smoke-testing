@@ -13,10 +13,9 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
 
         const EDFS = require("edfs");
         let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        let ref = edfs.createRawDossier();
         const fileName = 'simpleFile';
         const folderName = "/dir";
-        ref.load((err) => {
+        edfs.createRawDossier((err, ref) => {
             if (err) {
                 throw err;
             }
@@ -24,8 +23,7 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
                 if (err) {
                     throw err;
                 }
-                let raw_dossier = edfs.createRawDossier();
-                raw_dossier.load((err) => {
+                edfs.createRawDossier((err, raw_dossier) => {
                     if (err) {
                         throw err;
                     }

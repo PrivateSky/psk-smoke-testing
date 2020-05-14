@@ -31,8 +31,12 @@ $$.flows.describe("TestFlow", {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
 
-            this.rawDossier = this.edfs.createRawDossier();
-            this.rawDossier.load((err) => {
+            this.edfs.createRawDossier((err, rawDossier) => {
+                if (err) {
+                    throw err;
+                }
+
+                this.rawDossier = rawDossier;
                 this.rawDossier.writeFile(pskPath.join("/", rootFolderName, filename), fileContent, (err) => {
                     if (err) {
                         throw err;

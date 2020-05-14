@@ -13,36 +13,34 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
 
         const EDFS = require("edfs");
         let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        let ref = edfs.createRawDossier();
         const fileName = 'simpleFile';
         const folderName = "dir";
         const subFolder = "folder";
 
-        ref.load((err) => {
+        edfs.createRawDossier((err, ref) => {
             if (err) {
                 throw err;
             }
             ref.writeFile(pskPath.ensureIsAbsolute(fileName), "withcontent", (err) => {
-		if (err) {
-		    throw err;
-		}
-		let raw_dossier = edfs.createRawDossier();
-		raw_dossier.load((err) => {
-		    if (err) {
-		        throw err;
-		    }
-		    raw_dossier.writeFile(pskPath.join("/", folderName, subFolder, fileName), "content", (err) => {
-			if (err) {
-	   		    throw err;
-			}
+                if (err) {
+                    throw err;
+                }
+                edfs.createRawDossier((err, raw_dossier) => {
+                    if (err) {
+                        throw err;
+                    }
+                    raw_dossier.writeFile(pskPath.join("/", folderName, subFolder, fileName), "content", (err) => {
+                        if (err) {
+                            throw err;
+                        }
 
-			raw_dossier.mount(pskPath.join("/", folderName, subFolder), ref.getSeed(), (err) => {
-			    assert.true(err && err.message === "Tried to mount in a non-empty folder");
-		    	    testFinishCallback();
-		        });
-		    });		
-		});
-		
+                        raw_dossier.mount(pskPath.join("/", folderName, subFolder), ref.getSeed(), (err) => {
+                            assert.true(err && err.message === "Tried to mount in a non-empty folder");
+                            testFinishCallback();
+                        });
+                    });
+                });
+
 
             });
         })

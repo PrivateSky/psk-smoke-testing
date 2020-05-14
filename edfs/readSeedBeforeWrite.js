@@ -14,8 +14,7 @@ assert.callback("We should be able to get a seed of a bar before finish writing?
         const EDFS = require("edfs");
         let edfs = EDFS.attachToEndpoint(EDFS_HOST);
 
-        let bar = edfs.createBar();
-        bar.load((err) => {
+        edfs.createBar((err, bar) => {
             if (err) {
                 throw err;
             }

@@ -14,8 +14,7 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
         const EDFS = require("edfs");
         const edfs = EDFS.attachToEndpoint(EDFS_HOST);
 
-        const dossier = edfs.createRawDossier();
-        dossier.load((err) => {
+        edfs.createRawDossier((err, dossier) => {
             if (err) {
                 throw err;
             }
@@ -25,16 +24,12 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                console.log("write finished");
-                const newDossier = edfs.createRawDossier();
-                newDossier.load((err) => {
+                edfs.createRawDossier((err, newDossier) => {
                     if (err) {
                         throw err;
                     }
 
                     newDossier.writeFile("testFile", "testContent", (err) => {
-                        console.log("second finished");
-
                         assert.true(typeof err === "undefined");
 
                         dossier.mount("/code/constitution", newDossier.getSeed(), (err) => {
@@ -42,14 +37,12 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
                                 throw err;
                             }
                             assert.true(typeof err === "undefined");
-                            console.log("mount finished");
 
                             dossier.readFile("/code/constitution/testFile", (err, data) => {
                                 if (err) {
                                     throw err;
                                 }
 
-                                console.log("read file finished", data.toString());
                                 assert.true(typeof err === "undefined");
                                 assert.true(data.toString() === "testContent");
                                 testFinishCallback();

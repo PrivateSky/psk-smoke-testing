@@ -35,13 +35,12 @@ $$.flows.describe('WriteFileFromStream', {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            this.bar = this.edfs.createBar();
-
-            this.bar.load((err) => {
+            this.edfs.createBar((err, bar) => {
                 if (err) {
                     throw err;
                 }
 
+                this.bar = bar;
                 const fileStream = fs.createReadStream(filePath);
                 this.bar.writeFile(barPath, fileStream, (err, data) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to write file.");
@@ -78,7 +77,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
 
     const stream = fs.createWriteStream(filePath);
     stream.write(buf);
-    stream.on('finish',  () => {
+    stream.on('finish', () => {
         assert.callback("Write file from stream test", (callback) => {
             $$.flows.start("WriteFileFromStream", "start", callback);
         }, 3000);

@@ -16,7 +16,7 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             const fs = require("fs");
             const webAppFolder = folder + "/web";
             fs.mkdirSync(webAppFolder, {recursive: true});
-            fs.mkdirSync(webAppFolder+"/assets/js", {recursive: true});
+            fs.mkdirSync(webAppFolder + "/assets/js", {recursive: true});
             fs.writeFileSync(webAppFolder + "/index.html", "Hello World!");
             fs.writeFileSync(webAppFolder + "/assets/js/index.js", "Hello World from JS!");
             generateWallet(EDFS_HOST, webAppFolder, testFinishCallback);
@@ -29,8 +29,7 @@ function generateWallet(endpoint, webappFolder, callback) {
     const EDFS = require("edfs");
     let edfs = EDFS.attachToEndpoint(endpoint);
 
-    let walletTemplate = edfs.createRawDossier();
-    walletTemplate.load((err) => {
+    edfs.createRawDossier((err, walletTemplate) => {
         if (err) {
             throw err;
         }
@@ -39,8 +38,7 @@ function generateWallet(endpoint, webappFolder, callback) {
             if (err) {
                 throw err;
             }
-            let wallet = edfs.createRawDossier();
-            wallet.load((err) => {
+            edfs.createRawDossier((err, wallet) => {
                 if (err) {
                     throw err;
                 }
@@ -54,7 +52,7 @@ function generateWallet(endpoint, webappFolder, callback) {
                     if (err) {
                         throw err;
                     }
-                    wallet.listFiles("/app/assets", function(err, files){
+                    wallet.listFiles("/app/assets", function (err, files) {
                         console.log(files);
                     });
 

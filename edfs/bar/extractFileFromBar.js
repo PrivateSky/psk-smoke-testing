@@ -52,13 +52,12 @@ $$.flows.describe("AddFile", {
         const EDFS = require('edfs');
         const endpoint = `http://localhost:${this.port}`;
         this.edfs = EDFS.attachToEndpoint(endpoint);
-        this.archive = this.edfs.createBar();
-
-        this.archive.load((err) => {
+        this.edfs.createBar((err, bar) => {
             if (err) {
                 throw err;
             }
 
+            this.archive = bar;
             this.addFile();
         })
     },

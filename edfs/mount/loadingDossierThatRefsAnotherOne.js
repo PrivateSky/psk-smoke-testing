@@ -13,8 +13,7 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
 
         const EDFS = require("edfs");
         let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        let ref = edfs.createRawDossier();
-        ref.load((err) => {
+        edfs.createRawDossier((err, ref) => {
             if (err) {
                 throw err;
             }
@@ -22,9 +21,7 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
                 if (err) {
                     throw err;
                 }
-                let raw_dossier = edfs.createRawDossier();
-
-                raw_dossier.load((err) => {
+                edfs.createRawDossier((err, raw_dossier) => {
                     if (err) {
                         throw err;
                     }
