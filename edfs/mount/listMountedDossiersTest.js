@@ -64,6 +64,7 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
                                         throw err;
                                     }
 
+                                    console.log("Mounted dossiers", mountedDossiers);
                                     assert.true(mountedDossiers.length === 1);
                                     testFinishCallback();
                                 });
