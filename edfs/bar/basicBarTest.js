@@ -25,7 +25,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                     throw err;
                 }
 
-                bar.writeFile("a.txt", fileData, (err, barMapDigest) => {
+                bar.writeFile("/x/y/z/a.txt", fileData, (err, barMapDigest) => {
                     if (err) {
                         throw err;
                     }
@@ -36,11 +36,26 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                         if (err) {
                             throw err;
                         }
-                        newBar.readFile("a.txt", (err, data) => {
+                        newBar.readFile("/x/y/z/a.txt", (err, data) => {
                             assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
                             assert.true(fileData === data.toString(), "Invalid read data");
 
-                            callback();
+                            newBar.writeFile('/x/y/z/a.txt', 'test', (err) => {
+                                assert.true(err === null || typeof err === "undefined", "Failed read file from BAR. 2");
+
+                                newBar.readFile("/x/y/z/a.txt", (err, data) => {
+                                    assert.true(err === null || typeof err === "undefined", "Failed read file from BAR. 2");
+                                    assert.true('test' === data.toString(), "Invalid read data 2");
+
+                                    newBar.listFiles('/', (err, data) => {
+
+                                        newBar.listFolders('/', (err, data) => {
+
+                                            callback();
+                                        })
+                                    });
+                                });
+                            });
                         });
                     })
                 });

@@ -71,7 +71,7 @@ $$.flows.describe("RemoveFilesFromBar", {
 
 					console.log("files after remove", filesAfterRemoval, initialFiles);
 					assert.arraysMatch(initialFiles.slice(1), filesAfterRemoval);
-					this.callback();
+                    this.callback();
 				});
 			});
 		});
