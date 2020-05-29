@@ -4,7 +4,7 @@ require("../../../psknode/bundles/pskruntime");
 const tir = require("../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
 
-assert.callback("Read file from dossier test", (testFinishCallback) => {
+assert.callback("Rename file in dossier", (testFinishCallback) => {
     tir.launchVirtualMQNode(function (err, port) {
         if (err) {
             throw err;
