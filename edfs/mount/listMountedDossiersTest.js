@@ -28,10 +28,10 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
                         throw err;
                     }
                     const mountingPoints = [{path: "/temp", name: "dir", seed: dossier.getSeed()}, {
-                        path: "/folder",
-                        name: "test",
+                        path: "/temp/dossier1/folder",
+                        name: "dossier2",
                         seed: anotherDossier.getSeed()
-                    }, {path: "/test", name: "folder", seed: yetAnotherDossier.getSeed()}];
+                    }, {path: "/temp/dossier1/folder", name: "dossier3", seed: yetAnotherDossier.getSeed()}];
 
                     edfs.createRawDossier((err, raw_dossier) => {
                         if (err) {
@@ -59,12 +59,12 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
                             }
 
                             function startTest() {
-                                raw_dossier.listMountedDossiers("/temp", (err, mountedDossiers) => {
+                                raw_dossier.listMountedDossiers("/temp/dossier1/folder", (err, mountedDossiers) => {
                                     if (err) {
                                         throw err;
                                     }
 
-                                    assert.true(mountedDossiers.length === 1);
+                                    assert.true(mountedDossiers.length === 2);
                                     testFinishCallback();
                                 });
                             }

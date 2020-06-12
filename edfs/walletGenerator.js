@@ -41,22 +41,23 @@ function generateWallet(endpoint, webappFolder, callback) {
                     if (err) {
                         throw err;
                     }
-                });
-                wallet.addFolder(webappFolder, "app", function (err) {
-                    if (err) {
-                        throw err;
-                    }
 
-                    wallet.readFile("/app/index.html", function (err, content) {
+                    wallet.addFolder(webappFolder, "app", function (err) {
                         if (err) {
-                            throw  err;
+                            throw err;
                         }
 
-                        const seed = wallet.getSeed();
-                        if (callback) {
-                            callback(seed);
-                        }
-                    })
+                        wallet.readFile("/app/index.html", function (err, content) {
+                            if (err) {
+                                throw  err;
+                            }
+
+                            const seed = wallet.getSeed();
+                            if (callback) {
+                                callback(seed);
+                            }
+                        })
+                    });
                 });
             })
         });
