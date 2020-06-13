@@ -28,7 +28,7 @@ assert.callback(
                 }
 
                 let intervalHandler = setInterval(() => {
-                    console.log(`communicationWorking ${communicationWorking} swarms:${swarmCounter}`);
+                    console.log(`communicationWorking ${communicationWorking} swarms:${swarmCounter} noAgentsPerDomain: ${noOfAgentsPerDomain}`);
                     if (communicationWorking === noOfAgentsPerDomain - 1) {
                         console.log(`SWARMS STARTED ${swarmCounter}`);
                         assert.true(
@@ -45,14 +45,13 @@ assert.callback(
                     const nextAgent = testUtils.constructFullAgentName(noOfDomains-1,i + 1);
                     const currentAgent = testUtils.constructFullAgentName(noOfDomains-1, i);
 
-                    if (i + 1 === agentThrowingErrorIndex) {
+                    if (i + 1 === parseInt(agentThrowingErrorIndex, 10)) {
+                        console.log('throwing Error');
                         $$.interaction
                             .startSwarmAs(nextAgent, 'commTest', 'default', nextAgent, '#1')
                             .onReturn(result => {
                                 getResult();
-                                if (result === 2) {
-                                    communicationWorking += 1;
-                                }
+                                communicationWorking += 1;
                             });
                     } else {
                         $$.interactions.startSwarmAs(currentAgent, 'commTest', 'default', nextAgent, 0).onReturn(result => {
