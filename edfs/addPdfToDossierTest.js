@@ -36,7 +36,7 @@ assert.callback("Add PDF to dossier test", (testFinishCallback) => {
                         throw err;
                     }
 
-                    ref.extractFile("./myProspect.pdf", "/file", (err) => {
+                    dossierClone.extractFile("./myProspect.pdf", "/file", (err) => {
                         if (err) {
                             throw err;
                         }
