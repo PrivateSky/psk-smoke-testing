@@ -3,8 +3,7 @@ require("../../../psknode/bundles/pskruntime");
 
 const tir = require("../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
-const fs = require('fs');
-const crypto = require("pskcrypto");
+const fs = require("fs");
 
 const file = fs.createWriteStream("./bigFile.pdf");
 for (let i = 0; i <= 1e5; i++) {
@@ -32,16 +31,22 @@ assert.callback("Add PDF to dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                ref.extractFile("./myProspect.pdf", "/file", (err) => {
+                edfs.loadRawDossier(ref.getSeed(), (err, dossierClone) => {
                     if (err) {
                         throw err;
                     }
-                    const originalSize = fs.statSync("./bigFile.pdf").size;
-                    const newSize = fs.statSync("./myProspect.pdf").size;
-                    assert.true(originalSize === newSize);
-                    fs.unlinkSync("./bigFile.pdf");
-                    fs.unlinkSync("./myProspect.pdf");
-                    testFinishCallback();
+
+                    ref.extractFile("./myProspect.pdf", "/file", (err) => {
+                        if (err) {
+                            throw err;
+                        }
+                        const originalSize = fs.statSync("./bigFile.pdf").size;
+                        const newSize = fs.statSync("./myProspect.pdf").size;
+                        assert.true(originalSize === newSize);
+                        fs.unlinkSync("./bigFile.pdf");
+                        fs.unlinkSync("./myProspect.pdf");
+                        testFinishCallback();
+                    });
                 });
             });
         })
