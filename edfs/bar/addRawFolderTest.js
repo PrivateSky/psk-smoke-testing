@@ -24,12 +24,28 @@ $$.flows.describe("AddRawFolder", {
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
-            tir.launchVirtualMQNode((err, port) => {
+            tir.launchVirtualMQNode((err, serverPort) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                this.port = port;
-                const endpoint = `http://localhost:${port}`;
-                this.edfs = EDFS.attachToEndpoint(endpoint);
+                this.port = serverPort;
+                const configuration = {
+                    endpointsConfiguration: {
+                        brickEndpoints: [
+                            {
+                                endpoint: `http://localhost:${serverPort}`,
+                                protocol: 'EDFS'
+                            }
+                        ],
+                        aliasEndpoints: [
+                            {
+                                endpoint: `http://localhost:${serverPort}`,
+                                protocol: 'EDFS'
+                            }
+                        ]
+                    },
+                    dlDomain: 'localDomain'
+                }
+                this.edfs = EDFS.getHandler(configuration);
                 this.createBAR();
             });
         });
@@ -39,7 +55,7 @@ $$.flows.describe("AddRawFolder", {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            this.edfs.createBar((err, bar) => {
+            this.edfs.createDSU('Bar', (err, bar) => {
                 if (err) {
                     throw err;
                 }
