@@ -25,16 +25,16 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                     throw err;
                 }
 
-                bar.writeFile("/x/y/z/a.txt", fileData, (err, barMapDigest) => {
+                bar.writeFile("/x/y/z/a.txt", fileData, (err, brickMapDigest) => {
                     if (err) {
                         throw err;
                     }
                     assert.true(err === null || typeof err === "undefined", "Failed to write file in BAR");
-                    assert.true(barMapDigest !== null && typeof barMapDigest !== "undefined", "Bar map digest is null or undefined");
+                    assert.true(brickMapDigest !== null && typeof brickMapDigest !== "undefined", "Bar map digest is null or undefined");
 
-                    bar.writeFile('/x/y/b.txt', fileData, (err, barMapDigest) => {
+                    bar.writeFile('/x/y/b.txt', fileData, (err, brickMapDigest) => {
                         assert.true(err === null || typeof err === "undefined", "Failed to write second file in BAR");
-                        assert.true(barMapDigest !== null && typeof barMapDigest !== "undefined", "Bar map digest is null or undefined");
+                        assert.true(brickMapDigest !== null && typeof brickMapDigest !== "undefined", "Bar map digest is null or undefined");
 
                         edfs.loadBar(bar.getSeed(), (err, newBar) => {
                             if (err) {
