@@ -28,24 +28,20 @@ $$.flows.describe("AddRawFolder", {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
                 this.port = serverPort;
-                const configuration = {
-                    endpointsConfiguration: {
-                        brickEndpoints: [
-                            {
-                                endpoint: `http://localhost:${serverPort}`,
-                                protocol: 'EDFS'
-                            }
-                        ],
-                        aliasEndpoints: [
-                            {
-                                endpoint: `http://localhost:${serverPort}`,
-                                protocol: 'EDFS'
-                            }
-                        ]
-                    },
-                    dlDomain: 'localDomain'
+                const config = {
+                    endpoints: [
+                        {
+                            endpoint:`http://localhost:${serverPort}`,
+                            type: 'brickStorage'
+                        },
+                        {
+                            endpoint:`http://localhost:${serverPort}`,
+                            type: 'anchorService'
+                        }
+                    ],
+                    dlDomain: "localDomain"
                 }
-                this.edfs = EDFS.getHandler(configuration);
+                this.edfs = EDFS.getHandler(config);
                 this.createBAR();
             });
         });
