@@ -38,10 +38,9 @@ $$.flows.describe("AddRawFolder", {
                             endpoint:`http://localhost:${serverPort}`,
                             type: 'anchorService'
                         }
-                    ],
-                    dlDomain: "localDomain"
+                    ]
                 }
-                this.edfs = EDFS.getHandler(config);
+                $$.BDNS.addConfig('default', config);
                 this.createBAR();
             });
         });
@@ -51,7 +50,7 @@ $$.flows.describe("AddRawFolder", {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            this.edfs.createDSU('Bar', (err, bar) => {
+            EDFS.createDSU('Bar', (err, bar) => {
                 if (err) {
                     throw err;
                 }
@@ -74,7 +73,20 @@ $$.flows.describe("AddRawFolder", {
                             }
 
                             assert.true(initialHash === controlHash);
-                            this.callback();
+                            const seedSSI = this.bar.getKeySSI();
+                            EDFS.resolveSSI(seedSSI, 'Bar', (err, newBar) => {
+                                if (err) {
+                                    throw err;
+                                }
+
+                                newBar.listFolders("/", (err, folders) => {
+                                    if (err) {
+                                        throw err;
+                                    }
+                                    assert.true(folders.length === 1);
+                                    this.callback();
+                                });
+                            });
                         });
                     });
                 });
