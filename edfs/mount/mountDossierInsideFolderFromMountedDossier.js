@@ -9,17 +9,25 @@ assert.callback("mount - mount dossier inside a folder of a mounted dossier", (t
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
-
         const EDFS = require("edfs");
-        let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-
-        edfs.createRawDossier((err, rawDossier) => {
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
+        EDFS.createDSU("RawDossier", (err, rawDossier) => {
             if (err) {
                 throw err;
             }
 
-            edfs.createRawDossier((err, dossier1) => {
+            EDFS.createDSU("RawDossier", (err, dossier1) => {
                 if (err) {
                     throw err;
                 }
@@ -29,7 +37,7 @@ assert.callback("mount - mount dossier inside a folder of a mounted dossier", (t
                         throw err;
                     }
 
-                    rawDossier.mount('/folder1/dossier1', dossier1.getSeed(), (err) => {
+                    rawDossier.mount('/folder1/dossier1', dossier1.getKeySSI(), (err) => {
                         if (err) {
                             throw err;
                         }

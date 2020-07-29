@@ -12,8 +12,19 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
         const EDFS_HOST = `http://localhost:${port}`;
 
         const EDFS = require("edfs");
-        let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        edfs.createRawDossier((err, ref) => {
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
+        EDFS.createDSU("RawDossier", (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -23,13 +34,13 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                     throw err;
                 }
 
-                edfs.createRawDossier((err, raw_dossier) => {
+                EDFS.createDSU("RawDossier", (err, raw_dossier) => {
 
                     if (err) {
                         throw err;
                     }
 
-                    raw_dossier.mount("/code/test", ref.getSeed(), (err) => {
+                    raw_dossier.mount("/code/test", ref.getKeySSI(), (err) => {
                         if (err) {
                             throw err;
                         }
@@ -38,7 +49,7 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                                 throw err;
                             }
                             assert.true(typeof err === "undefined");
-                            edfs.loadRawDossier(raw_dossier.getSeed(), (err, raw_dossier_reloaded) => {
+                            EDFS.resolveSSI(raw_dossier.getKeySSI(), "RawDossier", (err, raw_dossier_reloaded) => {
                                 raw_dossier_reloaded.listFiles("/code/test", (err, files) => {
                                     if (err) {
                                         throw err;

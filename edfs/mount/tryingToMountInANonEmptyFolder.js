@@ -9,15 +9,24 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
-
         const EDFS = require("edfs");
-        let edfs = EDFS.attachToEndpoint(EDFS_HOST);
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
         const fileName = 'simpleFile';
         const folderName = "dir";
         const subFolder = "folder";
 
-        edfs.createRawDossier((err, ref) => {
+        EDFS.createDSU("RawDossier", (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -25,7 +34,7 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
                 if (err) {
                     throw err;
                 }
-                edfs.createRawDossier((err, raw_dossier) => {
+                EDFS.createDSU("RawDossier", (err, raw_dossier) => {
                     if (err) {
                         throw err;
                     }
@@ -34,7 +43,7 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
                             throw err;
                         }
 
-                        raw_dossier.mount(pskPath.join("/", folderName, subFolder), ref.getSeed(), (err) => {
+                        raw_dossier.mount(pskPath.join("/", folderName, subFolder), ref.getKeySSI(), (err) => {
                             assert.true(err && err.message === "Tried to mount in a non-empty folder");
                             testFinishCallback();
                         });

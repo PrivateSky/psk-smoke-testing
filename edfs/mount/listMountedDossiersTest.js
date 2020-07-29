@@ -12,28 +12,39 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
         const EDFS_HOST = `http://localhost:${port}`;
 
         const EDFS = require("edfs");
-        let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        edfs.createRawDossier((err, dossier) => {
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
+        EDFS.createDSU("RawDossier", (err, dossier) => {
             if (err) {
                 throw err;
             }
 
-            edfs.createRawDossier((err, anotherDossier) => {
+            EDFS.createDSU("RawDossier", (err, anotherDossier) => {
                 if (err) {
                     throw err;
                 }
 
-                edfs.createRawDossier((err, yetAnotherDossier) => {
+                EDFS.createDSU("RawDossier", (err, yetAnotherDossier) => {
                     if (err) {
                         throw err;
                     }
-                    const mountingPoints = [{path: "/temp", name: "dir", seed: dossier.getSeed()}, {
+                    const mountingPoints = [{path: "/temp", name: "dir", seed: dossier.getKeySSI()}, {
                         path: "/temp/dossier1/folder",
                         name: "dossier2",
-                        seed: anotherDossier.getSeed()
-                    }, {path: "/temp/dossier1/folder", name: "dossier3", seed: yetAnotherDossier.getSeed()}];
+                        seed: anotherDossier.getKeySSI()
+                    }, {path: "/temp/dossier1/folder", name: "dossier3", seed: yetAnotherDossier.getKeySSI()}];
 
-                    edfs.createRawDossier((err, raw_dossier) => {
+                    EDFS.createDSU("RawDossier", (err, raw_dossier) => {
                         if (err) {
                             throw err;
                         }

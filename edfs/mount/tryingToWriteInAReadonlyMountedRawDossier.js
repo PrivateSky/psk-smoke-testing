@@ -9,13 +9,22 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
-
         const EDFS = require("edfs");
-        let edfs = EDFS.attachToEndpoint(EDFS_HOST);
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
         const fileName = 'simpleFile';
         const folderName = "/dir";
-        edfs.createRawDossier((err, ref) => {
+        EDFS.createDSU("RawDossier", (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -23,11 +32,11 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
                 if (err) {
                     throw err;
                 }
-                edfs.createRawDossier((err, raw_dossier) => {
+                EDFS.createDSU("RawDossier", (err, raw_dossier) => {
                     if (err) {
                         throw err;
                     }
-                    raw_dossier.mount(folderName + "/test", ref.getSeed(), (err) => {
+                    raw_dossier.mount(folderName + "/test", ref.getKeySSI(), (err) => {
                         if (err) {
                             throw err;
                         }

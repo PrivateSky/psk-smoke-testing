@@ -9,32 +9,41 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
 
         const EDFS = require("edfs");
-        let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-
-        edfs.createRawDossier((err, rawDossier) => {
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
+        EDFS.createDSU("RawDossier", (err, rawDossier) => {
             if (err) {
                 throw err;
             }
 
-            edfs.createRawDossier((err, dossier1) => {
+            EDFS.createDSU("RawDossier", (err, dossier1) => {
                 if (err) {
                     throw err;
                 }
 
-                rawDossier.mount('/dossier1', dossier1.getSeed(), (err) => {
+                rawDossier.mount('/dossier1', dossier1.getKeySSI(), (err) => {
                     if (err) {
                         throw err;
                     }
 
-                    edfs.createRawDossier((err, dossier2) => {
+                    EDFS.createDSU("RawDossier", (err, dossier2) => {
                         if (err) {
                             throw err;
                         }
 
-                        dossier1.mount('/dossier2', dossier2.getSeed(), (err) => {
+                        dossier1.mount('/dossier2', dossier2.getKeySSI(), (err) => {
                             if (err) {
                                 throw err;
                             }
@@ -51,22 +60,22 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
                                     }
                                     assert.true(content[1].path === 'dossier2');
 
-                                    edfs.createRawDossier((err, dossier3) => {
+                                    EDFS.createDSU("RawDossier", (err, dossier3) => {
                                         if (err) {
                                             throw err;
                                         }
 
-                                        rawDossier.mount('/dossier3', dossier3.getSeed(), (err) => {
+                                        rawDossier.mount('/dossier3', dossier3.getKeySSI(), (err) => {
                                             if (err) {
                                                 throw err;
                                             }
 
-                                            edfs.loadRawDossier(dossier1.getSeed(), (err, dossier1Loaded) => {
+                                            EDFS.resolveSSI(dossier1.getKeySSI(), "RawDossier", (err, dossier1Loaded) => {
                                                 if (err) {
                                                     throw err;
                                                 }
 
-                                                dossier1Loaded.mount('/dossier4', dossier3.getSeed(), (err) => {
+                                                dossier1Loaded.mount('/dossier4', dossier3.getKeySSI(), (err) => {
                                                     if (err) {
                                                         throw err;
                                                     }
