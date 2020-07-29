@@ -4,6 +4,7 @@ require("../../../psknode/bundles/pskruntime");
 const tir = require("../../../psknode/tests/util/tir");
 const dc = require("double-check");
 const assert = dc.assert;
+const EDFS = require("edfs");
 
 assert.callback("Wallet generator", (testFinishCallback) => {
     dc.createTestFolder("wallet", function (err, folder) {
@@ -14,6 +15,18 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             }
             const EDFS_HOST = `http://localhost:${port}`;
             const fs = require("fs");
+            $$.BDNS.addConfig("default", {
+                endpoints: [
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'brickStorage'
+                    },
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'anchorService'
+                    }
+                ]
+            })
             const webAppFolder = folder + "\\web";
             fs.mkdirSync(webAppFolder, {recursive: true});
             fs.writeFileSync(webAppFolder + "/index.html", "Hello World!");
@@ -23,11 +36,7 @@ assert.callback("Wallet generator", (testFinishCallback) => {
 }, 5000);
 
 function generateWallet(endpoint, webappFolder, callback) {
-    const fs = require("fs");
-    const EDFS = require("edfs");
-    let edfs = EDFS.attachToEndpoint(endpoint);
-
-    edfs.createRawDossier((err, walletTemplate) => {
+    EDFS.createDSU("RawDossier", (err, walletTemplate) => {
         if (err) {
             throw err;
         }
@@ -36,8 +45,8 @@ function generateWallet(endpoint, webappFolder, callback) {
                 throw err;
             }
 
-            edfs.createRawDossier((err, wallet) => {
-                wallet.mount("/constitution", walletTemplate.getSeed(), function (err) {
+            EDFS.createDSU("RawDossier", (err, wallet) => {
+                wallet.mount("/constitution", walletTemplate.getKeySSI(), function (err) {
                     if (err) {
                         throw err;
                     }
@@ -52,7 +61,7 @@ function generateWallet(endpoint, webappFolder, callback) {
                                 throw  err;
                             }
 
-                            const seed = wallet.getSeed();
+                            const seed = wallet.getKeySSI();
                             if (callback) {
                                 callback(seed);
                             }

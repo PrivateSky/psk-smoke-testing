@@ -12,8 +12,19 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
         const EDFS_HOST = `http://localhost:${port}`;
 
         const EDFS = require("edfs");
-        let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        edfs.createRawDossier((err, ref) => {
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
+        EDFS.createDSU("RawDossier", (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -23,7 +34,7 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
                     throw err;
                 }
 
-                edfs.createRawDossier((err, newDossier) => {
+                EDFS.createDSU("RawDossier", (err, newDossier) => {
                     if (err) {
                         throw err;
                     }
@@ -33,12 +44,12 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
                             throw err;
                         }
 
-                        ref.mount('/dossier', newDossier.getSeed(), (err) => {
+                        ref.mount('/dossier', newDossier.getKeySSI(), (err) => {
                             if (err) {
                                 throw err;
                             }
 
-                            edfs.loadRawDossier(ref.getSeed(), (err, ref2) => {
+                            EDFS.resolveSSI(ref.getKeySSI(), "RawDossier", (err, ref2) => {
                                 if (err) {
                                     throw err;
                                 }

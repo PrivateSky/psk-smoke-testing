@@ -20,9 +20,18 @@ $$.flows.describe("TestFlow", {
         $$.securityContext = require("psk-security-context").createSecurityContext();
         tir.launchVirtualMQNode((err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server.");
-            const endpoint = `http://localhost:${port}`;
-            this.edfs = edfsModule.attachToEndpoint(endpoint);
-            this.createRawDossier();
+            $$.BDNS.addConfig("default", {
+                endpoints: [
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'brickStorage'
+                    },
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'anchorService'
+                    }
+                ]
+            })
         });
 
     },
@@ -31,7 +40,7 @@ $$.flows.describe("TestFlow", {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
 
-            this.edfs.createRawDossier((err, rawDossier) => {
+            edfsModule.createDSU("RawDossier", (err, rawDossier) => {
                 if (err) {
                     throw err;
                 }

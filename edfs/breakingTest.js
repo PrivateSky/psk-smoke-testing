@@ -13,8 +13,18 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             if (err) {
                 throw err;
             }
-            console.log("am lansat vmq");
-
+            $$.BDNS.addConfig("default", {
+                endpoints: [
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'brickStorage'
+                    },
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'anchorService'
+                    }
+                ]
+            })
             const EDFS_HOST = `http://localhost:${port}`;
             generateWallet(EDFS_HOST, "webAppFolder", testFinishCallback);
         });
@@ -24,9 +34,8 @@ assert.callback("Wallet generator", (testFinishCallback) => {
 function generateWallet(endpoint, webappFolder, callback) {
     const fs = require("fs");
     const EDFS = require("edfs");
-    let edfs = EDFS.attachToEndpoint(endpoint);
 
-    edfs.createRawDossier((err, appTemplate) => {
+    EDFS.createDSU("RawDossier", (err, appTemplate) => {
         if (err) {
             throw err;
         }
@@ -36,17 +45,17 @@ function generateWallet(endpoint, webappFolder, callback) {
                 throw err;
             }
 
-            edfs.createRawDossier((err, app) => {
+            EDFS.createDSU("RawDossier", (err, app) => {
                 if (err) {
                     throw err;
                 }
 
-                app.mount("/code", appTemplate.getSeed(), function (err) {
+                app.mount("/code", appTemplate.getKeySSI(), function (err) {
                     if (err) {
                         throw err;
                     }
 
-                    edfs.createRawDossier((err, walletTemplate) => {
+                    EDFS.createDSU("RawDossier", (err, walletTemplate) => {
                         if (err) {
                             throw err;
                         }
@@ -56,20 +65,20 @@ function generateWallet(endpoint, webappFolder, callback) {
                                 throw err;
                             }
 
-                            edfs.createRawDossier((err, wallet) => {
+                            EDFS.createDSU("RawDossier", (err, wallet) => {
                                 if (err) {
                                     throw err;
                                 }
-                                wallet.mount("/code", walletTemplate.getSeed(), function (err) {
+                                wallet.mount("/code", walletTemplate.getKeySSI(), function (err) {
                                     if (err) {
                                         throw err;
                                     }
-                                    wallet.mount("/apps/profile-app", app.getSeed(), function (err) {
+                                    wallet.mount("/apps/profile-app", app.getKeySSI(), function (err) {
                                         if (err) {
                                             throw err;
                                         }
 
-                                        edfs.loadRawDossier(wallet.getSeed(), (err, doi) => {
+                                        EDFS.resolveSSI(wallet.getKeySSI(), "RawDossier", (err, doi) => {
                                             if (err) {
                                                 throw err;
                                             }

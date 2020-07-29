@@ -12,9 +12,19 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
         const EDFS_HOST = `http://localhost:${port}`;
 
         const EDFS = require("edfs");
-        const edfs = EDFS.attachToEndpoint(EDFS_HOST);
-
-        edfs.createRawDossier((err, dossier) => {
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
+        EDFS.createDSU("RawDossier", (err, dossier) => {
             if (err) {
                 throw err;
             }
@@ -24,7 +34,7 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                edfs.createRawDossier((err, newDossier) => {
+                EDFS.createDSU("RawDossier", (err, newDossier) => {
                     if (err) {
                         throw err;
                     }
@@ -32,7 +42,7 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
                     newDossier.writeFile("testFile", "testContent", (err) => {
                         assert.true(typeof err === "undefined");
 
-                        dossier.mount("/code/constitution", newDossier.getSeed(), (err) => {
+                        dossier.mount("/code/constitution", newDossier.getKeySSI(), (err) => {
                             if (err) {
                                 throw err;
                             }

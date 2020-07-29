@@ -17,11 +17,20 @@ assert.callback("Add PDF to dossier test", (testFinishCallback) => {
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
-
         const EDFS = require("edfs");
-        let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        edfs.createRawDossier((err, ref) => {
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
+        EDFS.createDSU("RawDossier", (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -31,7 +40,7 @@ assert.callback("Add PDF to dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                edfs.loadRawDossier(ref.getSeed(), (err, dossierClone) => {
+                EDFS.resolveSSI(ref.getKeySSI(),"RawDossier", (err, dossierClone) => {
                     if (err) {
                         throw err;
                     }

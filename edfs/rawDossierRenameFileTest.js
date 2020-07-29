@@ -12,9 +12,20 @@ assert.callback("Rename file in dossier", (testFinishCallback) => {
         const EDFS_HOST = `http://localhost:${port}`;
 
         const EDFS = require("edfs");
-        const edfs = EDFS.attachToEndpoint(EDFS_HOST);
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
 
-        edfs.createRawDossier((err, dossier) => {
+        EDFS.createDSU("RawDossier",(err, dossier) => {
             if (err) {
                 throw err;
             }
@@ -48,38 +59,9 @@ assert.callback("Rename file in dossier", (testFinishCallback) => {
                                 testFinishCallback();
                             })
                         })
-
                     })
-
                 })
-                //edfs.createRawDossier((err, newDossier) => {
-                    //if (err) {
-                        //throw err;
-                    //}
-
-                    //newDossier.writeFile("testFile", "testContent", (err) => {
-                        //assert.true(typeof err === "undefined");
-
-                        //dossier.mount("/code/constitution", newDossier.getSeed(), (err) => {
-                            //if (err) {
-                                //throw err;
-                            //}
-                            //assert.true(typeof err === "undefined");
-
-                            //dossier.readFile("/code/constitution/testFile", (err, data) => {
-                                //if (err) {
-                                    //throw err;
-                                //}
-
-                                //assert.true(typeof err === "undefined");
-                                //assert.true(data.toString() === "testContent");
-                            //});
-                        //});
-                    //});
-                //})
-
             });
-
         })
     });
 }, 5000);
