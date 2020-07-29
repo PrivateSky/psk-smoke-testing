@@ -15,12 +15,22 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     const fileData = "Lorem Ipsum is simply dummy text";
 
     assert.callback("RenameFileFunctionality", (callback) => {
-        tir.launchVirtualMQNode(10, testFolder, (err, serverPort) => {
+        tir.launchVirtualMQNode(10, testFolder, (err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
-            const edfs = EDFS.attachToEndpoint("http://localhost:" + serverPort);
-
-            edfs.createBar((err, bar) => {
+            $$.BDNS.addConfig("default", {
+                endpoints: [
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'brickStorage'
+                    },
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'anchorService'
+                    }
+                ]
+            })
+            EDFS.createDSU("Bar", (err, bar) => {
                 if (err) {
                     throw err;
                 }
@@ -32,7 +42,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to write file in BAR");
                     assert.true(brickMapDigest !== null && typeof brickMapDigest !== "undefined", "Bar map digest is null or undefined");
 
-                    edfs.loadBar(bar.getSeed(), (err, newBar) => {
+                    EDFS.resolveSSI(bar.getKeySSI(), "Bar", (err, newBar) => {
                         if (err) {
                             throw err;
                         }

@@ -24,8 +24,18 @@ $$.flows.describe("RemoveFilesFromBar", {
 
 			tir.launchVirtualMQNode((err, port) => {
 				assert.true(err === null || typeof err === "undefined", "Failed to create server.");
-				const endpoint = `http://localhost:${port}`;
-				this.edfs = edfsModule.attachToEndpoint(endpoint);
+				$$.BDNS.addConfig("default", {
+					endpoints: [
+						{
+							endpoint:`http://localhost:${port}`,
+							type: 'brickStorage'
+						},
+						{
+							endpoint:`http://localhost:${port}`,
+							type: 'anchorService'
+						}
+					]
+				})
 				this.createBAR();
 			});
 		});
@@ -36,7 +46,7 @@ $$.flows.describe("RemoveFilesFromBar", {
 		$$.securityContext.generateIdentity((err, agentId) => {
 			assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
 
-			this.edfs.createBar((err, bar) => {
+			edfsModule.createDSU("Bar", (err, bar) => {
 				if (err) {
 					throw err;
 				}
@@ -69,7 +79,6 @@ $$.flows.describe("RemoveFilesFromBar", {
 						throw err;
 					}
 
-					console.log("files after remove", filesAfterRemoval, initialFiles);
 					assert.arraysMatch(initialFiles.slice(1), filesAfterRemoval);
 					this.callback();
 				});

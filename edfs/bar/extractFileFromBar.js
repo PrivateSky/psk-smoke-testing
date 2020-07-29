@@ -25,6 +25,7 @@ let folders;
 let tempFolder;
 
 const text = ["first text", "second fragment", "third"];
+const EDFS = require('edfs');
 
 $$.flows.describe("AddFile", {
     start: function (callback) {
@@ -40,7 +41,18 @@ $$.flows.describe("AddFile", {
                 tir.launchVirtualMQNode((err, port) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                    this.port = port;
+                    $$.BDNS.addConfig("default", {
+                        endpoints: [
+                            {
+                                endpoint:`http://localhost:${port}`,
+                                type: 'brickStorage'
+                            },
+                            {
+                                endpoint:`http://localhost:${port}`,
+                                type: 'anchorService'
+                            }
+                        ]
+                    })
                     this.createArchive();
                 });
             });
@@ -49,10 +61,7 @@ $$.flows.describe("AddFile", {
     },
 
     createArchive: function () {
-        const EDFS = require('edfs');
-        const endpoint = `http://localhost:${this.port}`;
-        this.edfs = EDFS.attachToEndpoint(endpoint);
-        this.edfs.createBar((err, bar) => {
+        EDFS.createDSU("Bar", (err, bar) => {
             if (err) {
                 throw err;
             }
@@ -70,12 +79,12 @@ $$.flows.describe("AddFile", {
             let fs = require("fs");
             //double_check.deleteFoldersSync(folderPath);
             fs.rmdirSync(folderPath, {recursive: true, maxRetries: 10});
-            this.extractFile(this.archive.getSeed());
+            this.extractFile(this.archive.getKeySSI());
         });
     },
 
-    extractFile: function (seed) {
-        this.edfs.loadBar(seed, (err, archive) => {
+    extractFile: function (keySSI) {
+        EDFS.resolveSSI(keySSI,"Bar", (err, archive) => {
             if (err) {
                 throw err;
             }

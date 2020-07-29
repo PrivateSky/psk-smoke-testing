@@ -17,12 +17,23 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     const expectedFileData = `${fileData}${dataToAppend}`;
 
     assert.callback("AppendToFileTest", (callback) => {
-        tir.launchVirtualMQNode(10, testFolder, (err, serverPort) => {
+        tir.launchVirtualMQNode(10, testFolder, (err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
-            const edfs = EDFS.attachToEndpoint("http://localhost:" + serverPort);
+            $$.BDNS.addConfig("default", {
+                endpoints: [
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'brickStorage'
+                    },
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'anchorService'
+                    }
+                ]
+            })
 
-            edfs.createBar((err, bar) => {
+            EDFS.createDSU("Bar", (err, bar) => {
                 if (err) {
                     throw err;
                 }
@@ -39,7 +50,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                             throw err;
                         }
 
-                        edfs.loadBar(bar.getSeed(), (err, newBar) => {
+                        EDFS.resolveSSI(bar.getKeySSI(), "Bar", (err, newBar) => {
                             if (err) {
                                 throw err;
                             }

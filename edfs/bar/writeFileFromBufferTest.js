@@ -24,9 +24,18 @@ $$.flows.describe('WriteFileFromBuffer', {
         tir.launchVirtualMQNode((err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-            this.port = port;
-            const endpoint = `http://localhost:${port}`;
-            this.edfs = EDFS.attachToEndpoint(endpoint);
+            $$.BDNS.addConfig("default", {
+                endpoints: [
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'brickStorage'
+                    },
+                    {
+                        endpoint:`http://localhost:${port}`,
+                        type: 'anchorService'
+                    }
+                ]
+            })
             this.createBAR();
         });
     },
@@ -34,7 +43,7 @@ $$.flows.describe('WriteFileFromBuffer', {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            this.edfs.createBar((err, bar) => {
+            EDFS.createDSU("Bar", (err, bar) => {
                 if (err) {
                     throw err;
                 }
@@ -52,7 +61,7 @@ $$.flows.describe('WriteFileFromBuffer', {
     },
 
     readFile: function (bar) {
-        this.edfs.loadBar(bar.getSeed(), (err, newBar) => {
+        EDFS.resolveSSI(bar.getKeySSI(),"Bar", (err, newBar) => {
             if (err) {
                 throw err;
             }
