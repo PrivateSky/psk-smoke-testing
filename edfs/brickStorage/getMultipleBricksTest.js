@@ -15,7 +15,7 @@ assert.callback("Get multiple bricks test", (callback) => {
     tir.launchVirtualMQNode((err, port) => {
         assert.true(err === null || typeof err === "undefined", "Failed to create server.");
         const endpoint = `http://localhost:${port}`;
-        const edfsBrickStorage = EDFSBrickStorage.create(endpoint);
+        const edfsBrickStorage = EDFSBrickStorage.createBrickStorageService(endpoint);
 
         let bricksData = ["first", "second", "third"];
         let bricksHashes = [];
