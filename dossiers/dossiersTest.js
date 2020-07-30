@@ -15,8 +15,7 @@ dossierTypeScripts.push("../../../psknode/bundles/" + "blockchain.js");
 
 function prepareCSB(endpoint, callback) {
     const EDFS = require("edfs");
-    let edfs = EDFS.attachToEndpoint(endpoint);
-    edfs.createBar((err, bar) => {
+    EDFS.createDSU("Bar", (err, bar) => {
         bar.addFiles(dossierTypeScripts, "/" + EDFS.constants.CSB.CODE_FOLDER + "/" + EDFS.constants.CSB.CONSTITUTION_FOLDER, (err) => {
             if (err) {
                 throw err;
@@ -26,7 +25,7 @@ function prepareCSB(endpoint, callback) {
                 if (err) {
                     throw err;
                 }
-                callback(undefined, bar.getSeed().toString());
+                callback(undefined, bar.getKeySSI());
             });
         });
     })
@@ -76,6 +75,18 @@ assert.callback("Test Dossiers capabilities", (testFinishCallback) => {
         if (err) {
             throw err;
         }
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
         const EDFS_HOST = `http://localhost:${port}`;
         prepareCSB(EDFS_HOST, function(err,seed){
             loadCSBAndStartTesting(err,seed, testFinishCallback);
