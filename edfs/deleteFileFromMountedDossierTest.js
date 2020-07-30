@@ -15,17 +15,17 @@ assert.callback("Delete file from mounted dossier test", (testFinishCallback) =>
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
         })
 
-        EDFS.createDSU("RawDossier",(err, dossier) => {
+        EDFS.createDSU("RawDossier", (err, dossier) => {
             if (err) {
                 throw err;
             }
@@ -35,7 +35,7 @@ assert.callback("Delete file from mounted dossier test", (testFinishCallback) =>
                     throw err;
                 }
 
-                EDFS.createDSU("RawDossier",(err, newDossier) => {
+                EDFS.createDSU("RawDossier", (err, newDossier) => {
                     if (err) {
                         throw err;
                     }
@@ -43,30 +43,36 @@ assert.callback("Delete file from mounted dossier test", (testFinishCallback) =>
                     newDossier.writeFile("testFile", "testContent", (err) => {
                         assert.true(typeof err === "undefined");
 
-                        dossier.mount("/code/constitution", newDossier.getKeySSI(), (err) => {
+                        newDossier.getKeySSI((err, newDossierKeySSI) => {
                             if (err) {
                                 throw err;
                             }
-                            assert.true(typeof err === "undefined");
 
-                            dossier.listFiles("/code/constitution", (err, files) => {
+                            dossier.mount("/code/constitution", newDossierKeySSI, (err) => {
                                 if (err) {
                                     throw err;
                                 }
+                                assert.true(typeof err === "undefined");
 
-                                assert.true(files.length === 1, "Unexpected files length");
-                                assert.arraysMatch(["testFile"], files, "Unexpected files list");
-                                dossier.delete("/code/constitution/testFile", {ignoreMounts: false}, (err) => {
+                                dossier.listFiles("/code/constitution", (err, files) => {
                                     if (err) {
                                         throw err;
                                     }
-                                    dossier.listFiles("/code/constitution", (err, files) => {
+
+                                    assert.true(files.length === 1, "Unexpected files length");
+                                    assert.arraysMatch(["testFile"], files, "Unexpected files list");
+                                    dossier.delete("/code/constitution/testFile", {ignoreMounts: false}, (err) => {
                                         if (err) {
                                             throw err;
                                         }
+                                        dossier.listFiles("/code/constitution", (err, files) => {
+                                            if (err) {
+                                                throw err;
+                                            }
 
-                                        assert.true(files.length === 0, "Unexpected files length");
-                                        testFinishCallback();
+                                            assert.true(files.length === 0, "Unexpected files length");
+                                            testFinishCallback();
+                                        });
                                     });
                                 });
                             });

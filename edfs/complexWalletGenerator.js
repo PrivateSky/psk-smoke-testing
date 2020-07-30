@@ -16,11 +16,11 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             $$.BDNS.addConfig("default", {
                 endpoints: [
                     {
-                        endpoint:`http://localhost:${port}`,
+                        endpoint: `http://localhost:${port}`,
                         type: 'brickStorage'
                     },
                     {
-                        endpoint:`http://localhost:${port}`,
+                        endpoint: `http://localhost:${port}`,
                         type: 'anchorService'
                     }
                 ]
@@ -53,30 +53,31 @@ function generateWallet(endpoint, webappFolder, callback) {
                     throw err;
                 }
 
-                wallet.mount("/constitution", walletTemplate.getKeySSI(), function (err) {
+                walletTemplate.getKeySSI((err, keySSI) => {
                     if (err) {
                         throw err;
                     }
-                });
-                wallet.addFolder(webappFolder, "app", {encrypt: true, depth: 0}, function (err) {
-                    if (err) {
-                        throw err;
-                    }
-                    wallet.listFiles("/app/assets", function (err, files) {
-                        console.log(files);
-                    });
-
-                    wallet.readFile("/app/assets/js/index.js", function (err, content) {
+                    wallet.mount("/constitution", keySSI, function (err) {
                         if (err) {
-                            throw  err;
+                            throw err;
                         }
-                        console.log("File Content", content.toString());
-                        const seed = wallet.getKeySSI();
-                        console.log("Wallet seed", seed);
-                        if (callback) {
-                            callback(seed);
+                    });
+                    wallet.addFolder(webappFolder, "app", {encrypt: true, depth: 0}, function (err) {
+                        if (err) {
+                            throw err;
                         }
-                    })
+                        wallet.listFiles("/app/assets", function (err, files) {
+                            console.log(files);
+                        });
+
+                        wallet.readFile("/app/assets/js/index.js", function (err, content) {
+                            if (err) {
+                                throw  err;
+                            }
+
+                            callback();
+                        })
+                    });
                 });
             })
         });

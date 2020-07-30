@@ -25,7 +25,7 @@ function prepareCSB(endpoint, callback) {
                 if (err) {
                     throw err;
                 }
-                callback(undefined, bar.getKeySSI());
+                bar.getKeySSI(callback);
             });
         });
     })

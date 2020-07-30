@@ -79,7 +79,13 @@ $$.flows.describe("AddFile", {
             let fs = require("fs");
             //double_check.deleteFoldersSync(folderPath);
             fs.rmdirSync(folderPath, {recursive: true, maxRetries: 10});
-            this.extractFile(this.archive.getKeySSI());
+            this.archive.getKeySSI((err, keySSI) => {
+                if (err) {
+                    throw err;
+                }
+
+                this.extractFile(keySSI);
+            });
         });
     },
 

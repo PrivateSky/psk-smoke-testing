@@ -9,17 +9,16 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
 
         const EDFS = require("edfs");
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -42,27 +41,30 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
                     newDossier.writeFile("testFile", "testContent", (err) => {
                         assert.true(typeof err === "undefined");
 
-                        dossier.mount("/code/constitution", newDossier.getKeySSI(), (err) => {
+                        newDossier.getKeySSI((err, keySSI) => {
                             if (err) {
                                 throw err;
                             }
-                            assert.true(typeof err === "undefined");
-
-                            dossier.readFile("/code/constitution/testFile", (err, data) => {
+                            dossier.mount("/code/constitution", keySSI, (err) => {
                                 if (err) {
                                     throw err;
                                 }
-
                                 assert.true(typeof err === "undefined");
-                                assert.true(data.toString() === "testContent");
-                                testFinishCallback();
+
+                                dossier.readFile("/code/constitution/testFile", (err, data) => {
+                                    if (err) {
+                                        throw err;
+                                    }
+
+                                    assert.true(typeof err === "undefined");
+                                    assert.true(data.toString() === "testContent");
+                                    testFinishCallback();
+                                });
                             });
                         });
                     });
                 })
-
             });
-
         })
     });
 }, 5000);

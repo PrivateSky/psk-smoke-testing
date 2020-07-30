@@ -15,11 +15,11 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -40,24 +40,33 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                         throw err;
                     }
 
-                    raw_dossier.mount("/code/test", ref.getKeySSI(), (err) => {
+                    ref.getKeySSI((err, refKeySSI) => {
                         if (err) {
                             throw err;
                         }
-                        raw_dossier.writeFile("just_a_path", "some_content", function (err) {
+                        raw_dossier.mount("/code/test", refKeySSI, (err) => {
                             if (err) {
                                 throw err;
                             }
-                            assert.true(typeof err === "undefined");
-                            EDFS.resolveSSI(raw_dossier.getKeySSI(), "RawDossier", (err, raw_dossier_reloaded) => {
-                                raw_dossier_reloaded.listFiles("/code/test", (err, files) => {
+                            raw_dossier.writeFile("just_a_path", "some_content", function (err) {
+                                if (err) {
+                                    throw err;
+                                }
+                                raw_dossier.getKeySSI((err, raw_dossierKeySSI) => {
                                     if (err) {
                                         throw err;
                                     }
-                                    assert.true(typeof err === "undefined");
-                                    assert.true(files.length === 1);
-                                    assert.true(files[0] === fileName);
-                                    testFinishCallback();
+                                    EDFS.resolveSSI(raw_dossierKeySSI, "RawDossier", (err, raw_dossier_reloaded) => {
+                                        raw_dossier_reloaded.listFiles("/code/test", (err, files) => {
+                                            if (err) {
+                                                throw err;
+                                            }
+                                            assert.true(typeof err === "undefined");
+                                            assert.true(files.length === 1);
+                                            assert.true(files[0] === fileName);
+                                            testFinishCallback();
+                                        });
+                                    });
                                 });
                             });
                         });

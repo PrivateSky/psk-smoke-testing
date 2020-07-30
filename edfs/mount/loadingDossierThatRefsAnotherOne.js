@@ -14,11 +14,11 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -48,23 +48,34 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
                         if (err) {
                             throw err;
                         }
-                        raw_dossier.mount("/code/constitution", ref.getKeySSI(), (err) => {
-                            assert.true(typeof err === "undefined" || err === null);
-                            raw_dossier.writeFile("just_a_file", "fileContent", function (err) {
-                                if (err) {
-                                    throw err;
-                                }
+
+                        ref.getKeySSI((err, refKeySSI) => {
+                            if (err) {
+                                throw err;
+                            }
+                            raw_dossier.mount("/code/constitution", refKeySSI, (err) => {
                                 assert.true(typeof err === "undefined" || err === null);
-                                EDFS.resolveSSI(raw_dossier.getKeySSI(),"NodeDossier", (err, handler) => {
+                                raw_dossier.writeFile("just_a_file", "fileContent", function (err) {
                                     if (err) {
                                         throw err;
                                     }
-
-                                    handler.startTransaction("echo", "say", "just test").onReturn((err, result) => {
+                                    raw_dossier.getKeySSI((err, raw_dossierKeySSI) => {
                                         if (err) {
                                             throw err;
                                         }
-                                        testFinishCallback();
+
+                                        EDFS.resolveSSI(raw_dossierKeySSI, "NodeDossier", (err, handler) => {
+                                            if (err) {
+                                                throw err;
+                                            }
+
+                                            handler.startTransaction("echo", "say", "just test").onReturn((err, result) => {
+                                                if (err) {
+                                                    throw err;
+                                                }
+                                                testFinishCallback();
+                                            });
+                                        });
                                     });
                                 });
                             });

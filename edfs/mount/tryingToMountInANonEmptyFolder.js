@@ -13,11 +13,11 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -43,9 +43,14 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
                             throw err;
                         }
 
-                        raw_dossier.mount(pskPath.join("/", folderName, subFolder), ref.getKeySSI(), (err) => {
-                            assert.true(err && err.message === "Tried to mount in a non-empty folder");
-                            testFinishCallback();
+                        ref.getKeySSI((err, keySSI) => {
+                            if (err) {
+                                throw err;
+                            }
+                            raw_dossier.mount(pskPath.join("/", folderName, subFolder), keySSI, (err) => {
+                                assert.true(err && err.message === "Tried to mount in a non-empty folder");
+                                testFinishCallback();
+                            });
                         });
                     });
                 });

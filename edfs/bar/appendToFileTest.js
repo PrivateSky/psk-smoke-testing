@@ -50,20 +50,25 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                             throw err;
                         }
 
-                        EDFS.resolveSSI(bar.getKeySSI(), "Bar", (err, newBar) => {
+                        bar.getKeySSI((err, keySSI) => {
                             if (err) {
                                 throw err;
                             }
-                            newBar.readFile("a.txt", (err, data) => {
-                                console.log(data.toString());
-                                assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
-                                assert.true(expectedFileData === data.toString(), "Invalid read data");
 
-                                callback();
+                            EDFS.resolveSSI(keySSI, "Bar", (err, newBar) => {
+                                if (err) {
+                                    throw err;
+                                }
+                                newBar.readFile("a.txt", (err, data) => {
+                                    console.log(data.toString());
+                                    assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
+                                    assert.true(expectedFileData === data.toString(), "Invalid read data");
+
+                                    callback();
+                                });
                             });
                         });
                     })
-
                 });
             })
         });

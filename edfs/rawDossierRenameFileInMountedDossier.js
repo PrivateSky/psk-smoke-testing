@@ -15,17 +15,17 @@ assert.callback("Rename file in mounted dossier test", (testFinishCallback) => {
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
         })
 
-        EDFS.createDSU("RawDossier",(err, dossier) => {
+        EDFS.createDSU("RawDossier", (err, dossier) => {
             if (err) {
                 throw err;
             }
@@ -35,7 +35,7 @@ assert.callback("Rename file in mounted dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                EDFS.createDSU("RawDossier",(err, newDossier) => {
+                EDFS.createDSU("RawDossier", (err, newDossier) => {
                     if (err) {
                         throw err;
                     }
@@ -43,21 +43,27 @@ assert.callback("Rename file in mounted dossier test", (testFinishCallback) => {
                     newDossier.writeFile("testFile", "testContent", (err) => {
                         assert.true(typeof err === "undefined");
 
-                        dossier.mount("/code/constitution", newDossier.getKeySSI(), (err) => {
+                        newDossier.getKeySSI((err, newDossierKeySSI) => {
                             if (err) {
                                 throw err;
                             }
-                            assert.true(typeof err === "undefined");
 
-                            dossier.readFile("/code/constitution/testFile", (err, data) => {
+                            dossier.mount("/code/constitution", newDossierKeySSI, (err) => {
                                 if (err) {
                                     throw err;
                                 }
-
                                 assert.true(typeof err === "undefined");
-                                assert.true(data.toString() === "testContent");
 
-                                runRenameTest(dossier, testFinishCallback);
+                                dossier.readFile("/code/constitution/testFile", (err, data) => {
+                                    if (err) {
+                                        throw err;
+                                    }
+
+                                    assert.true(typeof err === "undefined");
+                                    assert.true(data.toString() === "testContent");
+
+                                    runRenameTest(dossier, testFinishCallback);
+                                });
                             });
                         });
                     });

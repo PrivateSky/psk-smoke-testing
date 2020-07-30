@@ -53,15 +53,20 @@ $$.flows.describe('WriteFileFromStream', {
                 const fileStream = fs.createReadStream(filePath);
                 this.bar.writeFile(barPath, fileStream, (err, data) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to write file.");
-                    this.readFile();
+                    this.bar.getKeySSI((err, keySSI) => {
+                        if (err) {
+                            throw err;
+                        }
+                        this.readFile(keySSI);
+                    });
                 })
             })
 
         });
     },
 
-    readFile: function () {
-        EDFS.resolveSSI(this.bar.getKeySSI(), "Bar", (err, newBar) => {
+    readFile: function (keySSI) {
+        EDFS.resolveSSI(keySSI, "Bar", (err, newBar) => {
             if (err) {
                 throw err;
             }

@@ -21,11 +21,11 @@ assert.callback("Add PDF to dossier test", (testFinishCallback) => {
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -40,21 +40,26 @@ assert.callback("Add PDF to dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                EDFS.resolveSSI(ref.getKeySSI(),"RawDossier", (err, dossierClone) => {
+                ref.getKeySSI((err, refKeySSI) => {
                     if (err) {
                         throw err;
                     }
-
-                    dossierClone.extractFile("./myProspect.pdf", "/file", (err) => {
+                    EDFS.resolveSSI(refKeySSI, "RawDossier", (err, dossierClone) => {
                         if (err) {
                             throw err;
                         }
-                        const originalSize = fs.statSync("./bigFile.pdf").size;
-                        const newSize = fs.statSync("./myProspect.pdf").size;
-                        assert.true(originalSize === newSize);
-                        fs.unlinkSync("./bigFile.pdf");
-                        fs.unlinkSync("./myProspect.pdf");
-                        testFinishCallback();
+
+                        dossierClone.extractFile("./myProspect.pdf", "/file", (err) => {
+                            if (err) {
+                                throw err;
+                            }
+                            const originalSize = fs.statSync("./bigFile.pdf").size;
+                            const newSize = fs.statSync("./myProspect.pdf").size;
+                            assert.true(originalSize === newSize);
+                            fs.unlinkSync("./bigFile.pdf");
+                            fs.unlinkSync("./myProspect.pdf");
+                            testFinishCallback();
+                        });
                     });
                 });
             });

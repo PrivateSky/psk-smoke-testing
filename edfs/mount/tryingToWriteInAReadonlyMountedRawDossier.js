@@ -13,11 +13,11 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -36,18 +36,23 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
                     if (err) {
                         throw err;
                     }
-                    raw_dossier.mount(folderName + "/test", ref.getKeySSI(), (err) => {
+
+                    ref.getKeySSI((err, keySSI) => {
                         if (err) {
                             throw err;
                         }
+                        raw_dossier.mount(folderName + "/test", keySSI, (err) => {
+                            if (err) {
+                                throw err;
+                            }
 
-                        raw_dossier.writeFile(folderName + "/test/anotherFile", "some data", {ignoreMounts: false}, (err) => {
-                            assert.true(typeof err === "undefined");
-                            testFinishCallback();
+                            raw_dossier.writeFile(folderName + "/test/anotherFile", "some data", {ignoreMounts: false}, (err) => {
+                                assert.true(typeof err === "undefined");
+                                testFinishCallback();
+                            });
                         });
-                    });
+                    })
                 })
-
             });
         })
     });

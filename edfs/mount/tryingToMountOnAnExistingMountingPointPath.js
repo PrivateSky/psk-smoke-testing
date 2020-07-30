@@ -13,11 +13,11 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -32,48 +32,58 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
                     throw err;
                 }
 
-                rawDossier.mount('/dossier1', dossier1.getKeySSI(), (err) => {
+                dossier1.getKeySSI((err, dossier1KeySSI) => {
                     if (err) {
                         throw err;
                     }
-
-                    EDFS.createDSU("RawDossier", (err, dossier2) => {
+                    rawDossier.mount('/dossier1', dossier1KeySSI, (err) => {
                         if (err) {
                             throw err;
                         }
 
-                        rawDossier.mount('/dossier1/dossier2', dossier2.getKeySSI(), (err) => {
+                        EDFS.createDSU("RawDossier", (err, dossier2) => {
                             if (err) {
-                                assert.true(err && err.message === 'Mount not allowed. Already exist a mount for /dossier1');
-                                return testFinishCallback();
+                                throw err;
                             }
 
-                            // The test stops in the above error because /dossier1 already is inside the mounting points of the rawDossier.
-                            // I want to have dossier2 mounted into dossier1 using the above behaviour, not by using the inner dossier (dossier1) like on the current implemented behaviour. 
-
-                            // In the end I wish the following test to pass:
-
-                            rawDossier.readDir('/', (err, content) => {
+                            dossier2.getKeySSI((err, dossier2KeySSI) => {
                                 if (err) {
                                     throw err;
                                 }
-
-                                assert.true(content[1].path === '/dossier1');
-
-                                rawDossier.readDir('/dossier1', (err, content) => {
+                                rawDossier.mount('/dossier1/dossier2', dossier2KeySSI, (err) => {
                                     if (err) {
-                                        throw err;
+                                        assert.true(err && err.message === 'Mount not allowed. Already exist a mount for /dossier1');
+                                        return testFinishCallback();
                                     }
 
-                                    assert.true(content[1].path === '/dossier2');
+                                    // The test stops in the above error because /dossier1 already is inside the mounting points of the rawDossier.
+                                    // I want to have dossier2 mounted into dossier1 using the above behaviour, not by using the inner dossier (dossier1) like on the current implemented behaviour.
 
-                                    dossier1.readDir('/', (err, content) => {
+                                    // In the end I wish the following test to pass:
+
+                                    rawDossier.readDir('/', (err, content) => {
                                         if (err) {
                                             throw err;
                                         }
 
-                                        assert.true(content[1].path === '/dossier2');
-                                        testFinishCallback();
+                                        assert.true(content[1].path === '/dossier1');
+
+                                        rawDossier.readDir('/dossier1', (err, content) => {
+                                            if (err) {
+                                                throw err;
+                                            }
+
+                                            assert.true(content[1].path === '/dossier2');
+
+                                            dossier1.readDir('/', (err, content) => {
+                                                if (err) {
+                                                    throw err;
+                                                }
+
+                                                assert.true(content[1].path === '/dossier2');
+                                                testFinishCallback();
+                                            });
+                                        });
                                     });
                                 });
                             });

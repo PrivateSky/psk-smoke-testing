@@ -13,11 +13,11 @@ assert.callback("mount - mount dossier inside a folder of a mounted dossier", (t
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -37,24 +37,27 @@ assert.callback("mount - mount dossier inside a folder of a mounted dossier", (t
                         throw err;
                     }
 
-                    rawDossier.mount('/folder1/dossier1', dossier1.getKeySSI(), (err) => {
+                    dossier1.getKeySSI((err, keySSI) => {
                         if (err) {
                             throw err;
                         }
-
-                        rawDossier.listMountedDossiers('', (err, content) => {
+                        rawDossier.mount('/folder1/dossier1', keySSI, (err) => {
                             if (err) {
                                 throw err;
                             }
-                            console.log(content);
 
-                            rawDossier.listMountedDossiers('/folder1', (err, content) => {
+                            rawDossier.listMountedDossiers('', (err, content) => {
                                 if (err) {
                                     throw err;
                                 }
 
-                                console.log(content);
-                                testFinishCallback();
+                                rawDossier.listMountedDossiers('/folder1', (err, content) => {
+                                    if (err) {
+                                        throw err;
+                                    }
+
+                                    testFinishCallback();
+                                });
                             });
                         });
                     });

@@ -16,11 +16,11 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             $$.BDNS.addConfig("default", {
                 endpoints: [
                     {
-                        endpoint:`http://localhost:${port}`,
+                        endpoint: `http://localhost:${port}`,
                         type: 'brickStorage'
                     },
                     {
-                        endpoint:`http://localhost:${port}`,
+                        endpoint: `http://localhost:${port}`,
                         type: 'anchorService'
                     }
                 ]
@@ -49,54 +49,74 @@ function generateWallet(endpoint, webappFolder, callback) {
                 if (err) {
                     throw err;
                 }
-
-                app.mount("/code", appTemplate.getKeySSI(), function (err) {
+                appTemplate.getKeySSI((err, appTemplateKeySSI) => {
                     if (err) {
                         throw err;
                     }
-
-                    EDFS.createDSU("RawDossier", (err, walletTemplate) => {
+                    app.mount("/code", appTemplateKeySSI, function (err) {
                         if (err) {
                             throw err;
                         }
 
-                        walletTemplate.writeFile("/index.html", "wallet index content", function (err) {
+                        EDFS.createDSU("RawDossier", (err, walletTemplate) => {
                             if (err) {
                                 throw err;
                             }
 
-                            EDFS.createDSU("RawDossier", (err, wallet) => {
+                            walletTemplate.writeFile("/index.html", "wallet index content", function (err) {
                                 if (err) {
                                     throw err;
                                 }
-                                wallet.mount("/code", walletTemplate.getKeySSI(), function (err) {
+
+                                EDFS.createDSU("RawDossier", (err, wallet) => {
                                     if (err) {
                                         throw err;
                                     }
-                                    wallet.mount("/apps/profile-app", app.getKeySSI(), function (err) {
+                                    walletTemplate.getKeySSI((err, walletTemplateKeySSI) => {
                                         if (err) {
                                             throw err;
                                         }
-
-                                        EDFS.resolveSSI(wallet.getKeySSI(), "RawDossier", (err, doi) => {
+                                        wallet.mount("/code", walletTemplateKeySSI, function (err) {
                                             if (err) {
                                                 throw err;
                                             }
 
-                                            doi.readFile("/apps/profile-app/code/index.html", function (err, content) {
+                                            app.getKeySSI((err, appKeySSI) => {
                                                 if (err) {
                                                     throw err;
                                                 }
-                                                console.log(content.toString());
-                                                callback();
+                                                wallet.mount("/apps/profile-app", appKeySSI, function (err) {
+                                                    if (err) {
+                                                        throw err;
+                                                    }
+
+                                                    wallet.getKeySSI((err, walletKeySSI) => {
+                                                        if (err) {
+                                                            throw err;
+                                                        }
+                                                        EDFS.resolveSSI(walletKeySSI, "RawDossier", (err, doi) => {
+                                                            if (err) {
+                                                                throw err;
+                                                            }
+
+                                                            doi.readFile("/apps/profile-app/code/index.html", function (err, content) {
+                                                                if (err) {
+                                                                    throw err;
+                                                                }
+                                                                console.log(content.toString());
+                                                                callback();
+                                                            });
+                                                        });
+                                                    });
+                                                });
                                             });
                                         });
-                                    });
 
-                                })
+                                    })
+                                });
                             });
-                        });
 
+                        });
                     });
                 })
 

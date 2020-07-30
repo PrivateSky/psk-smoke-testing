@@ -28,7 +28,6 @@ assert.callback("We should be able to get a seed of a bar before finish writing?
             if (err) {
                 throw err;
             }
-            console.log("Early seed read", bar.getKeySSI());
             bar.writeFile("just_a_path", "some_content", function (err) {
                 assert.true(typeof err === "undefined");
 

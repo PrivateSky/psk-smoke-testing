@@ -15,11 +15,11 @@ assert.callback("rawDossier restore test", (testFinishCallback) => {
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -34,16 +34,21 @@ assert.callback("rawDossier restore test", (testFinishCallback) => {
                     throw err;
                 }
 
-                EDFS.resolveSSI(ref.getKeySSI(), "RawDossier", (err, ref2) => {
+                ref.getKeySSI((err, refKeySSI) => {
                     if (err) {
                         throw err;
                     }
-                    ref2.readFile("/constitution/edfsBar.js", function (err, content) {
+                    EDFS.resolveSSI(refKeySSI, "RawDossier", (err, ref2) => {
                         if (err) {
                             throw err;
                         }
-                        assert.true(content !== "");
-                        testFinishCallback();
+                        ref2.readFile("/constitution/edfsBar.js", function (err, content) {
+                            if (err) {
+                                throw err;
+                            }
+                            assert.true(content !== "");
+                            testFinishCallback();
+                        });
                     });
                 });
             });

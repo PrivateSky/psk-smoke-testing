@@ -21,11 +21,11 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
             $$.BDNS.addConfig("default", {
                 endpoints: [
                     {
-                        endpoint:`http://localhost:${port}`,
+                        endpoint: `http://localhost:${port}`,
                         type: 'brickStorage'
                     },
                     {
-                        endpoint:`http://localhost:${port}`,
+                        endpoint: `http://localhost:${port}`,
                         type: 'anchorService'
                     }
                 ]
@@ -43,16 +43,21 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to write file in BAR");
                     assert.true(brickMapDigest !== null && typeof brickMapDigest !== "undefined", "Bar map digest is null or undefined");
 
-                    EDFS.resolveSSI(bar.getKeySSI(), "Bar",(err, newBar) => {
+                    bar.getKeySSI((err, keySSI) => {
                         if (err) {
                             throw err;
                         }
-                        newBar.readFile("a.txt", (err, data) => {
-                            assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
-                            assert.true(fileData === data.toString(), "Invalid read data");
+                        EDFS.resolveSSI(keySSI, "Bar", (err, newBar) => {
+                            if (err) {
+                                throw err;
+                            }
+                            newBar.readFile("a.txt", (err, data) => {
+                                assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
+                                assert.true(fileData === data.toString(), "Invalid read data");
 
-                            callback();
-                        });
+                                callback();
+                            });
+                        })
                     })
                 });
             })

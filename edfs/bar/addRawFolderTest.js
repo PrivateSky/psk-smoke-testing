@@ -31,11 +31,11 @@ $$.flows.describe("AddRawFolder", {
                 const config = {
                     endpoints: [
                         {
-                            endpoint:`http://localhost:${serverPort}`,
+                            endpoint: `http://localhost:${serverPort}`,
                             type: 'brickStorage'
                         },
                         {
-                            endpoint:`http://localhost:${serverPort}`,
+                            endpoint: `http://localhost:${serverPort}`,
                             type: 'anchorService'
                         }
                     ]
@@ -65,26 +65,28 @@ $$.flows.describe("AddRawFolder", {
                         if (err) {
                             throw err;
                         }
-
-
                         this.addFolder(folderPath, "fld2", (err, controlHash) => {
                             if (err) {
                                 throw err;
                             }
 
                             assert.true(initialHash === controlHash);
-                            const seedSSI = this.bar.getKeySSI();
-                            EDFS.resolveSSI(seedSSI, 'Bar', (err, newBar) => {
+                            this.bar.getKeySSI((err, seedSSI) => {
                                 if (err) {
                                     throw err;
                                 }
-
-                                newBar.listFolders("/", (err, folders) => {
+                                EDFS.resolveSSI(seedSSI, 'Bar', (err, newBar) => {
                                     if (err) {
                                         throw err;
                                     }
-                                    assert.true(folders.length === 1);
-                                    this.callback();
+
+                                    newBar.listFolders("/", (err, folders) => {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        assert.true(folders.length === 1);
+                                        this.callback();
+                                    });
                                 });
                             });
                         });

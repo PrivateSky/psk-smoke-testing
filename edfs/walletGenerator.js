@@ -18,11 +18,11 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             $$.BDNS.addConfig("default", {
                 endpoints: [
                     {
-                        endpoint:`http://localhost:${port}`,
+                        endpoint: `http://localhost:${port}`,
                         type: 'brickStorage'
                     },
                     {
-                        endpoint:`http://localhost:${port}`,
+                        endpoint: `http://localhost:${port}`,
                         type: 'anchorService'
                     }
                 ]
@@ -46,26 +46,31 @@ function generateWallet(endpoint, webappFolder, callback) {
             }
 
             EDFS.createDSU("RawDossier", (err, wallet) => {
-                wallet.mount("/constitution", walletTemplate.getKeySSI(), function (err) {
+                if (err) {
+                    throw err;
+                }
+                walletTemplate.getKeySSI((err, walletTemplateKeySSI) => {
                     if (err) {
                         throw err;
                     }
-
-                    wallet.addFolder(webappFolder, "app", function (err) {
+                    wallet.mount("/constitution", walletTemplateKeySSI, function (err) {
                         if (err) {
                             throw err;
                         }
 
-                        wallet.readFile("/app/index.html", function (err, content) {
+                        wallet.addFolder(webappFolder, "app", function (err) {
                             if (err) {
-                                throw  err;
+                                throw err;
                             }
 
-                            const seed = wallet.getKeySSI();
-                            if (callback) {
-                                callback(seed);
-                            }
-                        })
+                            wallet.readFile("/app/index.html", function (err, content) {
+                                if (err) {
+                                    throw  err;
+                                }
+
+                                callback();
+                            })
+                        });
                     });
                 });
             })

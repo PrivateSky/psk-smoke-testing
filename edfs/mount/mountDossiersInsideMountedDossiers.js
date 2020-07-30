@@ -14,11 +14,11 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
         $$.BDNS.addConfig("default", {
             endpoints: [
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'brickStorage'
                 },
                 {
-                    endpoint:`http://localhost:${port}`,
+                    endpoint: `http://localhost:${port}`,
                     type: 'anchorService'
                 }
             ]
@@ -33,62 +33,76 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
                     throw err;
                 }
 
-                rawDossier.mount('/dossier1', dossier1.getKeySSI(), (err) => {
+                dossier1.getKeySSI((err, dossier1KeySSI) => {
                     if (err) {
                         throw err;
                     }
-
-                    EDFS.createDSU("RawDossier", (err, dossier2) => {
+                    rawDossier.mount('/dossier1', dossier1KeySSI, (err) => {
                         if (err) {
                             throw err;
                         }
 
-                        dossier1.mount('/dossier2', dossier2.getKeySSI(), (err) => {
+                        EDFS.createDSU("RawDossier", (err, dossier2) => {
                             if (err) {
                                 throw err;
                             }
-
-                            rawDossier.readDir('/', (err, content) => {
+                            dossier2.getKeySSI((err, dossier2KeySSI) => {
                                 if (err) {
                                     throw err;
                                 }
-                                assert.true(content[1].path === 'dossier1');
-
-                                dossier1.readDir('/', (err, content) => {
+                                dossier1.mount('/dossier2', dossier2KeySSI, (err) => {
                                     if (err) {
                                         throw err;
                                     }
-                                    assert.true(content[1].path === 'dossier2');
 
-                                    EDFS.createDSU("RawDossier", (err, dossier3) => {
+                                    rawDossier.readDir('/', (err, content) => {
                                         if (err) {
                                             throw err;
                                         }
+                                        assert.true(content[1].path === 'dossier1');
 
-                                        rawDossier.mount('/dossier3', dossier3.getKeySSI(), (err) => {
+                                        dossier1.readDir('/', (err, content) => {
                                             if (err) {
                                                 throw err;
                                             }
+                                            assert.true(content[1].path === 'dossier2');
 
-                                            EDFS.resolveSSI(dossier1.getKeySSI(), "RawDossier", (err, dossier1Loaded) => {
+                                            EDFS.createDSU("RawDossier", (err, dossier3) => {
                                                 if (err) {
                                                     throw err;
                                                 }
 
-                                                dossier1Loaded.mount('/dossier4', dossier3.getKeySSI(), (err) => {
+                                                dossier3.getKeySSI((err, dossier3KeySSI) => {
+                                                    if (err) {
+                                                        throw err;
+                                                    }
+                                                rawDossier.mount('/dossier3', dossier3KeySSI, (err) => {
                                                     if (err) {
                                                         throw err;
                                                     }
 
-                                                    dossier1Loaded.readDir('/', (err, content) => {
+                                                    EDFS.resolveSSI(dossier1KeySSI, "RawDossier", (err, dossier1Loaded) => {
                                                         if (err) {
                                                             throw err;
                                                         }
-                                                        assert.true(content[1].path === 'dossier2');
-                                                        assert.true(content[2].path === 'dossier4');
 
-                                                        testFinishCallback();
+                                                        dossier1Loaded.mount('/dossier4', dossier3KeySSI, (err) => {
+                                                            if (err) {
+                                                                throw err;
+                                                            }
+
+                                                            dossier1Loaded.readDir('/', (err, content) => {
+                                                                if (err) {
+                                                                    throw err;
+                                                                }
+                                                                assert.true(content[1].path === 'dossier2');
+                                                                assert.true(content[2].path === 'dossier4');
+
+                                                                testFinishCallback();
+                                                            });
+                                                        });
                                                     });
+                                                });
                                                 });
                                             });
                                         });
