@@ -9,11 +9,22 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
 
         const EDFS = require("edfs");
-        let edfs = EDFS.attachToEndpoint(EDFS_HOST);
-        edfs.createRawDossier((err, ref) => {
+        $$.BDNS.addConfig("default", {
+            endpoints: [
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'brickStorage'
+                },
+                {
+                    endpoint:`http://localhost:${port}`,
+                    type: 'anchorService'
+                }
+            ]
+        })
+
+        EDFS.createDSU("RawDossier", (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -21,10 +32,12 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
                 if (err) {
                     throw err;
                 }
-                edfs.createRawDossier((err, raw_dossier) => {
+
+                EDFS.createDSU("RawDossier", (err, raw_dossier) => {
                     if (err) {
                         throw err;
                     }
+
                     const fileContent = "$$.transactions.describe('echo', {\n" +
                         "\t\tsay: function (message) {\n" +
                         "\t\t\tthis.return(undefined, message);\n" +
@@ -35,17 +48,14 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
                         if (err) {
                             throw err;
                         }
-                        raw_dossier.mount("/code/constitution", ref.getSeed(), (err) => {
+                        raw_dossier.mount("/code/constitution", ref.getKeySSI(), (err) => {
                             assert.true(typeof err === "undefined" || err === null);
                             raw_dossier.writeFile("just_a_file", "fileContent", function (err) {
                                 if (err) {
                                     throw err;
                                 }
                                 assert.true(typeof err === "undefined" || err === null);
-                                const dossier = require("dossier");
-                                dossier.load(raw_dossier.getSeed(), "test", (err, handler) => {
-                                    testFinishCallback();
-                                    return;
+                                EDFS.resolveSSI(raw_dossier.getKeySSI(),"NodeDossier", (err, handler) => {
                                     if (err) {
                                         throw err;
                                     }
