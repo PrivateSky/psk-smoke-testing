@@ -32,8 +32,8 @@ $$.flows.describe("TestFlow", {
                     }
                 ]
             })
+            this.createRawDossier();
         });
-
     },
 
     createRawDossier: function () {
@@ -82,6 +82,7 @@ $$.flows.describe("TestFlow", {
             assert.true(folders.length === 1, "Invalid length for folder list");
             assert.true(folders[0] === subFolder, "Invalid folder name");
 
+            console.log("About to exit ===");
             this.callback();
         });
     }
