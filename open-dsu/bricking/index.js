@@ -14,28 +14,42 @@ assert.callback("Get brick put brick", (callback) => {
             throw err;
         }
 
+        assert.true(typeof bricking.getBrick === 'function');
+        assert.true(typeof bricking.putBrick === 'function');
+        assert.true(typeof bricking.getMultipleBricks === 'function');
+
         const seedSSI = keyssi.buildSeedSSI("default", undefined, "some string", "control", "v0", "hint");
         const brickData = "some data";
-        bricking.putBrick(seedSSI, brickData, (err, brickHash) => {
+
+        bricking.putBrick(seedSSI, brickData, null, (err, brickHash) => {
             if (err) {
                 throw err;
             }
 
-            brickHash = JSON.parse(brickHash).message;
             crypto.hash(seedSSI, brickData, (err, hash) => {
                 if (err) {
                     throw err;
                 }
 
                 assert.true(brickHash === hash);
-                const hlSSI = keyssi.buildHashLinkSSI("default", undefined, brickHash);
-                bricking.getBrick(hlSSI, (err, data) => {
+
+                const haskLinkSSI = keyssi.buildHashLinkSSI("default", undefined, brickHash);
+
+                bricking.getBrick(haskLinkSSI, null, (err, data) => {
                     if (err) {
                         throw err;
                     }
 
                     assert.true(data.toString() === brickData);
-                    callback();
+
+                    bricking.getMultipleBricks([haskLinkSSI], null, (err, data) => {
+                        if (err) {
+                            throw err;
+                        }
+                        
+                        assert.true(data[0].toString().includes(brickData));
+                        callback();
+                    });
                 });
             });
         });
