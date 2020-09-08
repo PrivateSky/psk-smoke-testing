@@ -1,14 +1,14 @@
-require("../../../../psknode/bundles/testsRuntime");
-require("../../../../psknode/bundles/openDSU");
+require('../../../../psknode/bundles/testsRuntime');
+require('../../../../psknode/bundles/openDSU');
 
-const tir = require("../../../../psknode/tests/util/tir");
-const assert = require("double-check").assert;
-const openDSU = require("open-dsu");
-const bricking = openDSU.loadApi("bricking");
-const keyssi = openDSU.loadApi("keyssi");
-const crypto = openDSU.loadApi("crypto");
+const tir = require('../../../../psknode/tests/util/tir');
+const assert = require('double-check').assert;
+const openDSU = require('open-dsu');
+const bricking = openDSU.loadApi('bricking');
+const keyssi = openDSU.loadApi('keyssi');
+const crypto = openDSU.loadApi('crypto');
 
-assert.callback("Get brick put brick", (callback) => {
+assert.callback('Get brick put brick', (callback) => {
     tir.launchVirtualMQNode((err, port) => {
         if (err) {
             throw err;
@@ -18,8 +18,8 @@ assert.callback("Get brick put brick", (callback) => {
         assert.true(typeof bricking.putBrick === 'function');
         assert.true(typeof bricking.getMultipleBricks === 'function');
 
-        const seedSSI = keyssi.buildSeedSSI("default", undefined, "some string", "control", "v0", "hint");
-        const brickData = "some data";
+        const seedSSI = keyssi.buildSeedSSI('default', undefined, 'some string', 'control', 'v0', 'hint');
+        const brickData = 'some data';
 
         bricking.putBrick(seedSSI, brickData, null, (err, brickHash) => {
             if (err) {
@@ -33,7 +33,7 @@ assert.callback("Get brick put brick", (callback) => {
 
                 assert.true(brickHash === hash);
 
-                const haskLinkSSI = keyssi.buildHashLinkSSI("default", undefined, brickHash);
+                const haskLinkSSI = keyssi.buildHashLinkSSI('default', undefined, brickHash);
 
                 bricking.getBrick(haskLinkSSI, null, (err, data) => {
                     if (err) {
@@ -46,8 +46,8 @@ assert.callback("Get brick put brick", (callback) => {
                         if (err) {
                             throw err;
                         }
-                        
-                        assert.true(data[0].toString().includes(brickData));
+
+                        assert.true(data.toString() === brickData);
                         callback();
                     });
                 });
