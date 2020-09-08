@@ -8,7 +8,7 @@ const bricking = openDSU.loadApi('bricking');
 const keyssi = openDSU.loadApi('keyssi');
 const crypto = openDSU.loadApi('crypto');
 
-assert.callback('Get brick put brick', (callback) => {
+assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
     tir.launchVirtualMQNode((err, port) => {
         if (err) {
             throw err;
