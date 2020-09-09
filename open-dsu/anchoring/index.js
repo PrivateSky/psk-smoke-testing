@@ -28,7 +28,7 @@ assert.callback('Anchoring tests (GET, PUT anchor version)', (callback) => {
 
             const haskLinkSSI = keyssi.buildHashLinkSSI('default', undefined, hash);
 
-            anchoring.addVersion(seedSSI, haskLinkSSI, (err, data) => {
+            anchoring.addVersion(seedSSI, haskLinkSSI, null, 'zkp', 'digitalProoff', (err, data) => {
                 if (err) {
                     throw err;
                 }
@@ -37,15 +37,50 @@ assert.callback('Anchoring tests (GET, PUT anchor version)', (callback) => {
 
                 anchoring.versions(seedSSI, (err, data) => {
                     if (err) {
-                        console.log(err)
                         throw err;
                     }
 
                     assert.true(Array.isArray(data));
+                    assert.true(data.length === 1);
+                    assert.true(data[0] === haskLinkSSI.getIdentifier());
 
-                    callback();
+                    anchoring.addVersion(seedSSI, haskLinkSSI, null, 'zkp', 'digitalProoff', (err) => {
+                        if (err) {
+                            assert.true(err.statusCode === 428);
+                            assert.true(err.message === 'Unable to add alias: versions out of sync');
+                        }
+                    });
+
+                    const secondBrickData = 'some data2 successs';
+                   
+                    crypto.hash(seedSSI, secondBrickData, (err, secondHash) => {
+                        if (err) {
+                            throw err;
+                        }
+
+                        const secondHaskLinkSSI = keyssi.buildHashLinkSSI('default', undefined, secondHash);
+
+                        anchoring.addVersion(seedSSI, secondHaskLinkSSI, haskLinkSSI, 'zkp', 'digitalProoff', (err, data) => {
+                            if (err) {
+                                throw err;
+                            }
+
+                            assert.true(true);
+
+                            anchoring.versions(seedSSI, (err, data) => {
+                                if (err) {
+                                    throw err;
+                                }
+                            
+                                assert.true(Array.isArray(data));
+                                assert.true(data.length === 2);
+                                assert.true(data[0] === haskLinkSSI.getIdentifier());
+                                assert.true(data[1] === secondHaskLinkSSI.getIdentifier());
+                                callback();
+                            })
+                        })
+                    });
                 });
-
             });
         });
     })
