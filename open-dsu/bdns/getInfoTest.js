@@ -3,7 +3,7 @@ require("../../../../psknode/bundles/openDSU");
 
 require("../../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
-const openDSU = require("open-dsu");
+const openDSU = require("opendsu");
 const keySSI = openDSU.loadApi("keyssi");
 const bdns = openDSU.loadApi("bdns");
 

@@ -3,7 +3,7 @@ require('../../../../psknode/bundles/openDSU');
 
 const tir = require('../../../../psknode/tests/util/tir');
 const assert = require('double-check').assert;
-const openDSU = require('open-dsu');
+const openDSU = require('opendsu');
 const bricking = openDSU.loadApi('bricking');
 const keyssi = openDSU.loadApi('keyssi');
 const crypto = openDSU.loadApi('crypto');

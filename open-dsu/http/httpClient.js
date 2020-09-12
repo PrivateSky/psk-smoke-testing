@@ -3,7 +3,7 @@ require('../../../../psknode/bundles/openDSU');
 const tir = require('../../../../psknode/tests/util/tir');
 
 const assert = require('double-check').assert;
-const openDSU = require('open-dsu');
+const openDSU = require('opendsu');
 const http = openDSU.loadApi('http');
 
 assert.callback('HTTP test', (callback) => {
