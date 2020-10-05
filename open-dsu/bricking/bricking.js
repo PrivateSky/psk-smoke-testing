@@ -6,6 +6,7 @@ const assert = require('double-check').assert;
 const openDSU = require('opendsu');
 const bricking = openDSU.loadApi('bricking');
 const keyssi = openDSU.loadApi('keyssi');
+const bdns = openDSU.loadApi('bdns');
 const crypto = openDSU.loadApi('crypto');
 
 assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
