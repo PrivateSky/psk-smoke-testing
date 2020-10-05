@@ -5,7 +5,6 @@ require("../../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
-const EDFS = require("edfs");
 
 let folderPath;
 let filePath;
@@ -13,7 +12,10 @@ let filePath;
 let files;
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
 const text = ["first", "second", "third"];
 
 $$.flows.describe("AddRawFiles", {
@@ -27,18 +29,11 @@ $$.flows.describe("AddRawFiles", {
             tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                $$.BDNS.addConfig("default", {
-                    endpoints: [
-                        {
-                            endpoint:`http://localhost:${port}`,
-                            type: 'brickStorage'
-                        },
-                        {
-                            endpoint:`http://localhost:${port}`,
-                            type: 'anchorService'
-                        }
-                    ]
-                })
+                bdns.addRawInfo("default", {
+                    brickStorages: [`http://localhost:${port}`],
+                    anchoringServices: [`http://localhost:${port}`]
+                });
+
                 this.createBAR();
             });
         });
@@ -48,7 +43,7 @@ $$.flows.describe("AddRawFiles", {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            EDFS.createDSU("Bar", (err, bar) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
                 if (err) {
                     throw err;
                 }

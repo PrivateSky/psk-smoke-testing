@@ -1,11 +1,6 @@
-require('../../../../psknode/bundles/consoleTools');
 require('../../../../psknode/bundles/testsRuntime');
-require("../../../../psknode/bundles/pskruntime");
 require("../../../../psknode/bundles/pskWebServer");
-require("../../../../psknode/bundles/edfsBar");
 
-const fs = require('fs');
-const EDFS = require("edfs");
 const double_check = require("double-check");
 const assert = double_check.assert;
 const crc32 = require('buffer-crc32');
@@ -14,6 +9,10 @@ let expectedCrc;
 const barPath = '/big-file.big';
 
 const tir = require("../../../../psknode/tests/util/tir.js");
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
 
 $$.flows.describe('ReadFileFromStream', {
 
@@ -24,18 +23,11 @@ $$.flows.describe('ReadFileFromStream', {
         tir.launchVirtualMQNode((err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-            $$.BDNS.addConfig("default", {
-                endpoints: [
-                    {
-                        endpoint:`http://localhost:${port}`,
-                        type: 'brickStorage'
-                    },
-                    {
-                        endpoint:`http://localhost:${port}`,
-                        type: 'anchorService'
-                    }
-                ]
-            })
+            bdns.addRawInfo("default", {
+                brickStorages: [`http://localhost:${port}`],
+                anchoringServices: [`http://localhost:${port}`]
+            });
+
             this.createBAR();
         });
     },
@@ -43,7 +35,7 @@ $$.flows.describe('ReadFileFromStream', {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            EDFS.createDSU("Bar", (err, bar) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
                 if (err) {
                     throw err;
                 }
@@ -68,7 +60,7 @@ $$.flows.describe('ReadFileFromStream', {
     },
 
     readFile: function (keySSI) {
-        EDFS.resolveSSI(keySSI, "Bar", (err, newBar) => {
+        resolver.loadDSU(keySSI, (err, newBar) => {
             if (err) {
                 throw err;
             }
@@ -94,7 +86,6 @@ $$.flows.describe('ReadFileFromStream', {
 });
 
 double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
-    const path = require("path");
     assert.callback("Read file from stream test", (callback) => {
         $$.flows.start("ReadFileFromStream", "start", callback);
     }, 3000);

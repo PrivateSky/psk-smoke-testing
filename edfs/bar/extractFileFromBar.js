@@ -1,17 +1,8 @@
 require('../../../../psknode/bundles/testsRuntime');
-require("../../../../psknode/bundles/pskruntime");
 require("../../../../psknode/bundles/pskWebServer");
-require("../../../../psknode/bundles/edfsBar");
 
-const bar = require('bar');
-const createEDFSBrickStorage = require("edfs-brick-storage").create;
-const createFsAdapter = require("bar-fs-adapter").createFsAdapter;
 const double_check = require("double-check");
 const assert = double_check.assert;
-const Archive = bar.Archive;
-const ArchiveConfigurator = bar.ArchiveConfigurator;
-ArchiveConfigurator.prototype.registerFsAdapter("FsAdapter", createFsAdapter);
-ArchiveConfigurator.prototype.registerStorageProvider("EDFSBrickStorage", createEDFSBrickStorage);
 const path = require("path");
 
 const tir = require("../../../../psknode/tests/util/tir.js");
@@ -25,7 +16,10 @@ let folders;
 let tempFolder;
 
 const text = ["first text", "second fragment", "third"];
-const EDFS = require('edfs');
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
 
 $$.flows.describe("AddFile", {
     start: function (callback) {
@@ -41,18 +35,11 @@ $$.flows.describe("AddFile", {
                 tir.launchVirtualMQNode((err, port) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                    $$.BDNS.addConfig("default", {
-                        endpoints: [
-                            {
-                                endpoint:`http://localhost:${port}`,
-                                type: 'brickStorage'
-                            },
-                            {
-                                endpoint:`http://localhost:${port}`,
-                                type: 'anchorService'
-                            }
-                        ]
-                    })
+                    bdns.addRawInfo("default", {
+                        brickStorages: [`http://localhost:${port}`],
+                        anchoringServices: [`http://localhost:${port}`]
+                    });
+
                     this.createArchive();
                 });
             });
@@ -61,7 +48,7 @@ $$.flows.describe("AddFile", {
     },
 
     createArchive: function () {
-        EDFS.createDSU("Bar", (err, bar) => {
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
             if (err) {
                 throw err;
             }
@@ -90,7 +77,7 @@ $$.flows.describe("AddFile", {
     },
 
     extractFile: function (keySSI) {
-        EDFS.resolveSSI(keySSI,"Bar", (err, archive) => {
+        resolver.loadDSU(keySSI, (err, archive) => {
             if (err) {
                 throw err;
             }
@@ -121,5 +108,5 @@ double_check.createTestFolder("Extract file from bar", (err, testFolder) => {
     filePath = path.join(testFolder, "fld", "a.txt");
     assert.callback("AddFileEDFSTest", (callback) => {
         $$.flows.start("AddFile", "start", callback);
-    }, 3000);
+    }, 10000);
 });

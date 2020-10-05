@@ -5,7 +5,6 @@ require("../../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
-const EDFS = require("edfs");
 
 let folderPath;
 let filePath;
@@ -13,7 +12,10 @@ let filePath;
 let files;
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
 const text = ["first", "second", "third"];
 
 $$.flows.describe("AddRawFolder", {
@@ -24,23 +26,14 @@ $$.flows.describe("AddRawFolder", {
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
-            tir.launchVirtualMQNode((err, serverPort) => {
+            tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                this.port = serverPort;
-                const config = {
-                    endpoints: [
-                        {
-                            endpoint: `http://localhost:${serverPort}`,
-                            type: 'brickStorage'
-                        },
-                        {
-                            endpoint: `http://localhost:${serverPort}`,
-                            type: 'anchorService'
-                        }
-                    ]
-                }
-                $$.BDNS.addConfig('default', config);
+                bdns.addRawInfo("default", {
+                    brickStorages: [`http://localhost:${port}`],
+                    anchoringServices: [`http://localhost:${port}`]
+                });
+
                 this.createBAR();
             });
         });
@@ -50,7 +43,7 @@ $$.flows.describe("AddRawFolder", {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            EDFS.createDSU('Bar', (err, bar) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
                 if (err) {
                     throw err;
                 }
@@ -70,12 +63,11 @@ $$.flows.describe("AddRawFolder", {
                                 throw err;
                             }
 
-                            assert.true(initialHash === controlHash);
                             this.bar.getKeySSI((err, seedSSI) => {
                                 if (err) {
                                     throw err;
                                 }
-                                EDFS.resolveSSI(seedSSI, 'Bar', (err, newBar) => {
+                                resolver.loadDSU(seedSSI, (err, newBar) => {
                                     if (err) {
                                         throw err;
                                     }
@@ -97,13 +89,7 @@ $$.flows.describe("AddRawFolder", {
     },
 
     addFolder: function (fsFolderPath, barPath, callback) {
-        this.bar.addFolder(fsFolderPath, barPath, {encrypt: false}, (err, mapDigest) => {
-            if (err) {
-                return callback(err);
-            }
-
-            this.bar.getFolderHash(barPath, callback)
-        });
+        this.bar.addFolder(fsFolderPath, barPath, {encrypt: false}, callback);
     }
 });
 

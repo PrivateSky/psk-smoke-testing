@@ -1,13 +1,14 @@
 require('../../../../psknode/bundles/testsRuntime');
-require("../../../../psknode/bundles/pskruntime");
 require("../../../../psknode/bundles/pskWebServer");
-require("../../../../psknode/bundles/edfsBar");
 
-const EDFS = require("edfs");
 const double_check = require("double-check");
 const assert = double_check.assert;
 
 const tir = require("../../../../psknode/tests/util/tir.js");
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
 
 double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     assert.true(err === null || typeof err === "undefined", "Failed to create test folder");
@@ -20,20 +21,12 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
         tir.launchVirtualMQNode(10, testFolder, (err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
-            $$.BDNS.addConfig("default", {
-                endpoints: [
-                    {
-                        endpoint:`http://localhost:${port}`,
-                        type: 'brickStorage'
-                    },
-                    {
-                        endpoint:`http://localhost:${port}`,
-                        type: 'anchorService'
-                    }
-                ]
+            bdns.addRawInfo("default", {
+                brickStorages: [`http://localhost:${port}`],
+                anchoringServices: [`http://localhost:${port}`]
             })
 
-            EDFS.createDSU("Bar", (err, bar) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
                 if (err) {
                     throw err;
                 }
@@ -55,12 +48,11 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                                 throw err;
                             }
 
-                            EDFS.resolveSSI(keySSI, "Bar", (err, newBar) => {
+                            resolver.loadDSU(keySSI, (err, newBar) => {
                                 if (err) {
                                     throw err;
                                 }
                                 newBar.readFile("a.txt", (err, data) => {
-                                    console.log(data.toString());
                                     assert.true(err === null || typeof err === "undefined", "Failed read file from BAR.");
                                     assert.true(expectedFileData === data.toString(), "Invalid read data");
 
