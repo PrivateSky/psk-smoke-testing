@@ -2,10 +2,9 @@ require('../../../../psknode/bundles/consoleTools');
 require('../../../../psknode/bundles/testsRuntime');
 require("../../../../psknode/bundles/pskruntime");
 require("../../../../psknode/bundles/pskWebServer");
-require("../../../../psknode/bundles/edfsBar");
+require("../../../../psknode/bundles/openDSU");
 
 const fs = require('fs');
-const EDFS = require("edfs");
 const double_check = require("double-check");
 const assert = double_check.assert;
 const crc32 = require('buffer-crc32');
@@ -15,7 +14,10 @@ let expectedCrc;
 const barPath = '/big-file.big';
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
 $$.flows.describe('WriteFileFromStream', {
 
     start: function (callback) {
@@ -25,18 +27,11 @@ $$.flows.describe('WriteFileFromStream', {
         tir.launchVirtualMQNode((err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-            $$.BDNS.addConfig("default", {
-                endpoints: [
-                    {
-                        endpoint:`http://localhost:${port}`,
-                        type: 'brickStorage'
-                    },
-                    {
-                        endpoint:`http://localhost:${port}`,
-                        type: 'anchorService'
-                    }
-                ]
-            })
+            bdns.addRawInfo("default", {
+                brickStorages: [`http://localhost:${port}`],
+                anchoringServices: [`http://localhost:${port}`]
+            });
+
             this.createBAR();
         });
     },
@@ -44,7 +39,7 @@ $$.flows.describe('WriteFileFromStream', {
     createBAR: function () {
         $$.securityContext.generateIdentity((err, agentId) => {
             assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            EDFS.createDSU("Bar", (err, bar) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
                 if (err) {
                     throw err;
                 }
@@ -66,7 +61,7 @@ $$.flows.describe('WriteFileFromStream', {
     },
 
     readFile: function (keySSI) {
-        EDFS.resolveSSI(keySSI, "Bar", (err, newBar) => {
+        resolver.loadDSU(keySSI, (err, newBar) => {
             if (err) {
                 throw err;
             }

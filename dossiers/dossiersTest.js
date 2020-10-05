@@ -1,6 +1,7 @@
 const DOMAIN_CONSTITUTION_FOLDER = "./leafletDossierType";
 require("../../../psknode/bundles/testsRuntime");
 require("../../../psknode/bundles/pskruntime");
+require("../../../psknode/bundles/openDSU");
 
 const tir = require("../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
@@ -9,17 +10,26 @@ const AGENT_IDENTITY = "did:example:123456789abcdefghi";
 
 let dossierTypeScripts = [];
 
-dossierTypeScripts.push("../../../psknode/bundles/" + "pskruntime.js");
-dossierTypeScripts.push("../../../psknode/bundles/" + "blockchain.js");
+dossierTypeScripts.push("../../../psknode/bundles/pskruntime.js");
+dossierTypeScripts.push("../../../psknode/bundles/blockchain.js");
 //dossierTypeScripts.push("../../../psknode/bundles/" + "webshims.js");
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
 
-function prepareCSB(endpoint, callback) {
-    const EDFS = require("edfs");
-    EDFS.createDSU("Bar", (err, bar) => {
-        bar.addFiles(dossierTypeScripts, "/" + EDFS.constants.CSB.CODE_FOLDER + "/" + EDFS.constants.CSB.CONSTITUTION_FOLDER, (err) => {
+function prepareCSB(callback) {
+    resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+        if (err) {
+            throw err;
+        }
+        console.log("Created DSU .....");
+        bar.addFiles(dossierTypeScripts, "/code/constitution", (err) => {
             if (err) {
                 throw err;
             }
+
+            console.log("Added bundles to constirution");
             //bar.addFile...
             tir.buildConstitution(DOMAIN_CONSTITUTION_FOLDER, bar, (err) => {
                 if (err) {
@@ -75,20 +85,12 @@ assert.callback("Test Dossiers capabilities", (testFinishCallback) => {
         if (err) {
             throw err;
         }
-        $$.BDNS.addConfig("default", {
-            endpoints: [
-                {
-                    endpoint:`http://localhost:${port}`,
-                    type: 'brickStorage'
-                },
-                {
-                    endpoint:`http://localhost:${port}`,
-                    type: 'anchorService'
-                }
-            ]
-        })
-        const EDFS_HOST = `http://localhost:${port}`;
-        prepareCSB(EDFS_HOST, function(err,seed){
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
+        });
+
+        prepareCSB(function(err,seed){
             loadCSBAndStartTesting(err,seed, testFinishCallback);
         });
     });

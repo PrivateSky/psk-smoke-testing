@@ -9,20 +9,15 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
         if (err) {
             throw err;
         }
-        const EDFS = require("edfs");
-        $$.BDNS.addConfig("default", {
-            endpoints: [
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'brickStorage'
-                },
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'anchorService'
-                }
-            ]
-        })
-        EDFS.createDSU("RawDossier", (err, ref) => {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        const bdns = openDSU.loadApi("bdns");
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
+        });
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -32,7 +27,7 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
                     throw err;
                 }
 
-                EDFS.createDSU("RawDossier", (err, newDossier) => {
+                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, newDossier) => {
                     if (err) {
                         throw err;
                     }
@@ -55,7 +50,7 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
                                     if (err) {
                                         throw err;
                                     }
-                                    EDFS.resolveSSI(refKeySSI, "RawDossier", (err, ref2) => {
+                                    resolver.loadDSU(refKeySSI, (err, ref2) => {
                                         if (err) {
                                             throw err;
                                         }

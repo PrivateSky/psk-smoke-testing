@@ -4,11 +4,10 @@ require("../../../../psknode/bundles/openDSU");
 require("../../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
 const openDSU = require("opendsu");
-const keySSI = openDSU.loadApi("keyssi");
+const keySSISpace = openDSU.loadApi("keyssi");
 const bdns = openDSU.loadApi("bdns");
 
 assert.callback("Get Info Test", (callback) => {
-    const seedSSI = keySSI.buildSeedSSI("default", undefined, "some string", "control", "v0", "hint");
     const defaultConfig = {
         "default": {
             "replicas": [],
@@ -20,28 +19,28 @@ assert.callback("Get Info Test", (callback) => {
             ]
         }
     };
-    bdns.getRawInfo(seedSSI, (err, rawInfo) => {
+    bdns.getRawInfo("default", (err, rawInfo) => {
         if (err) {
             throw err;
         }
 
         assert.true(JSON.stringify(rawInfo) === JSON.stringify(defaultConfig["default"]));
 
-        bdns.getBrickStorages(seedSSI, (err, brickStorages) => {
+        bdns.getBrickStorages("default", (err, brickStorages) => {
             if (err) {
                 throw err;
             }
 
             assert.arraysMatch(brickStorages, defaultConfig["default"].brickStorages);
 
-            bdns.getAnchoringServices(seedSSI, (err, anchoringServices) => {
+            bdns.getAnchoringServices("default", (err, anchoringServices) => {
                 if (err) {
                     throw err;
                 }
 
                 assert.arraysMatch(anchoringServices, defaultConfig["default"].anchoringServices);
 
-                bdns.getReplicas(seedSSI, (err, replicas) => {
+                bdns.getReplicas("default", (err, replicas) => {
                     if (err) {
                         throw err;
                     }

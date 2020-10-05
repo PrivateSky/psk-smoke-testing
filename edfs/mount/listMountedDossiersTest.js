@@ -9,32 +9,26 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        const bdns = openDSU.loadApi("bdns");
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
+        });
 
-        const EDFS = require("edfs");
-        $$.BDNS.addConfig("default", {
-            endpoints: [
-                {
-                    endpoint:`http://localhost:${port}`,
-                    type: 'brickStorage'
-                },
-                {
-                    endpoint:`http://localhost:${port}`,
-                    type: 'anchorService'
-                }
-            ]
-        })
-        EDFS.createDSU("RawDossier", (err, dossier) => {
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier) => {
             if (err) {
                 throw err;
             }
 
-            EDFS.createDSU("RawDossier", (err, anotherDossier) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, anotherDossier) => {
                 if (err) {
                     throw err;
                 }
 
-                EDFS.createDSU("RawDossier", (err, yetAnotherDossier) => {
+                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, yetAnotherDossier) => {
                     if (err) {
                         throw err;
                     }
@@ -59,7 +53,7 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
                                     seed: anotherDossierKeySSI
                                 }, {path: "/temp/dossier1/folder", name: "dossier3", seed: yetAnotherDossierKeySSI}];
 
-                                EDFS.createDSU("RawDossier", (err, raw_dossier) => {
+                                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, raw_dossier) => {
                                     if (err) {
                                         throw err;
                                     }

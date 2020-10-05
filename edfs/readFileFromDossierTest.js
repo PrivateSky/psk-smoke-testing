@@ -10,20 +10,16 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
             throw err;
         }
 
-        const EDFS = require("edfs");
-        $$.BDNS.addConfig("default", {
-            endpoints: [
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'brickStorage'
-                },
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'anchorService'
-                }
-            ]
-        })
-        EDFS.createDSU("RawDossier", (err, dossier) => {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        const bdns = openDSU.loadApi("bdns");
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
+        });
+
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier) => {
             if (err) {
                 throw err;
             }
@@ -33,7 +29,7 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                EDFS.createDSU("RawDossier", (err, newDossier) => {
+                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, newDossier) => {
                     if (err) {
                         throw err;
                     }

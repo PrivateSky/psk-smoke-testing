@@ -9,25 +9,21 @@ assert.callback("mount - mount dossier inside a folder of a mounted dossier", (t
         if (err) {
             throw err;
         }
-        const EDFS = require("edfs");
-        $$.BDNS.addConfig("default", {
-            endpoints: [
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'brickStorage'
-                },
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'anchorService'
-                }
-            ]
-        })
-        EDFS.createDSU("RawDossier", (err, rawDossier) => {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        const bdns = openDSU.loadApi("bdns");
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
+        });
+
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, rawDossier) => {
             if (err) {
                 throw err;
             }
 
-            EDFS.createDSU("RawDossier", (err, dossier1) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier1) => {
                 if (err) {
                     throw err;
                 }

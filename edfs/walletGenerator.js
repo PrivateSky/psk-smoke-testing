@@ -4,7 +4,11 @@ require("../../../psknode/bundles/pskruntime");
 const tir = require("../../../psknode/tests/util/tir");
 const dc = require("double-check");
 const assert = dc.assert;
-const EDFS = require("edfs");
+const fs = require("fs");
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
 
 assert.callback("Wallet generator", (testFinishCallback) => {
     dc.createTestFolder("wallet", function (err, folder) {
@@ -13,30 +17,22 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             if (err) {
                 throw err;
             }
-            const EDFS_HOST = `http://localhost:${port}`;
-            const fs = require("fs");
-            $$.BDNS.addConfig("default", {
-                endpoints: [
-                    {
-                        endpoint: `http://localhost:${port}`,
-                        type: 'brickStorage'
-                    },
-                    {
-                        endpoint: `http://localhost:${port}`,
-                        type: 'anchorService'
-                    }
-                ]
-            })
+
+            bdns.addRawInfo("default", {
+                brickStorages: [`http://localhost:${port}`],
+                anchoringServices: [`http://localhost:${port}`]
+            });
+
             const webAppFolder = folder + "\\web";
             fs.mkdirSync(webAppFolder, {recursive: true});
             fs.writeFileSync(webAppFolder + "/index.html", "Hello World!");
-            generateWallet(EDFS_HOST, webAppFolder, testFinishCallback);
+            generateWallet(webAppFolder, testFinishCallback);
         });
     });
 }, 5000);
 
-function generateWallet(endpoint, webappFolder, callback) {
-    EDFS.createDSU("RawDossier", (err, walletTemplate) => {
+function generateWallet(webappFolder, callback) {
+    resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, walletTemplate) => {
         if (err) {
             throw err;
         }
@@ -45,7 +41,7 @@ function generateWallet(endpoint, webappFolder, callback) {
                 throw err;
             }
 
-            EDFS.createDSU("RawDossier", (err, wallet) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, wallet) => {
                 if (err) {
                     throw err;
                 }

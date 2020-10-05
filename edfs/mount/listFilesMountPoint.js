@@ -9,22 +9,16 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        const bdns = openDSU.loadApi("bdns");
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
+        });
 
-        const EDFS = require("edfs");
-        $$.BDNS.addConfig("default", {
-            endpoints: [
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'brickStorage'
-                },
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'anchorService'
-                }
-            ]
-        })
-        EDFS.createDSU("RawDossier", (err, ref) => {
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -34,7 +28,7 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                     throw err;
                 }
 
-                EDFS.createDSU("RawDossier", (err, raw_dossier) => {
+                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, raw_dossier) => {
 
                     if (err) {
                         throw err;
@@ -56,7 +50,7 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                                     if (err) {
                                         throw err;
                                     }
-                                    EDFS.resolveSSI(raw_dossierKeySSI, "RawDossier", (err, raw_dossier_reloaded) => {
+                                    resolver.loadDSU(raw_dossierKeySSI, (err, raw_dossier_reloaded) => {
                                         raw_dossier_reloaded.listFiles("/code/test", (err, files) => {
                                             if (err) {
                                                 throw err;

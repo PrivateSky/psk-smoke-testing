@@ -1,9 +1,8 @@
 require('../../../../psknode/bundles/testsRuntime');
 require("../../../../psknode/bundles/pskruntime");
 require("../../../../psknode/bundles/pskWebServer");
-require("../../../../psknode/bundles/edfsBar");
+require("../../../../psknode/bundles/openDSU");
 
-const EDFS = require("edfs");
 const double_check = require("double-check");
 const assert = double_check.assert;
 
@@ -18,19 +17,16 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
         tir.launchVirtualMQNode(10, testFolder, (err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
-            $$.BDNS.addConfig("default", {
-                endpoints: [
-                    {
-                        endpoint: `http://localhost:${port}`,
-                        type: 'brickStorage'
-                    },
-                    {
-                        endpoint: `http://localhost:${port}`,
-                        type: 'anchorService'
-                    }
-                ]
-            })
-            EDFS.createDSU("Bar", (err, bar) => {
+            const openDSU = require("opendsu");
+            const resolver = openDSU.loadApi("resolver");
+            const keySSISpace = openDSU.loadApi("keyssi");
+            const bdns = openDSU.loadApi("bdns");
+            bdns.addRawInfo("default", {
+                brickStorages: [`http://localhost:${port}`],
+                anchoringServices: [`http://localhost:${port}`]
+            });
+
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
                 if (err) {
                     throw err;
                 }
@@ -50,7 +46,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                             if (err) {
                                 throw err;
                             }
-                            EDFS.resolveSSI(keySSI, "Bar", (err, newBar) => {
+                            resolver.loadDSU(keySSI, (err, newBar) => {
                                 if (err) {
                                     throw err;
                                 }

@@ -4,6 +4,10 @@ require("../../../psknode/bundles/pskruntime");
 const tir = require("../../../psknode/tests/util/tir");
 const dc = require("double-check");
 const assert = dc.assert;
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
 
 assert.callback("Wallet generator", (testFinishCallback) => {
     dc.createTestFolder("wallet", function (err, folder) {
@@ -13,39 +17,29 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             if (err) {
                 throw err;
             }
-            $$.BDNS.addConfig("default", {
-                endpoints: [
-                    {
-                        endpoint: `http://localhost:${port}`,
-                        type: 'brickStorage'
-                    },
-                    {
-                        endpoint: `http://localhost:${port}`,
-                        type: 'anchorService'
-                    }
-                ]
-            })
-            const EDFS_HOST = `http://localhost:${port}`;
-            generateWallet(EDFS_HOST, "webAppFolder", testFinishCallback);
+            bdns.addRawInfo("default", {
+                brickStorages: [`http://localhost:${port}`],
+                anchoringServices: [`http://localhost:${port}`]
+            });
+
+            generateWallet( "webAppFolder", testFinishCallback);
         });
     });
 }, 15000);
 
-function generateWallet(endpoint, webappFolder, callback) {
-    const fs = require("fs");
-    const EDFS = require("edfs");
-
-    EDFS.createDSU("RawDossier", (err, appTemplate) => {
+function generateWallet(webappFolder, callback) {
+    resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, appTemplate) => {
         if (err) {
             throw err;
         }
 
-        appTemplate.writeFile("/index.html", "profile-app index content", function (err) {
+        const indexContent = "profile-app index content";
+        appTemplate.writeFile("/index.html", indexContent, function (err) {
             if (err) {
                 throw err;
             }
 
-            EDFS.createDSU("RawDossier", (err, app) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, app) => {
                 if (err) {
                     throw err;
                 }
@@ -58,7 +52,7 @@ function generateWallet(endpoint, webappFolder, callback) {
                             throw err;
                         }
 
-                        EDFS.createDSU("RawDossier", (err, walletTemplate) => {
+                        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, walletTemplate) => {
                             if (err) {
                                 throw err;
                             }
@@ -68,7 +62,7 @@ function generateWallet(endpoint, webappFolder, callback) {
                                     throw err;
                                 }
 
-                                EDFS.createDSU("RawDossier", (err, wallet) => {
+                                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, wallet) => {
                                     if (err) {
                                         throw err;
                                     }
@@ -94,7 +88,7 @@ function generateWallet(endpoint, webappFolder, callback) {
                                                         if (err) {
                                                             throw err;
                                                         }
-                                                        EDFS.resolveSSI(walletKeySSI, "RawDossier", (err, doi) => {
+                                                        resolver.loadDSU(walletKeySSI, (err, doi) => {
                                                             if (err) {
                                                                 throw err;
                                                             }
@@ -103,7 +97,7 @@ function generateWallet(endpoint, webappFolder, callback) {
                                                                 if (err) {
                                                                     throw err;
                                                                 }
-                                                                console.log(content.toString());
+                                                                assert.true(content.toString() === indexContent);
                                                                 callback();
                                                             });
                                                         });

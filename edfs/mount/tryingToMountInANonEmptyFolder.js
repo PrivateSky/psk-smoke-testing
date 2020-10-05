@@ -9,24 +9,21 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
         if (err) {
             throw err;
         }
-        const EDFS = require("edfs");
-        $$.BDNS.addConfig("default", {
-            endpoints: [
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'brickStorage'
-                },
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'anchorService'
-                }
-            ]
-        })
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        const bdns = openDSU.loadApi("bdns");
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
+        });
+
         const fileName = 'simpleFile';
         const folderName = "dir";
         const subFolder = "folder";
 
-        EDFS.createDSU("RawDossier", (err, ref) => {
+        resolver.createDSU(keySSISpace.buildSeedSSI("default" +
+            ""), (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -34,7 +31,7 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
                 if (err) {
                     throw err;
                 }
-                EDFS.createDSU("RawDossier", (err, raw_dossier) => {
+                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, raw_dossier) => {
                     if (err) {
                         throw err;
                     }

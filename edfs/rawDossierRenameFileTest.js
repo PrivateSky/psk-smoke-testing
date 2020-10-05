@@ -9,23 +9,16 @@ assert.callback("Rename file in dossier", (testFinishCallback) => {
         if (err) {
             throw err;
         }
-        const EDFS_HOST = `http://localhost:${port}`;
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        const bdns = openDSU.loadApi("bdns");
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
+        });
 
-        const EDFS = require("edfs");
-        $$.BDNS.addConfig("default", {
-            endpoints: [
-                {
-                    endpoint:`http://localhost:${port}`,
-                    type: 'brickStorage'
-                },
-                {
-                    endpoint:`http://localhost:${port}`,
-                    type: 'anchorService'
-                }
-            ]
-        })
-
-        EDFS.createDSU("RawDossier",(err, dossier) => {
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier) => {
             if (err) {
                 throw err;
             }

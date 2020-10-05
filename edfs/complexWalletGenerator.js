@@ -4,6 +4,13 @@ require("../../../psknode/bundles/pskruntime");
 const tir = require("../../../psknode/tests/util/tir");
 const dc = require("double-check");
 const assert = dc.assert;
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
+const bdns = openDSU.loadApi("bdns");
+
+const assetsIndexData = "Hello World from JS!";
+const indexData = "Hello World!";
 
 assert.callback("Wallet generator", (testFinishCallback) => {
     dc.createTestFolder("wallet", function (err, folder) {
@@ -12,34 +19,24 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             if (err) {
                 throw err;
             }
-            const EDFS_HOST = `http://localhost:${port}`;
-            $$.BDNS.addConfig("default", {
-                endpoints: [
-                    {
-                        endpoint: `http://localhost:${port}`,
-                        type: 'brickStorage'
-                    },
-                    {
-                        endpoint: `http://localhost:${port}`,
-                        type: 'anchorService'
-                    }
-                ]
-            })
+            bdns.addRawInfo("default", {
+                brickStorages: [`http://localhost:${port}`],
+                anchoringServices: [`http://localhost:${port}`]
+            });
+
             const fs = require("fs");
             const webAppFolder = folder + "/web";
             fs.mkdirSync(webAppFolder, {recursive: true});
             fs.mkdirSync(webAppFolder + "/assets/js", {recursive: true});
-            fs.writeFileSync(webAppFolder + "/index.html", "Hello World!");
-            fs.writeFileSync(webAppFolder + "/assets/js/index.js", "Hello World from JS!");
-            generateWallet(EDFS_HOST, webAppFolder, testFinishCallback);
+            fs.writeFileSync(webAppFolder + "/index.html", indexData);
+            fs.writeFileSync(webAppFolder + "/assets/js/index.js", assetsIndexData);
+            generateWallet(webAppFolder, testFinishCallback);
         });
     });
 }, 15000);
 
-function generateWallet(endpoint, webappFolder, callback) {
-    const EDFS = require("edfs");
-
-    EDFS.createDSU("RawDossier", (err, walletTemplate) => {
+function generateWallet(webappFolder, callback) {
+    resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, walletTemplate) => {
         if (err) {
             throw err;
         }
@@ -48,7 +45,7 @@ function generateWallet(endpoint, webappFolder, callback) {
             if (err) {
                 throw err;
             }
-            EDFS.createDSU("RawDossier", (err, wallet) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, wallet) => {
                 if (err) {
                     throw err;
                 }
@@ -67,20 +64,25 @@ function generateWallet(endpoint, webappFolder, callback) {
                             throw err;
                         }
                         wallet.listFiles("/app/assets", function (err, files) {
-                            console.log(files);
-                        });
-
-                        wallet.readFile("/app/assets/js/index.js", function (err, content) {
                             if (err) {
-                                throw  err;
+                                throw err;
                             }
 
-                            callback();
-                        })
+                            assert.arraysMatch(['js/index.js'], files);
+
+                            wallet.readFile("/app/assets/js/index.js", function (err, content) {
+                                if (err) {
+                                    throw  err;
+                                }
+
+                                assert.true(content.toString() === assetsIndexData);
+
+                                callback();
+                            })
+                        });
                     });
                 });
             })
         });
     })
-
 }
