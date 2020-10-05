@@ -14,11 +14,16 @@ assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
             throw err;
         }
 
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
+        })
+
         assert.true(typeof bricking.getBrick === 'function');
         assert.true(typeof bricking.putBrick === 'function');
         assert.true(typeof bricking.getMultipleBricks === 'function');
 
-        const seedSSI = keyssi.buildSeedSSI('default', undefined, 'some string', 'control', 'v0', 'hint');
+        const seedSSI = keyssi.buildSeedSSI('default', 'some string', 'control', 'v0', 'hint');
         const brickData = 'some data';
 
         bricking.putBrick(seedSSI, brickData, null, (err, brickHash) => {
@@ -33,7 +38,7 @@ assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
 
                 assert.true(brickHash === hash);
 
-                const haskLinkSSI = keyssi.buildHashLinkSSI('default', undefined, brickHash);
+                const haskLinkSSI = keyssi.buildHashLinkSSI('default', brickHash);
 
                 bricking.getBrick(haskLinkSSI, null, (err, data) => {
                     if (err) {
