@@ -9,25 +9,22 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
         if (err) {
             throw err;
         }
-        const EDFS = require("edfs");
-        $$.BDNS.addConfig("default", {
-            endpoints: [
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'brickStorage'
-                },
-                {
-                    endpoint: `http://localhost:${port}`,
-                    type: 'anchorService'
-                }
-            ]
+        const openDSU = require('opendsu');
+        const keySSISpace = openDSU.loadApi('keyssi');
+        const resolver = openDSU.loadApi('resolver');
+        const bdns = openDSU.loadApi('bdns');
+
+        bdns.addRawInfo("default", {
+            brickStorages: [`http://localhost:${port}`],
+            anchoringServices: [`http://localhost:${port}`]
         })
-        EDFS.createDSU("RawDossier", (err, rawDossier) => {
+
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, rawDossier) => {
             if (err) {
                 throw err;
             }
 
-            EDFS.createDSU("RawDossier", (err, dossier1) => {
+            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier1) => {
                 if (err) {
                     throw err;
                 }
@@ -41,7 +38,7 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
                             throw err;
                         }
 
-                        EDFS.createDSU("RawDossier", (err, dossier2) => {
+                        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier2) => {
                             if (err) {
                                 throw err;
                             }
