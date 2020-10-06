@@ -1,5 +1,4 @@
 require("../../../../psknode/bundles/testsRuntime");
-require("../../../../psknode/bundles/pskruntime");
 
 const tir = require("../../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
@@ -64,12 +63,7 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
                                                 throw err;
                                             }
 
-                                            handler.startTransaction("echo", "say", "just test").onReturn((err, result) => {
-                                                if (err) {
-                                                    throw err;
-                                                }
-                                                testFinishCallback();
-                                            });
+                                            testFinishCallback();
                                         });
                                     });
                                 });
