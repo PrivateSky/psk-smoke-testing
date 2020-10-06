@@ -1,8 +1,4 @@
-require('../../../../psknode/bundles/consoleTools');
 require('../../../../psknode/bundles/testsRuntime');
-require("../../../../psknode/bundles/pskruntime");
-require("../../../../psknode/bundles/pskWebServer");
-require("../../../../psknode/bundles/openDSU");
 
 const fs = require('fs');
 const double_check = require("double-check");
@@ -18,12 +14,12 @@ const openDSU = require("opendsu");
 const resolver = openDSU.loadApi("resolver");
 const keySSISpace = openDSU.loadApi("keyssi");
 const bdns = openDSU.loadApi("bdns");
-$$.flows.describe('WriteFileFromStream', {
 
+require("callflow").initialise();
+
+$$.flows.describe('WriteFileFromStream', {
     start: function (callback) {
         this.callback = callback;
-
-        $$.securityContext = require("psk-security-context").createSecurityContext();
         tir.launchVirtualMQNode((err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 

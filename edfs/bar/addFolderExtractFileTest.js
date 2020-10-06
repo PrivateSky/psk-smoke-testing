@@ -1,7 +1,4 @@
 require('../../../../psknode/bundles/testsRuntime');
-require("../../../../psknode/bundles/pskruntime");
-require("../../../../psknode/bundles/pskWebServer");
-require("../../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
@@ -19,11 +16,11 @@ const tir = require("../../../../psknode/tests/util/tir.js");
 
 const text = ["first", "second", "third"];
 
+require("callflow").initialise();
+
 $$.flows.describe("AddFolderToCSB", {
     start: function (callback) {
         this.callback = callback;
-        $$.securityContext = require("psk-security-context").createSecurityContext();
-
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 

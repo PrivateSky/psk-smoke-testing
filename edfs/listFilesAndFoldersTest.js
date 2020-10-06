@@ -1,7 +1,4 @@
 require('../../../psknode/bundles/testsRuntime');
-require("../../../psknode/bundles/pskruntime");
-require("../../../psknode/bundles/pskWebServer");
-require("../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
@@ -17,10 +14,12 @@ const openDSU = require("opendsu");
 const resolver = openDSU.loadApi("resolver");
 const keySSISpace = openDSU.loadApi("keyssi");
 const bdns = openDSU.loadApi("bdns");
+
+require("callflow").initialise();
+
 $$.flows.describe("TestFlow", {
     start: function (callback) {
         this.callback = callback;
-        $$.securityContext = require("psk-security-context").createSecurityContext();
         tir.launchVirtualMQNode((err, port) => {
             if (err) {
                 throw err;

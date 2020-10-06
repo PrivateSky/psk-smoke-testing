@@ -1,5 +1,4 @@
 require('../../../../psknode/bundles/testsRuntime');
-require("../../../../psknode/bundles/pskWebServer");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
@@ -15,11 +14,11 @@ const resolver = openDSU.loadApi("resolver");
 const keySSISpace = openDSU.loadApi("keyssi");
 const bdns = openDSU.loadApi("bdns");
 
+require("callflow").initialise();
+
 $$.flows.describe("RemoveFilesFromBar", {
 	start: function (callback) {
 		this.callback = callback;
-		$$.securityContext = require("psk-security-context").createSecurityContext();
-
 		double_check.ensureFilesExist([folderPath], files, text, (err) => {
 			assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 

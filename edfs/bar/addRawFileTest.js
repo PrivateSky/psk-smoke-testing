@@ -1,7 +1,4 @@
 require('../../../../psknode/bundles/testsRuntime');
-require("../../../../psknode/bundles/pskruntime");
-require("../../../../psknode/bundles/pskWebServer");
-require("../../../../psknode/bundles/edfsBar");
 
 const double_check = require("double-check");
 const assert = double_check.assert;
@@ -18,6 +15,8 @@ const resolver = openDSU.loadApi("resolver");
 const keySSISpace = openDSU.loadApi("keyssi");
 const bdns = openDSU.loadApi("bdns");
 const text = ["first", "second", "third"];
+
+require("callflow").initialise();
 
 $$.flows.describe("AddRawFile", {
     start: function (callback) {
