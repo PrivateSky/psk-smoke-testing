@@ -19,7 +19,7 @@ assert.callback('HTTP test', (callback) => {
 
         http.doPut(`http://localhost:${port}/bricks/put-brick/${domain}`, { test: 'da' }, (err, response) => {
             const brickHash = JSON.parse(response).message
-            assert.true(brickHash === '0de3c7406ae0dab1ed5f90fe20dd59992a7d6f9a383ff397b2fa9325c34011cf')
+            assert.true(brickHash === 'wDkQYUMeLGEaaGSwzJm1Xcd8R6eBCyKJiCwxqV3BmNn')
 
             http.fetch(`http://localhost:${port}/bricks/get-brick/${brickHash}/${domain}`).then((responseGetBrick) => {
 
