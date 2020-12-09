@@ -1,5 +1,4 @@
 require("../../../../psknode/bundles/testsRuntime");
-require("../../../../psknode/bundles/pskruntime");
 
 const tir = require("../../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
@@ -12,12 +11,6 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
         const openDSU = require('opendsu');
         const keySSISpace = openDSU.loadApi('keyssi');
         const resolver = openDSU.loadApi('resolver');
-        const bdns = openDSU.loadApi('bdns');
-
-        bdns.addRawInfo("default", {
-            brickStorages: [`http://localhost:${port}`],
-            anchoringServices: [`http://localhost:${port}`]
-        })
 
         resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, rawDossier) => {
             if (err) {

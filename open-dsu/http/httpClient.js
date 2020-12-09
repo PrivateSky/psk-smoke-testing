@@ -1,27 +1,28 @@
 require('../../../../psknode/bundles/testsRuntime');
-require('../../../../psknode/bundles/openDSU');
 const tir = require('../../../../psknode/tests/util/tir');
 
 const assert = require('double-check').assert;
-const openDSU = require('opendsu');
-const http = openDSU.loadApi('http');
 
 assert.callback('HTTP test', (callback) => {
     tir.launchVirtualMQNode((err, port) => {
         if (err) {
             return;
         }
+
+        const openDSU = require('opendsu');
+        const http = openDSU.loadApi('http');
+
         const domain = 'default';
         assert.true(typeof http.poll === 'function');
         assert.true(typeof http.fetch === 'function');
         assert.true(typeof http.doPost === 'function');
         assert.true(typeof http.doPut === 'function');
 
-        http.doPut(`http://localhost:${port}/bricks/put-brick/${domain}`, { test: 'da' }, (err, response) => {
+        http.doPut(`http://localhost:${port}/bricking/${domain}/put-brick/${domain}`, { test: 'da' }, (err, response) => {
             const brickHash = JSON.parse(response).message
             assert.true(brickHash === 'wDkQYUMeLGEaaGSwzJm1Xcd8R6eBCyKJiCwxqV3BmNn')
 
-            http.fetch(`http://localhost:${port}/bricks/get-brick/${brickHash}/${domain}`).then((responseGetBrick) => {
+            http.fetch(`http://localhost:${port}/bricking/${domain}/get-brick/${brickHash}/${domain}`).then((responseGetBrick) => {
 
                 assert.true(typeof responseGetBrick.text === 'function');
                 assert.true(typeof responseGetBrick.json === 'function');
@@ -32,7 +33,7 @@ assert.callback('HTTP test', (callback) => {
                 assert.true(typeof responseGetBrick.ok === 'boolean');
                 assert.true(responseGetBrick.ok === true);
 
-                http.fetch(`http://localhost:${port}/bricks/downloadMultipleBricks/${domain}/?hashes=${brickHash}`).then((responseMultiple) => {
+                http.fetch(`http://localhost:${port}/bricking/${domain}/downloadMultipleBricks/${domain}/?hashes=${brickHash}`).then((responseMultiple) => {
                     assert.true(typeof responseMultiple.ok === 'boolean');
                     assert.true(responseMultiple.ok === true);
 

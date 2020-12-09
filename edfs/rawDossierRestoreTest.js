@@ -12,11 +12,6 @@ assert.callback("rawDossier restore test", (testFinishCallback) => {
         const openDSU = require("opendsu");
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
-        const bdns = openDSU.loadApi("bdns");
-        bdns.addRawInfo("default", {
-            brickStorages: [`http://localhost:${port}`],
-            anchoringServices: [`http://localhost:${port}`]
-        });
 
         resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, ref) => {
             if (err) {
@@ -36,7 +31,7 @@ assert.callback("rawDossier restore test", (testFinishCallback) => {
                         if (err) {
                             throw err;
                         }
-                        ref2.readFile("/constitution/edfsBar.js", function (err, content) {
+                        ref2.readFile("/constitution/pskruntime.js", function (err, content) {
                             if (err) {
                                 throw err;
                             }

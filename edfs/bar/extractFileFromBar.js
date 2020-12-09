@@ -15,10 +15,6 @@ let folders;
 let tempFolder;
 
 const text = ["first text", "second fragment", "third"];
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
 
 require("callflow").initialise();
 
@@ -36,11 +32,6 @@ $$.flows.describe("AddFile", {
                 tir.launchVirtualMQNode((err, port) => {
                     assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                    bdns.addRawInfo("default", {
-                        brickStorages: [`http://localhost:${port}`],
-                        anchoringServices: [`http://localhost:${port}`]
-                    });
-
                     this.createArchive();
                 });
             });
@@ -49,6 +40,10 @@ $$.flows.describe("AddFile", {
     },
 
     createArchive: function () {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+
         resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
             if (err) {
                 throw err;
@@ -78,6 +73,9 @@ $$.flows.describe("AddFile", {
     },
 
     extractFile: function (keySSI) {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+
         resolver.loadDSU(keySSI, (err, archive) => {
             if (err) {
                 throw err;

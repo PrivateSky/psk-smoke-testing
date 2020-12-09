@@ -10,10 +10,6 @@ let expectedCrc;
 const barPath = '/big-file.big';
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
 
 require("callflow").initialise();
 
@@ -23,40 +19,38 @@ $$.flows.describe('WriteFileFromStream', {
         tir.launchVirtualMQNode((err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-            bdns.addRawInfo("default", {
-                brickStorages: [`http://localhost:${port}`],
-                anchoringServices: [`http://localhost:${port}`]
-            });
-
             this.createBAR();
         });
     },
 
     createBAR: function () {
-        $$.securityContext.generateIdentity((err, agentId) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
-                if (err) {
-                    throw err;
-                }
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
 
-                this.bar = bar;
-                const fileStream = fs.createReadStream(filePath);
-                this.bar.writeFile(barPath, fileStream, (err, data) => {
-                    assert.true(err === null || typeof err === "undefined", "Failed to write file.");
-                    this.bar.getKeySSI((err, keySSI) => {
-                        if (err) {
-                            throw err;
-                        }
-                        this.readFile(keySSI);
-                    });
-                })
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+            if (err) {
+                throw err;
+            }
+
+            this.bar = bar;
+            const fileStream = fs.createReadStream(filePath);
+            this.bar.writeFile(barPath, fileStream, (err, data) => {
+                assert.true(err === null || typeof err === "undefined", "Failed to write file.");
+                this.bar.getKeySSI((err, keySSI) => {
+                    if (err) {
+                        throw err;
+                    }
+                    this.readFile(keySSI);
+                });
             })
-
-        });
+        })
     },
 
     readFile: function (keySSI) {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+
         resolver.loadDSU(keySSI, (err, newBar) => {
             if (err) {
                 throw err;

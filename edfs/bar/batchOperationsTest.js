@@ -9,10 +9,6 @@ let filePath;
 let files;
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
 const text = ["first", "second", "third"];
 
 require("callflow").initialise();
@@ -27,11 +23,6 @@ $$.flows.describe("BatchOperationsTest", {
             tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                bdns.addRawInfo("default", {
-                    brickStorages: [`http://localhost:${port}`],
-                    anchoringServices: [`http://localhost:${port}`]
-                });
-
                 this.createDSU((dsu) => {
                     this.testBatchIsCommited(dsu);
                 });
@@ -41,15 +32,16 @@ $$.flows.describe("BatchOperationsTest", {
     },
 
     createDSU: function (callback) {
-        $$.securityContext.generateIdentity((err, agentId) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dsu) => {
-                if (err) {
-                    throw err;
-                }
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
 
-                callback(dsu);
-            });
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dsu) => {
+            if (err) {
+                throw err;
+            }
+
+            callback(dsu);
         });
     },
 
@@ -147,6 +139,8 @@ $$.flows.describe("BatchOperationsTest", {
     },
 
     testCommitedBatch: function (keySSI) {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
         resolver.loadDSU(keySSI, (err, dsu) => {
             if (err) {
                 throw err;
@@ -221,6 +215,8 @@ $$.flows.describe("BatchOperationsTest", {
     },
 
     testBatchInMountSecondLevel: function (testDSU) {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
         this.createDSU((dsu) => {
             dsu.getKeySSI((err, keySSI) => {
                 if (err) {

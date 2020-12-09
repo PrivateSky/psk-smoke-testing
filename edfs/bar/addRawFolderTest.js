@@ -9,10 +9,6 @@ let filePath;
 let files;
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
 const text = ["first", "second", "third"];
 
 require("callflow").initialise();
@@ -27,11 +23,6 @@ $$.flows.describe("AddRawFolder", {
             tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                bdns.addRawInfo("default", {
-                    brickStorages: [`http://localhost:${port}`],
-                    anchoringServices: [`http://localhost:${port}`]
-                });
-
                 this.createBAR();
             });
         });
@@ -39,51 +30,52 @@ $$.flows.describe("AddRawFolder", {
     },
 
     createBAR: function () {
-        $$.securityContext.generateIdentity((err, agentId) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+            if (err) {
+                throw err;
+            }
+
+            this.bar = bar;
+            this.addFolder(folderPath, "fld1", (err, initialHash) => {
                 if (err) {
                     throw err;
                 }
 
-                this.bar = bar;
-                this.addFolder(folderPath, "fld1", (err, initialHash) => {
+                this.bar.delete("/", (err) => {
                     if (err) {
                         throw err;
                     }
-
-                    this.bar.delete("/", (err) => {
+                    this.addFolder(folderPath, "fld2", (err, controlHash) => {
                         if (err) {
                             throw err;
                         }
-                        this.addFolder(folderPath, "fld2", (err, controlHash) => {
+
+                        this.bar.getKeySSI((err, seedSSI) => {
                             if (err) {
                                 throw err;
                             }
-
-                            this.bar.getKeySSI((err, seedSSI) => {
+                            resolver.loadDSU(seedSSI, (err, newBar) => {
                                 if (err) {
                                     throw err;
                                 }
-                                resolver.loadDSU(seedSSI, (err, newBar) => {
+
+                                newBar.listFolders("/", (err, folders) => {
                                     if (err) {
                                         throw err;
                                     }
-
-                                    newBar.listFolders("/", (err, folders) => {
-                                        if (err) {
-                                            throw err;
-                                        }
-                                        assert.true(folders.length === 1);
-                                        this.callback();
-                                    });
+                                    assert.true(folders.length === 1);
+                                    this.callback();
                                 });
                             });
                         });
                     });
                 });
-            })
-        });
+            });
+        })
     },
 
     addFolder: function (fsFolderPath, barPath, callback) {

@@ -12,11 +12,7 @@ assert.callback("We should be able to get a seed of a bar before finish writing?
         const openDSU = require("opendsu");
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
-        const bdns = openDSU.loadApi("bdns");
-        bdns.addRawInfo("default", {
-            brickStorages: [`http://localhost:${port}`],
-            anchoringServices: [`http://localhost:${port}`]
-        });
+
         resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
             if (err) {
                 throw err;

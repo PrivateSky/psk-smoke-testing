@@ -5,10 +5,6 @@ const double_check = require("double-check");
 const assert = double_check.assert;
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
 
 double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     assert.true(err === null || typeof err === "undefined", "Failed to create test folder");
@@ -19,10 +15,9 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
         tir.launchVirtualMQNode(10, testFolder, (err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
-            bdns.addRawInfo("default", {
-                brickStorages: [`http://localhost:${port}`],
-                anchoringServices: [`http://localhost:${port}`]
-            });
+            const openDSU = require("opendsu");
+            const resolver = openDSU.loadApi("resolver");
+            const keySSISpace = openDSU.loadApi("keyssi");
 
             resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
                 if (err) {

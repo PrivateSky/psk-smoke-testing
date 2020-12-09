@@ -1,13 +1,7 @@
 require('../../../../psknode/bundles/testsRuntime');
-require('../../../../psknode/bundles/openDSU');
 
 const tir = require('../../../../psknode/tests/util/tir');
 const assert = require('double-check').assert;
-const openDSU = require('opendsu');
-const anchoring = openDSU.loadApi('anchoring');
-const keySSISpace = openDSU.loadApi('keyssi');
-const bdns = openDSU.loadApi('bdns');
-const crypto = openDSU.loadApi('crypto');
 
 assert.callback('Anchoring tests (GET, PUT anchor version)', (callback) => {
     tir.launchVirtualMQNode((err, port) => {
@@ -15,10 +9,10 @@ assert.callback('Anchoring tests (GET, PUT anchor version)', (callback) => {
             throw err;
         }
 
-        bdns.addRawInfo("default", {
-            brickStorages: [`http://localhost:${port}`],
-            anchoringServices: [`http://localhost:${port}`]
-        })
+        const openDSU = require('opendsu');
+        const anchoring = openDSU.loadApi('anchoring');
+        const keySSISpace = openDSU.loadApi('keyssi');
+        const crypto = openDSU.loadApi('crypto');
 
         assert.true(typeof anchoring.versions === 'function');
         assert.true(typeof anchoring.addVersion === 'function');

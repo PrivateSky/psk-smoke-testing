@@ -1,24 +1,17 @@
 require('../../../../psknode/bundles/testsRuntime');
-require('../../../../psknode/bundles/openDSU');
 
 const tir = require('../../../../psknode/tests/util/tir');
 const assert = require('double-check').assert;
-const openDSU = require('opendsu');
-const bricking = openDSU.loadApi('bricking');
-const keyssi = openDSU.loadApi('keyssi');
-const bdns = openDSU.loadApi('bdns');
-const crypto = openDSU.loadApi('crypto');
 
 assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
     tir.launchVirtualMQNode((err, port) => {
         if (err) {
             throw err;
         }
-
-        bdns.addRawInfo("default", {
-            brickStorages: [`http://localhost:${port}`],
-            anchoringServices: [`http://localhost:${port}`]
-        })
+        const openDSU = require('opendsu');
+        const bricking = openDSU.loadApi('bricking');
+        const keyssi = openDSU.loadApi('keyssi');
+        const crypto = openDSU.loadApi('crypto');
 
         assert.true(typeof bricking.getBrick === 'function');
         assert.true(typeof bricking.putBrick === 'function');

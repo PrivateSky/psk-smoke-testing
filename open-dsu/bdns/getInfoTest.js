@@ -1,10 +1,8 @@
 require("../../../../psknode/bundles/testsRuntime");
-require("../../../../psknode/bundles/openDSU");
 
 require("../../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
 const openDSU = require("opendsu");
-const keySSISpace = openDSU.loadApi("keyssi");
 const bdns = openDSU.loadApi("bdns");
 
 assert.callback("Get Info Test", (callback) => {

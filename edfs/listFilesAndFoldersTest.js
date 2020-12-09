@@ -10,11 +10,6 @@ const rootFolderName = "firsLevelDir";
 const subFolder = "secondLevelDir";
 const filename = "file.txt";
 
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
-
 require("callflow").initialise();
 
 $$.flows.describe("TestFlow", {
@@ -24,40 +19,35 @@ $$.flows.describe("TestFlow", {
             if (err) {
                 throw err;
             }
-            bdns.addRawInfo("default", {
-                brickStorages: [`http://localhost:${port}`],
-                anchoringServices: [`http://localhost:${port}`]
-            });
-
             this.createRawDossier();
         });
     },
 
     createRawDossier: function () {
-        $$.securityContext.generateIdentity((err, agentId) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
 
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, rawDossier) => {
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, rawDossier) => {
+            if (err) {
+                throw err;
+            }
+
+            this.rawDossier = rawDossier;
+            this.rawDossier.writeFile(pskPath.join("/", rootFolderName, filename), fileContent, (err) => {
                 if (err) {
                     throw err;
                 }
 
-                this.rawDossier = rawDossier;
-                this.rawDossier.writeFile(pskPath.join("/", rootFolderName, filename), fileContent, (err) => {
+                this.rawDossier.writeFile(pskPath.join("/", rootFolderName, subFolder, filename), fileContent, (err) => {
                     if (err) {
                         throw err;
                     }
 
-                    this.rawDossier.writeFile(pskPath.join("/", rootFolderName, subFolder, filename), fileContent, (err) => {
-                        if (err) {
-                            throw err;
-                        }
-
-                        this.listFiles(this.rawDossier);
-                    });
+                    this.listFiles(this.rawDossier);
                 });
-            })
-        });
+            });
+        })
     },
 
     listFiles: function (rawDossier) {

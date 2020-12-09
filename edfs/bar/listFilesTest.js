@@ -9,10 +9,7 @@ let filePath;
 let files;
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
+
 const text = ["first", "second", "third"];
 
 require("callflow").initialise();
@@ -54,15 +51,16 @@ $$.flows.describe("ListFilesTest", {
     },
 
     createDSU: function (callback) {
-        $$.securityContext.generateIdentity((err, agentId) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dsu) => {
-                if (err) {
-                    throw err;
-                }
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
 
-                callback(dsu);
-            });
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dsu) => {
+            if (err) {
+                throw err;
+            }
+
+            callback(dsu);
         });
     },
 
@@ -138,6 +136,8 @@ $$.flows.describe("ListFilesTest", {
     },
 
     testListingFilesFromMountedDSUs: function (keySSI) {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
         resolver.loadDSU(keySSI, (err, dsu) => {
             if (err) {
                 throw err;

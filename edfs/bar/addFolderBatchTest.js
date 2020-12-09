@@ -9,10 +9,6 @@ let filePath;
 let files;
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
 const text = ["first", "second", "third"];
 
 require("callflow").initialise();
@@ -27,11 +23,6 @@ $$.flows.describe("AddFolderBatch", {
             tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                bdns.addRawInfo("default", {
-                    brickStorages: [`http://localhost:${port}`],
-                    anchoringServices: [`http://localhost:${port}`]
-                });
-
                 this.createBAR();
             });
         });
@@ -39,46 +30,46 @@ $$.flows.describe("AddFolderBatch", {
     },
 
     createBAR: function () {
-        $$.securityContext.generateIdentity((err, agentId) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+            if (err) {
+                throw err;
+            }
+
+            this.bar = bar;
+            this.addFolder(folderPath, "fld1",  (err, initialHash) => {
                 if (err) {
                     throw err;
                 }
 
-                this.bar = bar;
-                this.addFolder(folderPath, "fld1",  (err, initialHash) => {
-                    if (err) {
-                        throw err;
-                    }
+                this.bar.getKeySSI((err, seedSSI) => {
+                    resolver.loadDSU(seedSSI, (err, dsu) => {
+                        dsu.listFiles('/', (err, files) => {
+                            assert.true(files.length === 3);
 
-                    this.bar.getKeySSI((err, seedSSI) => {
-                        resolver.loadDSU(seedSSI, (err, dsu) => {
-                            dsu.listFiles('/', (err, files) => {
-                                assert.true(files.length === 3);
+                            dsu.readFile('/fld1/a.txt', (err, data) => {
+                                assert.true(err === null || typeof err === "undefined", "Failed to read file");
+                                assert.true(text[0] === data.toString(), "Invalid read first file");
 
-                                dsu.readFile('/fld1/a.txt', (err, data) => {
+                                dsu.readFile('/fld1/b.txt', (err, data) => {
                                     assert.true(err === null || typeof err === "undefined", "Failed to read file");
-                                    assert.true(text[0] === data.toString(), "Invalid read first file");
+                                    assert.true(text[1] === data.toString(), "Invalid read second file");
 
-                                    dsu.readFile('/fld1/b.txt', (err, data) => {
+                                    dsu.readFile('/fld1/c.txt', (err, data) => {
                                         assert.true(err === null || typeof err === "undefined", "Failed to read file");
-                                        assert.true(text[1] === data.toString(), "Invalid read second file");
+                                        assert.true(text[2] === data.toString(), "Invalid read third file");
 
-                                        dsu.readFile('/fld1/c.txt', (err, data) => {
-                                            assert.true(err === null || typeof err === "undefined", "Failed to read file");
-                                            assert.true(text[2] === data.toString(), "Invalid read third file");
-
-                                            this.callback();
-                                        });
+                                        this.callback();
                                     });
                                 });
-                            })
+                            });
                         })
                     })
-                });
-            })
-        });
+                })
+            });
+        })
     },
 
     addFolder: function (fsFolderPath, barPath, callback) {

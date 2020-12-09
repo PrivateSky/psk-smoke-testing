@@ -10,10 +10,7 @@ let extractionPath;
 let files;
 
 const tir = require("../../../../psknode/tests/util/tir.js");
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
+
 const text = ["first", "second", "third"];
 
 require("callflow").initialise();
@@ -21,18 +18,12 @@ require("callflow").initialise();
 $$.flows.describe("AddRawFile", {
     start: function (callback) {
         this.callback = callback;
-        $$.securityContext = require("psk-security-context").createSecurityContext();
 
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
             tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
-
-                bdns.addRawInfo("default", {
-                    brickStorages: [`http://localhost:${port}`],
-                    anchoringServices: [`http://localhost:${port}`]
-                });
 
                 this.createBAR();
             });
@@ -41,31 +32,32 @@ $$.flows.describe("AddRawFile", {
     },
 
     createBAR: function () {
-        $$.securityContext.generateIdentity((err, agentId) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+            if (err) {
+                throw err;
+            }
+
+            this.bar = bar;
+            this.addFile(filePath, "fld/a.txt", (err, initialHash) => {
                 if (err) {
                     throw err;
                 }
 
-                this.bar = bar;
-                this.addFile(filePath, "fld/a.txt", (err, initialHash) => {
+
+                this.addFile(filePath, "fld/b.txt", (err, controlHash) => {
                     if (err) {
                         throw err;
                     }
 
+                    this.callback();
+                })
 
-                    this.addFile(filePath, "fld/b.txt", (err, controlHash) => {
-                        if (err) {
-                            throw err;
-                        }
-
-                        this.callback();
-                    })
-
-                });
-            })
-        });
+            });
+        })
     },
 
     addFile: function (fsFilePath, barPath, callback) {

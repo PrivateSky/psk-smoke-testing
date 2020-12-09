@@ -1,5 +1,4 @@
 require("../../../../psknode/bundles/testsRuntime");
-require("../../../../psknode/bundles/pskruntime");
 
 const tir = require("../../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
@@ -12,11 +11,6 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
         const openDSU = require("opendsu");
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
-        const bdns = openDSU.loadApi("bdns");
-        bdns.addRawInfo("default", {
-            brickStorages: [`http://localhost:${port}`],
-            anchoringServices: [`http://localhost:${port}`]
-        });
 
         const fileName = 'simpleFile';
         const folderName = "dir";

@@ -12,11 +12,6 @@ assert.callback("Missing first letter from file name", (testFinishCallback) => {
         const openDSU = require("opendsu");
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
-        const bdns = openDSU.loadApi("bdns");
-        bdns.addRawInfo("default", {
-            brickStorages: [`http://localhost:${port}`],
-            anchoringServices: [`http://localhost:${port}`]
-        });
 
         resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, ref) => {
             if (err) {

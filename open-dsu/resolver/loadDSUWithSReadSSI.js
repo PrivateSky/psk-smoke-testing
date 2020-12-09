@@ -1,23 +1,17 @@
 require("../../../../psknode/bundles/testsRuntime");
-require("../../../../psknode/bundles/openDSU");
 
 const tir = require("../../../../psknode/tests/util/tir");
 const assert = require("double-check").assert;
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
 assert.callback("Create and load DSU test", (callback) => {
     tir.launchVirtualMQNode((err, port) => {
         if (err) {
             throw err;
         }
 
-        const bdns = openDSU.loadApi("bdns");
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
         const keyssi = openDSU.loadApi("keyssi");
-        const seedSSI = keyssi.buildSeedSSI("localDomain", undefined, undefined, "v0", "hint");
-        bdns.addRawInfo("localDomain", {
-            brickStorages: [`http://localhost:${port}`],
-            anchoringServices: [`http://localhost:${port}`]
-        })
+        const seedSSI = keyssi.buildSeedSSI("default", undefined, undefined, "v0", "hint");
 
         resolver.createDSU(seedSSI, (err, rawDossier) => {
             if (err) {

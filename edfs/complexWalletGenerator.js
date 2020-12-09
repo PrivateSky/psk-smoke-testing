@@ -4,10 +4,6 @@ require("../../../psknode/bundles/pskruntime");
 const tir = require("../../../psknode/tests/util/tir");
 const dc = require("double-check");
 const assert = dc.assert;
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
 
 const assetsIndexData = "Hello World from JS!";
 const indexData = "Hello World!";
@@ -19,11 +15,6 @@ assert.callback("Wallet generator", (testFinishCallback) => {
             if (err) {
                 throw err;
             }
-            bdns.addRawInfo("default", {
-                brickStorages: [`http://localhost:${port}`],
-                anchoringServices: [`http://localhost:${port}`]
-            });
-
             const fs = require("fs");
             const webAppFolder = folder + "/web";
             fs.mkdirSync(webAppFolder, {recursive: true});
@@ -36,6 +27,9 @@ assert.callback("Wallet generator", (testFinishCallback) => {
 }, 15000);
 
 function generateWallet(webappFolder, callback) {
+    const openDSU = require("opendsu");
+    const resolver = openDSU.loadApi("resolver");
+    const keySSISpace = openDSU.loadApi("keyssi");
     resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, walletTemplate) => {
         if (err) {
             throw err;

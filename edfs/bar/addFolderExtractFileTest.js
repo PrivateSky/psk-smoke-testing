@@ -2,10 +2,6 @@ require('../../../../psknode/bundles/testsRuntime');
 
 const double_check = require("double-check");
 const assert = double_check.assert;
-const openDSU = require("opendsu");
-const resolver = openDSU.loadApi("resolver");
-const keySSISpace = openDSU.loadApi("keyssi");
-const bdns = openDSU.loadApi("bdns");
 
 let folderPath;
 let filePath;
@@ -27,11 +23,6 @@ $$.flows.describe("AddFolderToCSB", {
             tir.launchVirtualMQNode((err, port) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                bdns.addRawInfo("default", {
-                    brickStorages: [`http://localhost:${port}`],
-                    anchoringServices: [`http://localhost:${port}`]
-                });
-
                 this.createBAR();
             });
         });
@@ -39,16 +30,16 @@ $$.flows.describe("AddFolderToCSB", {
     },
 
     createBAR: function () {
-        $$.securityContext.generateIdentity((err, agentId) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to generate identity.");
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
-                if (err) {
-                    throw err;
-                }
+        const openDSU = require("opendsu");
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+            if (err) {
+                throw err;
+            }
 
-                this.bar = bar;
-                this.addFolder();
-            });
+            this.bar = bar;
+            this.addFolder();
         });
     },
 
