@@ -62,7 +62,8 @@ function generateWallet(webappFolder, callback) {
                                 throw err;
                             }
 
-                            assert.arraysMatch(['js/index.js'], files);
+                            assert.true(files.indexOf('js/index.js') !== -1);
+                            assert.true(files.indexOf('constitution/testsRuntime.js') !== -1);
 
                             wallet.readFile("/app/assets/js/index.js", function (err, content) {
                                 if (err) {
