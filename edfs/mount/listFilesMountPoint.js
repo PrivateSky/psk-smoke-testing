@@ -50,8 +50,8 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                                                 throw err;
                                             }
                                             assert.true(typeof err === "undefined");
-                                            assert.true(files.length === 1);
-                                            assert.true(files[0] === fileName);
+                                            assert.true(files.length === 2);
+                                            assert.true(files[1] === fileName);
                                             testFinishCallback();
                                         });
                                     });

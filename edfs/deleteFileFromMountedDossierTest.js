@@ -47,8 +47,7 @@ assert.callback("Delete file from mounted dossier test", (testFinishCallback) =>
                                         throw err;
                                     }
 
-                                    assert.true(files.length === 1, "Unexpected files length");
-                                    assert.arraysMatch(["testFile"], files, "Unexpected files list");
+                                    assert.true(files.length === 2, "Unexpected files length");
                                     dossier.delete("/code/constitution/testFile", {ignoreMounts: false}, (err) => {
                                         if (err) {
                                             throw err;
@@ -58,7 +57,7 @@ assert.callback("Delete file from mounted dossier test", (testFinishCallback) =>
                                                 throw err;
                                             }
 
-                                            assert.true(files.length === 0, "Unexpected files length");
+                                            assert.true(files.length === 1, "Unexpected files length");
                                             testFinishCallback();
                                         });
                                     });

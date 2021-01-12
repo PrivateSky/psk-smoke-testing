@@ -49,13 +49,13 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
                                         if (err) {
                                             throw err;
                                         }
-                                        assert.true(content[1].path === 'dossier1');
+                                        assert.true(content[2].path === 'dossier1');
 
                                         dossier1.readDir('/', (err, content) => {
                                             if (err) {
                                                 throw err;
                                             }
-                                            assert.true(content[1].path === 'dossier2');
+                                            assert.true(content[2].path === 'dossier2');
 
                                             resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier3) => {
                                                 if (err) {
@@ -85,8 +85,8 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
                                                                 if (err) {
                                                                     throw err;
                                                                 }
-                                                                assert.true(content[1].path === 'dossier2');
-                                                                assert.true(content[2].path === 'dossier4');
+                                                                assert.true(content[2].path === 'dossier2');
+                                                                assert.true(content[3].path === 'dossier4');
 
                                                                 testFinishCallback();
                                                             });

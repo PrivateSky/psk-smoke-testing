@@ -56,21 +56,21 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
                                             throw err;
                                         }
 
-                                        assert.true(content[1].path === '/dossier1');
+                                        assert.true(content[2].path === 'dossier1');
 
                                         rawDossier.readDir('/dossier1', (err, content) => {
                                             if (err) {
                                                 throw err;
                                             }
 
-                                            assert.true(content[1].path === '/dossier2');
+                                            assert.true(content[2].path === 'dossier2');
 
                                             dossier1.readDir('/', (err, content) => {
                                                 if (err) {
                                                     throw err;
                                                 }
 
-                                                assert.true(content[1].path === '/dossier2');
+                                                assert.true(content[2].path === 'dossier2');
                                                 testFinishCallback();
                                             });
                                         });

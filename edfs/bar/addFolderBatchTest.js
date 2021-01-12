@@ -47,7 +47,7 @@ $$.flows.describe("AddFolderBatch", {
                 this.bar.getKeySSI((err, seedSSI) => {
                     resolver.loadDSU(seedSSI, (err, dsu) => {
                         dsu.listFiles('/', (err, files) => {
-                            assert.true(files.length === 3);
+                            assert.true(files.length === 4);
 
                             dsu.readFile('/fld1/a.txt', (err, data) => {
                                 assert.true(err === null || typeof err === "undefined", "Failed to read file");
