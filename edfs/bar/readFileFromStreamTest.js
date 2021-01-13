@@ -39,7 +39,7 @@ $$.flows.describe('ReadFileFromStream', {
             this.bar.writeFile(barPath, buf, (err, data) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to write file.");
 
-                this.bar.getKeySSI((err, keySSI) => {
+                this.bar.getKeySSIAsString((err, keySSI) => {
                     if (err) {
                         throw err;
                     }

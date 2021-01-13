@@ -34,7 +34,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                         assert.true(err === null || typeof err === "undefined", "Failed to write second file in BAR");
                         assert.true(brickMapDigest !== null && typeof brickMapDigest !== "undefined", "Bar map digest is null or undefined");
 
-                        bar.getKeySSI((err, keySSI) => {
+                        bar.getKeySSIAsString((err, keySSI) => {
                             if (err) {
                                 throw err;
                             }

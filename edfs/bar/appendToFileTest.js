@@ -38,7 +38,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
                             throw err;
                         }
 
-                        bar.getKeySSI((err, keySSI) => {
+                        bar.getKeySSIAsString((err, keySSI) => {
                             if (err) {
                                 throw err;
                             }

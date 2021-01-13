@@ -39,7 +39,7 @@ double_check.createTestFolder("delay_anchoring_test_folder", (err, testFolder) =
                     }
                     assert.true(err === null || typeof err === "undefined", "Failed to write file in BAR");
 
-                    //bar.getKeySSI((err, keySSI) => {
+                    //bar.getKeySSIAsString((err, keySSI) => {
                         //if (err) {
                             //throw err;
                         //}

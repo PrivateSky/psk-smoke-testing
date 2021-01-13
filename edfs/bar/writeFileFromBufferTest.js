@@ -37,7 +37,7 @@ $$.flows.describe('WriteFileFromBuffer', {
 
             bar.writeFile(barPath, buf, (err, data) => {
                 assert.true(err === null || typeof err === "undefined", "Failed to write file.");
-                bar.getKeySSI((err, keySSI) => {
+                bar.getKeySSIAsString((err, keySSI) => {
                     if (err) {
                         throw err;
                     }
