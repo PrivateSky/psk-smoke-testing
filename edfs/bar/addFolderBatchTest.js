@@ -44,7 +44,7 @@ $$.flows.describe("AddFolderBatch", {
                     throw err;
                 }
 
-                this.bar.getKeySSI((err, seedSSI) => {
+                this.bar.getKeySSIAsString((err, seedSSI) => {
                     resolver.loadDSU(seedSSI, (err, dsu) => {
                         dsu.listFiles('/', (err, files) => {
                             assert.true(files.length === 4);
