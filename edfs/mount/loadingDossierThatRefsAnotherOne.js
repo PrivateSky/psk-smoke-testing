@@ -38,7 +38,7 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
                             throw err;
                         }
 
-                        ref.getKeySSI((err, refKeySSI) => {
+                        ref.getKeySSIAsString((err, refKeySSI) => {
                             if (err) {
                                 throw err;
                             }
@@ -48,7 +48,7 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
                                     if (err) {
                                         throw err;
                                     }
-                                    raw_dossier.getKeySSI((err, raw_dossierKeySSI) => {
+                                    raw_dossier.getKeySSIAsString((err, raw_dossierKeySSI) => {
                                         if (err) {
                                             throw err;
                                         }

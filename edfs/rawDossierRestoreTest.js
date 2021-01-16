@@ -23,7 +23,7 @@ assert.callback("rawDossier restore test", (testFinishCallback) => {
                     throw err;
                 }
 
-                ref.getKeySSI((err, refKeySSI) => {
+                ref.getKeySSIAsString((err, refKeySSI) => {
                     if (err) {
                         throw err;
                     }

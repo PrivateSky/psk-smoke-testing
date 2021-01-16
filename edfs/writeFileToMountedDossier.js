@@ -33,7 +33,7 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
                             throw err;
                         }
 
-                        newDossier.getKeySSI((err, newDossierKeySSI) => {
+                        newDossier.getKeySSIAsString((err, newDossierKeySSI) => {
                             if (err) {
                                 throw err;
                             }
@@ -42,7 +42,7 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
                                     throw err;
                                 }
 
-                                ref.getKeySSI((err, refKeySSI) => {
+                                ref.getKeySSIAsString((err, refKeySSI) => {
                                     if (err) {
                                         throw err;
                                     }

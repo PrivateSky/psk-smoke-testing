@@ -27,7 +27,7 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
                         throw err;
                     }
 
-                    ref.getKeySSI((err, keySSI) => {
+                    ref.getKeySSIAsString((err, keySSI) => {
                         if (err) {
                             throw err;
                         }

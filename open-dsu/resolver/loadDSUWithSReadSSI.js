@@ -23,7 +23,7 @@ assert.callback("Create and load DSU test", (callback) => {
                     throw err;
                 }
 
-                rawDossier.getKeySSI("sread", (err, sreadSSI) => {
+                rawDossier.getKeySSIAsString("sread", (err, sreadSSI) => {
                     if (err) {
                         throw err;
                     }
@@ -34,7 +34,7 @@ assert.callback("Create and load DSU test", (callback) => {
                         }
 
 
-                        loadedDSU.getKeySSI((err, cloneKeySSI) => {
+                        loadedDSU.getKeySSIAsString((err, cloneKeySSI) => {
                             if (err) {
                                 throw err;
                             }

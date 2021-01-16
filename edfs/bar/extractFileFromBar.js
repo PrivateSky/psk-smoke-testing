@@ -62,7 +62,7 @@ $$.flows.describe("AddFile", {
             let fs = require("fs");
             //double_check.deleteFoldersSync(folderPath);
             fs.rmdirSync(folderPath, {recursive: true, maxRetries: 10});
-            this.archive.getKeySSI((err, keySSI) => {
+            this.archive.getKeySSIAsString((err, keySSI) => {
                 if (err) {
                     throw err;
                 }

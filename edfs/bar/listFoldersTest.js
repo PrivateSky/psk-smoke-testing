@@ -90,7 +90,7 @@ $$.flows.describe("ListFoldersTest", {
                             throw err;
                         }
 
-                        level2DSU.getKeySSI((err, identifier) => {
+                        level2DSU.getKeySSIAsString((err, identifier) => {
                             if (err) {
                                 throw err;
                             }
@@ -100,7 +100,7 @@ $$.flows.describe("ListFoldersTest", {
                                     throw err;
                                 }
 
-                                level1DSU.getKeySSI((err, identifier) => {
+                                level1DSU.getKeySSIAsString((err, identifier) => {
                                     if (err) {
                                         throw err;
                                     }
@@ -110,7 +110,7 @@ $$.flows.describe("ListFoldersTest", {
                                             throw err;
                                         }
 
-                                        dsu.getKeySSI((err, identifier) => {
+                                        dsu.getKeySSIAsString((err, identifier) => {
                                             if (err) {
                                                 throw err;
                                             }

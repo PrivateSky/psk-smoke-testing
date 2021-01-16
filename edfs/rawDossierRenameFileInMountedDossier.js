@@ -31,7 +31,7 @@ assert.callback("Rename file in mounted dossier test", (testFinishCallback) => {
                     newDossier.writeFile("testFile", "testContent", (err) => {
                         assert.true(typeof err === "undefined");
 
-                        newDossier.getKeySSI((err, newDossierKeySSI) => {
+                        newDossier.getKeySSIAsString((err, newDossierKeySSI) => {
                             if (err) {
                                 throw err;
                             }

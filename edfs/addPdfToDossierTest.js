@@ -31,7 +31,7 @@ assert.callback("Add PDF to dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                ref.getKeySSI((err, refKeySSI) => {
+                ref.getKeySSIAsString((err, refKeySSI) => {
                     if (err) {
                         throw err;
                     }

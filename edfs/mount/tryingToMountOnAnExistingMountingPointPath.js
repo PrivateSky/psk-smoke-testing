@@ -22,7 +22,7 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
                     throw err;
                 }
 
-                dossier1.getKeySSI((err, dossier1KeySSI) => {
+                dossier1.getKeySSIAsString((err, dossier1KeySSI) => {
                     if (err) {
                         throw err;
                     }
@@ -36,7 +36,7 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
                                 throw err;
                             }
 
-                            dossier2.getKeySSI((err, dossier2KeySSI) => {
+                            dossier2.getKeySSIAsString((err, dossier2KeySSI) => {
                                 if (err) {
                                     throw err;
                                 }

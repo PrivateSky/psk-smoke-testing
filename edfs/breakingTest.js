@@ -38,7 +38,7 @@ function generateWallet(webappFolder, callback) {
                 if (err) {
                     throw err;
                 }
-                appTemplate.getKeySSI((err, appTemplateKeySSI) => {
+                appTemplate.getKeySSIAsString((err, appTemplateKeySSI) => {
                     if (err) {
                         throw err;
                     }
@@ -61,7 +61,7 @@ function generateWallet(webappFolder, callback) {
                                     if (err) {
                                         throw err;
                                     }
-                                    walletTemplate.getKeySSI((err, walletTemplateKeySSI) => {
+                                    walletTemplate.getKeySSIAsString((err, walletTemplateKeySSI) => {
                                         if (err) {
                                             throw err;
                                         }
@@ -70,7 +70,7 @@ function generateWallet(webappFolder, callback) {
                                                 throw err;
                                             }
 
-                                            app.getKeySSI((err, appKeySSI) => {
+                                            app.getKeySSIAsString((err, appKeySSI) => {
                                                 if (err) {
                                                     throw err;
                                                 }
@@ -79,7 +79,7 @@ function generateWallet(webappFolder, callback) {
                                                         throw err;
                                                     }
 
-                                                    wallet.getKeySSI((err, walletKeySSI) => {
+                                                    wallet.getKeySSIAsString((err, walletKeySSI) => {
                                                         if (err) {
                                                             throw err;
                                                         }

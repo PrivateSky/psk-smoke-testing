@@ -81,7 +81,7 @@ $$.flows.describe("BatchOperationsTest", {
 
     testBatchWithMountedDSUs: function () {
         this.createDSU((dsu) => {
-            dsu.getKeySSI((err, keySSI) => {
+            dsu.getKeySSIAsString((err, keySSI) => {
                 if (err) {
                     throw err;
                 }
@@ -122,7 +122,7 @@ $$.flows.describe("BatchOperationsTest", {
                                         }
                                         assert.false(this.testDSU.hasUnanchoredChanges());
 
-                                        this.testDSU.getKeySSI((err, keySSI) => {
+                                        this.testDSU.getKeySSIAsString((err, keySSI) => {
                                             if (err) {
                                                 throw err;
                                             }
@@ -218,7 +218,7 @@ $$.flows.describe("BatchOperationsTest", {
         const openDSU = require("opendsu");
         const resolver = openDSU.loadApi("resolver");
         this.createDSU((dsu) => {
-            dsu.getKeySSI((err, keySSI) => {
+            dsu.getKeySSIAsString((err, keySSI) => {
                 if (err) {
                     throw err;
                 }
@@ -232,7 +232,7 @@ $$.flows.describe("BatchOperationsTest", {
                             throw err;
                         }
 
-                        testDSU.getKeySSI((err, keySSI) => {
+                        testDSU.getKeySSIAsString((err, keySSI) => {
                             if (err) {
                                 throw err;
                             }

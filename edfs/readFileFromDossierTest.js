@@ -32,7 +32,7 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
                     newDossier.writeFile("testFile", "testContent", (err) => {
                         assert.true(typeof err === "undefined");
 
-                        newDossier.getKeySSI((err, keySSI) => {
+                        newDossier.getKeySSIAsString((err, keySSI) => {
                             if (err) {
                                 throw err;
                             }

@@ -34,7 +34,7 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
                             throw err;
                         }
 
-                        ref.getKeySSI((err, keySSI) => {
+                        ref.getKeySSIAsString((err, keySSI) => {
                             if (err) {
                                 throw err;
                             }

@@ -28,7 +28,7 @@ assert.callback("mount - mount dossier inside a folder of a mounted dossier", (t
                         throw err;
                     }
 
-                    dossier1.getKeySSI((err, keySSI) => {
+                    dossier1.getKeySSIAsString((err, keySSI) => {
                         if (err) {
                             throw err;
                         }

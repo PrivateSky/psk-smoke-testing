@@ -44,7 +44,7 @@ function generateWallet(webappFolder, callback) {
                     throw err;
                 }
 
-                walletTemplate.getKeySSI((err, keySSI) => {
+                walletTemplate.getKeySSIAsString((err, keySSI) => {
                     if (err) {
                         throw err;
                     }

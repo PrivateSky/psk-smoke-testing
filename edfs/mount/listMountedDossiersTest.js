@@ -26,17 +26,17 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
                     if (err) {
                         throw err;
                     }
-                    dossier.getKeySSI((err, dossierKeySSI) => {
+                    dossier.getKeySSIAsString((err, dossierKeySSI) => {
                         if (err) {
                             throw err;
                         }
 
-                        anotherDossier.getKeySSI((err, anotherDossierKeySSI) => {
+                        anotherDossier.getKeySSIAsString((err, anotherDossierKeySSI) => {
                             if (err) {
                                 throw err;
                             }
 
-                            yetAnotherDossier.getKeySSI((err, yetAnotherDossierKeySSI) => {
+                            yetAnotherDossier.getKeySSIAsString((err, yetAnotherDossierKeySSI) => {
                                 if (err) {
                                     throw err;
                                 }

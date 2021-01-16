@@ -54,7 +54,7 @@ $$.flows.describe("AddRawFolder", {
                             throw err;
                         }
 
-                        this.bar.getKeySSI((err, seedSSI) => {
+                        this.bar.getKeySSIAsString((err, seedSSI) => {
                             if (err) {
                                 throw err;
                             }

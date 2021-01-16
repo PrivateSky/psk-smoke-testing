@@ -23,7 +23,7 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
                     throw err;
                 }
 
-                dossier1.getKeySSI((err, dossier1KeySSI) => {
+                dossier1.getKeySSIAsString((err, dossier1KeySSI) => {
                     if (err) {
                         throw err;
                     }
@@ -36,7 +36,7 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
                             if (err) {
                                 throw err;
                             }
-                            dossier2.getKeySSI((err, dossier2KeySSI) => {
+                            dossier2.getKeySSIAsString((err, dossier2KeySSI) => {
                                 if (err) {
                                     throw err;
                                 }
@@ -62,7 +62,7 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
                                                     throw err;
                                                 }
 
-                                                dossier3.getKeySSI((err, dossier3KeySSI) => {
+                                                dossier3.getKeySSIAsString((err, dossier3KeySSI) => {
                                                     if (err) {
                                                         throw err;
                                                     }
