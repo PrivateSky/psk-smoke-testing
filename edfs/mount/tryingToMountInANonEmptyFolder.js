@@ -16,7 +16,7 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
         const folderName = "dir";
         const subFolder = "folder";
 
-        resolver.createDSU(keySSISpace.buildSeedSSI("default" +
+        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default" +
             ""), (err, ref) => {
             if (err) {
                 throw err;
@@ -25,7 +25,7 @@ assert.callback("Trying to mount in a non-empty folder test", (testFinishCallbac
                 if (err) {
                     throw err;
                 }
-                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, raw_dossier) => {
+                resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, raw_dossier) => {
                     if (err) {
                         throw err;
                     }

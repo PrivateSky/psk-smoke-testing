@@ -27,7 +27,7 @@ function generateWallet(webappFolder, callback) {
     const resolver = openDSU.loadApi("resolver");
     const keySSISpace = openDSU.loadApi("keyssi");
 
-    resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, walletTemplate) => {
+    resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, walletTemplate) => {
         if (err) {
             throw err;
         }
@@ -36,7 +36,7 @@ function generateWallet(webappFolder, callback) {
                 throw err;
             }
 
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, wallet) => {
+            resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, wallet) => {
                 if (err) {
                     throw err;
                 }

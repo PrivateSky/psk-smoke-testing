@@ -13,7 +13,7 @@ assert.callback("Rename file in mounted dossier test", (testFinishCallback) => {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier) => {
+        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier) => {
             if (err) {
                 throw err;
             }
@@ -23,7 +23,7 @@ assert.callback("Rename file in mounted dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, newDossier) => {
+                resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, newDossier) => {
                     if (err) {
                         throw err;
                     }

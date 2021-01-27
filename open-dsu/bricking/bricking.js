@@ -17,7 +17,7 @@ assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
         assert.true(typeof bricking.putBrick === 'function');
         assert.true(typeof bricking.getMultipleBricks === 'function');
 
-        const seedSSI = keyssi.buildSeedSSI('default', 'some string', 'control', 'v0', 'hint');
+        const seedSSI = keyssi.buildTemplateSeedSSI('default', 'some string', 'control', 'v0', 'hint');
         const brickData = 'some data';
 
         bricking.putBrick(seedSSI, brickData, null, (err, brickHash) => {
@@ -32,7 +32,7 @@ assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
 
                 assert.true(brickHash === hash);
 
-                const haskLinkSSI = keyssi.buildHashLinkSSI('default', brickHash);
+                const haskLinkSSI = keyssi.buildTemplateHashLinkSSI('default', brickHash);
 
                 bricking.getBrick(haskLinkSSI, null, (err, data) => {
                     if (err) {

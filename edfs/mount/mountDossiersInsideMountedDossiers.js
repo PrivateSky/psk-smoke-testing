@@ -13,12 +13,12 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, rawDossier) => {
+        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, rawDossier) => {
             if (err) {
                 throw err;
             }
 
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier1) => {
+            resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier1) => {
                 if (err) {
                     throw err;
                 }
@@ -32,7 +32,7 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
                             throw err;
                         }
 
-                        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier2) => {
+                        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier2) => {
                             if (err) {
                                 throw err;
                             }
@@ -57,7 +57,7 @@ assert.callback("mount - mount multiple dossiers into other mounted dossiers", (
                                             }
                                             assert.true(content[2].path === 'dossier2');
 
-                                            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier3) => {
+                                            resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier3) => {
                                                 if (err) {
                                                     throw err;
                                                 }

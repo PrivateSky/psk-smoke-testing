@@ -12,7 +12,7 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, ref) => {
+        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -22,7 +22,7 @@ assert.callback("Test list files from a mount point", (testFinishCallback) => {
                     throw err;
                 }
 
-                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, raw_dossier) => {
+                resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, raw_dossier) => {
 
                     if (err) {
                         throw err;

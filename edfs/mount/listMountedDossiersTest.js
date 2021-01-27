@@ -12,17 +12,17 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, dossier) => {
+        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier) => {
             if (err) {
                 throw err;
             }
 
-            resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, anotherDossier) => {
+            resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, anotherDossier) => {
                 if (err) {
                     throw err;
                 }
 
-                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, yetAnotherDossier) => {
+                resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, yetAnotherDossier) => {
                     if (err) {
                         throw err;
                     }
@@ -47,7 +47,7 @@ assert.callback("List mounted dossiers test", (testFinishCallback) => {
                                     seed: anotherDossierKeySSI
                                 }, {path: "/temp/dossier1/folder", name: "dossier3", seed: yetAnotherDossierKeySSI}];
 
-                                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, raw_dossier) => {
+                                resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, raw_dossier) => {
                                     if (err) {
                                         throw err;
                                     }

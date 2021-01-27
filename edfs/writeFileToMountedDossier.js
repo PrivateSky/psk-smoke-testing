@@ -13,7 +13,7 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, ref) => {
+        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -23,7 +23,7 @@ assert.callback("rawDossier - write file into a mounted dossier", (testFinishCal
                     throw err;
                 }
 
-                resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, newDossier) => {
+                resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, newDossier) => {
                     if (err) {
                         throw err;
                     }

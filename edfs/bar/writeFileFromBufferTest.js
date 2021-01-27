@@ -27,7 +27,7 @@ $$.flows.describe('WriteFileFromBuffer', {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildSeedSSI("default"), (err, bar) => {
+        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, bar) => {
             if (err) {
                 throw err;
             }
