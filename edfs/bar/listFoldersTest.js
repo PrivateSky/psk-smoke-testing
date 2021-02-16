@@ -162,6 +162,6 @@ double_check.createTestFolder("list_files_test_folder", (err, testFolder) => {
     filePath = path.join(testFolder, "test.txt");
     assert.callback("List folders", (callback) => {
         $$.flows.start("ListFoldersTest", "start", callback);
-    //}, 3000);
-    }, 3000 * 1000);
+    }, 3000);
+    // }, 3000 * 1000);
 });
