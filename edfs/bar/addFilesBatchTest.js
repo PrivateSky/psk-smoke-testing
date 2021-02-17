@@ -42,7 +42,7 @@ $$.flows.describe("AddFilesBatch", {
             }
 
             this.bar = bar;
-            this.bar.addFiles(files, 'filesFolder', {batch: true}, (err, result) => {
+            this.bar.addFiles(files, 'filesFolder', {embedded: true}, (err, result) => {
                 if (err) {
                     throw err;
                 }
@@ -85,7 +85,7 @@ double_check.createTestFolder("bar_test_folder", (err, testFolder) => {
     folderPath = path.join(testFolder, "fld");
     files = ["fld/a.txt", "fld/b.txt", "fld/c.txt"].map(file => path.join(testFolder, file));
     filePath = path.join(testFolder, "test.txt");
-    assert.callback("Add files (batch: true) to bar test", (callback) => {
+    assert.callback("Add files (embedded: true) to bar test", (callback) => {
         $$.flows.start("AddFilesBatch", "start", callback);
     }, 3000);
 });
