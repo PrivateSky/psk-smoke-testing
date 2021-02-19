@@ -32,16 +32,16 @@ assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
 
                 assert.true(brickHash === hash);
 
-                const haskLinkSSI = keyssi.buildTemplateHashLinkSSI('default', brickHash);
+                const hashLinkSSI = keyssi.createHashLinkSSI('default', brickHash);
 
-                bricking.getBrick(haskLinkSSI, null, (err, data) => {
+                bricking.getBrick(hashLinkSSI, null, (err, data) => {
                     if (err) {
                         throw err;
                     }
 
                     assert.true(data.toString() === brickData);
 
-                    bricking.getMultipleBricks([haskLinkSSI], null, (err, data) => {
+                    bricking.getMultipleBricks([hashLinkSSI], null, (err, data) => {
                         if (err) {
                             throw err;
                         }
