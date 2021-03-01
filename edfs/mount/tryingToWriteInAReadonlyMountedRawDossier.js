@@ -14,7 +14,7 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
 
         const fileName = 'simpleFile';
         const folderName = "/dir";
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, ref) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -22,7 +22,7 @@ assert.callback("Trying to write in a readonly mounted RawDossier", (testFinishC
                 if (err) {
                     throw err;
                 }
-                resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, raw_dossier) => {
+                resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, raw_dossier) => {
                     if (err) {
                         throw err;
                     }

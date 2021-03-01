@@ -34,7 +34,7 @@ $$.flows.describe("AddRawFolder", {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, bar) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, bar) => {
             if (err) {
                 throw err;
             }

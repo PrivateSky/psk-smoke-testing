@@ -14,7 +14,7 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, dossier) => {
             if (err) {
                 throw err;
             }
@@ -24,7 +24,7 @@ assert.callback("Read file from dossier test", (testFinishCallback) => {
                     throw err;
                 }
 
-                resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, newDossier) => {
+                resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, newDossier) => {
                     if (err) {
                         throw err;
                     }

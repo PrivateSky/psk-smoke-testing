@@ -28,7 +28,7 @@ $$.flows.describe("TestFlow", {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, rawDossier) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, rawDossier) => {
             if (err) {
                 throw err;
             }

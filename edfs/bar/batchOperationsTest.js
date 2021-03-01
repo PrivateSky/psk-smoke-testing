@@ -36,7 +36,7 @@ $$.flows.describe("BatchOperationsTest", {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dsu) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, dsu) => {
             if (err) {
                 throw err;
             }

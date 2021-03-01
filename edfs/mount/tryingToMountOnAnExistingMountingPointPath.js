@@ -12,12 +12,12 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
         const keySSISpace = openDSU.loadApi('keyssi');
         const resolver = openDSU.loadApi('resolver');
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, rawDossier) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, rawDossier) => {
             if (err) {
                 throw err;
             }
 
-            resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier1) => {
+            resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, dossier1) => {
                 if (err) {
                     throw err;
                 }
@@ -31,7 +31,7 @@ assert.callback("mount - trying to mount into an existing mounting point path", 
                             throw err;
                         }
 
-                        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier2) => {
+                        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, dossier2) => {
                             if (err) {
                                 throw err;
                             }

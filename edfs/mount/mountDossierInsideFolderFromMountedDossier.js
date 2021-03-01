@@ -13,12 +13,12 @@ assert.callback("mount - mount dossier inside a folder of a mounted dossier", (t
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, rawDossier) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, rawDossier) => {
             if (err) {
                 throw err;
             }
 
-            resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier1) => {
+            resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, dossier1) => {
                 if (err) {
                     throw err;
                 }

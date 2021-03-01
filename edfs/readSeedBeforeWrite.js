@@ -13,7 +13,7 @@ assert.callback("We should be able to get a seed of a bar before finish writing?
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, bar) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, bar) => {
             if (err) {
                 throw err;
             }

@@ -28,7 +28,7 @@ double_check.createTestFolder("delay_anchoring_test_folder", (err, testFolder) =
                 }
             }
 
-            resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), options, (err, bar) => {
+            resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), options, (err, bar) => {
                 if (err) {
                     throw err;
                 }

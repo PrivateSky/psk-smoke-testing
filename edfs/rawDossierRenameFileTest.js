@@ -13,7 +13,7 @@ assert.callback("Rename file in dossier", (testFinishCallback) => {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, dossier) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, dossier) => {
             if (err) {
                 throw err;
             }

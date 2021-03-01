@@ -13,7 +13,7 @@ assert.callback("Missing first letter from file name", (testFinishCallback) => {
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, ref) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, ref) => {
             if (err) {
                 throw err;
             }

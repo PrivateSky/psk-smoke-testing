@@ -13,7 +13,7 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, ref) => {
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, ref) => {
             if (err) {
                 throw err;
             }
@@ -22,7 +22,7 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
                     throw err;
                 }
 
-                resolver.createDSU(keySSISpace.buildTemplateSeedSSI("default"), (err, raw_dossier) => {
+                resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, raw_dossier) => {
                     if (err) {
                         throw err;
                     }

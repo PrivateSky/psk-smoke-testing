@@ -17,7 +17,7 @@ assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
         assert.true(typeof bricking.putBrick === 'function');
         assert.true(typeof bricking.getMultipleBricks === 'function');
 
-        const seedSSI = keyssi.buildTemplateSeedSSI('default', 'some string', 'control', 'v0', 'hint');
+        const seedSSI = keyssi.createTemplateSeedSSI('default', 'some string', 'control', 'v0', 'hint');
         const brickData = 'some data';
 
         bricking.putBrick(seedSSI, brickData, null, (err, brickHash) => {
@@ -25,30 +25,27 @@ assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
                 throw err;
             }
 
-            crypto.hash(seedSSI, brickData, (err, hash) => {
+            const hashFn = crypto.getCryptoFunctionForKeySSI(seedSSI, "hash");
+            const hash = hashFn(brickData);
+
+            assert.true(brickHash === hash);
+
+            const hashLinkSSI = keyssi.createHashLinkSSI('default', brickHash);
+
+            bricking.getBrick(hashLinkSSI, null, (err, data) => {
                 if (err) {
                     throw err;
                 }
 
-                assert.true(brickHash === hash);
+                assert.true(data.toString() === brickData);
 
-                const hashLinkSSI = keyssi.createHashLinkSSI('default', brickHash);
-
-                bricking.getBrick(hashLinkSSI, null, (err, data) => {
+                bricking.getMultipleBricks([hashLinkSSI], null, (err, data) => {
                     if (err) {
                         throw err;
                     }
 
                     assert.true(data.toString() === brickData);
-
-                    bricking.getMultipleBricks([hashLinkSSI], null, (err, data) => {
-                        if (err) {
-                            throw err;
-                        }
-
-                        assert.true(data.toString() === brickData);
-                        callback();
-                    });
+                    callback();
                 });
             });
         });
