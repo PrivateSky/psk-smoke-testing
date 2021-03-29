@@ -3,9 +3,11 @@ require('../../../../psknode/bundles/testsRuntime');
 const double_check = require("double-check");
 const assert = double_check.assert;
 
-let filePath = "/fld/somePath";
 const tir = require("../../../../psknode/tests/util/tir.js");
 require("callflow").initialise();
+const openDSU = require("opendsu");
+const resolver = openDSU.loadApi("resolver");
+const keySSISpace = openDSU.loadApi("keyssi");
 
 $$.flows.describe("CreateEmptyFile", {
     start: function (callback) {
@@ -19,32 +21,55 @@ $$.flows.describe("CreateEmptyFile", {
     },
 
     createDSU: function () {
-        const openDSU = require("opendsu");
-        const resolver = openDSU.loadApi("resolver");
-        const keySSISpace = openDSU.loadApi("keyssi");
 
+        console.log("Started creating DSU");
         resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, dsu) => {
             if (err) {
                 throw err;
             }
 
-            this.dsu = dsu;
-            this.dsu.createFile(filePath, (err, result) => {
+            console.log("Started creating file /fld/somePath");
+            dsu.writeFile("/fld/somePath", (err, result) => {
                 if (err) {
                     throw err;
                 }
-                this.runAssertions();
+                console.log("created file /fld/somePath")
+                console.log("Started creating file /fld/somePath1");
+                dsu.writeFile("/fld/somePath1", (err, result) => {
+                    if (err) {
+                        throw err;
+                    }
+
+                    // console.log("created file /fld/somePath1")
+                    this.createDSUCopy(dsu);
+                })
             })
         })
     },
-    runAssertions: function () {
-        this.dsu.listFiles('/fld', (err, files) => {
+
+    createDSUCopy: function(dsu){
+        dsu.getKeySSIAsObject((err, keySSI) => {
+            if (err) {
+                console.log(err);
+            }
+            resolver.loadDSU(keySSI,(err, copyDSU) => {
+                if (err) {
+                    console.log(err);
+                }
+
+                this.runAssertions(copyDSU);
+            });
+        });
+    },
+    runAssertions: function (dsu) {
+       dsu.listFiles('/fld', (err, files) => {
             if (err) {
                 throw err;
             }
 
-            assert.true(files.length === 1);
+            assert.true(files.length === 2);
             assert.true(files.indexOf("somePath") !== -1);
+            assert.true(files.indexOf("somePath1") !== -1);
 
             this.callback();
         });
