@@ -28,25 +28,41 @@ $$.flows.describe("CloneFolder", {
                 throw err;
             }
 
-            this.dsu = dsu;
-            this.addFiles();
+            this.addFiles(dsu);
         })
     },
 
-    addFiles: function () {
-        this.dsu.writeFile("fld/file1", "some_data", (err, result) => {
+    addFiles: function (dsu) {
+        dsu.writeFile("fld/file1", "some_data", (err, result) => {
             if (err) {
                 throw err;
             }
-            this.dsu.writeFile("fld/file2", "some_other_data", (err, result) => {
+            dsu.writeFile("fld/file2", "some_other_data", (err, result) => {
                 if (err) {
                     throw err;
                 }
 
-                this.dsu.cloneFolder("fld", "fld2", () => {
-                    this.loadDSU();
+                dsu.cloneFolder("fld", "fld2", () => {
+                    this.mountDSU(dsu);
                 });
             })
+        })
+    },
+
+    mountDSU: function (mountedDSU) {
+        const resolver = openDSU.loadApi("resolver");
+        const keySSISpace = openDSU.loadApi("keyssi");
+        resolver.createDSU(keySSISpace.createTemplateSeedSSI("default"), (err, dsu) => {
+            if (err) {
+                throw err;
+            }
+
+            mountedDSU.getKeySSIAsString((err, keySSI) => {
+                dsu.mount("root", keySSI, () => {
+                    this.dsu = dsu;
+                    this.loadDSU();
+                });
+            });
         })
     },
 
@@ -60,7 +76,7 @@ $$.flows.describe("CloneFolder", {
     },
 
     runAssertions: function (dsu) {
-        dsu.listFiles('fld2', (err, files) => {
+        dsu.listFiles('root/fld2', (err, files) => {
             if (err) {
                 throw err;
             }
@@ -69,7 +85,7 @@ $$.flows.describe("CloneFolder", {
             assert.true(files.indexOf('file1') !== -1);
             assert.true(files.indexOf('file2') !== -1);
 
-            dsu.readFile("fld2/file1", (err, data) => {
+            dsu.readFile("root/fld2/file1", (err, data) => {
                 assert.true(data.toString(), "some_data");
                 this.callback();
             });
