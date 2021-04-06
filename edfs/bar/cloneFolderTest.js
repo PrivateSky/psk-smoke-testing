@@ -81,14 +81,18 @@ $$.flows.describe("CloneFolder", {
                 throw err;
             }
 
-            assert.true(files.length === 2);
+            dsu.listFiles('root/fld', (err, initialFiles) => {
+            assert.true(files.length === initialFiles.length);
             assert.true(files.indexOf('file1') !== -1);
+            assert.true(initialFiles.indexOf('file1') !== -1);
             assert.true(files.indexOf('file2') !== -1);
+            assert.true(initialFiles.indexOf('file2') !== -1);
 
             dsu.readFile("root/fld2/file1", (err, data) => {
                 assert.true(data.toString(), "some_data");
                 this.callback();
             });
+        });
         });
     }
 });
