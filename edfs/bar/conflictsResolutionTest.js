@@ -28,84 +28,6 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
         let secondaryDSUKeySSI;
         let thirdDSUKeySSI;
 
-        //let dsuKeySSI;
-        //let dsu1;
-        //let dsu2;
-
-        //const promisifyDSUs = (method, ...dsus) => {
-        //const promisifiedMethods = [];
-        //for (const dsu of dsus) {
-        //promisifiedMethods.push(util.promisify(dsu[method]));
-        //}
-
-        //return promisifiedMethods;
-        //}
-
-        //const sleep = () => {
-        //return new Promise((resolve) => {
-        //setTimeout(resolve, 1000);
-        //})
-        //}
-
-
-        //const triggerConflict = async () => {
-        //const openDSU = require("opendsu");
-        //const resolver = openDSU.loadApi("resolver");
-        //const keySSISpace = openDSU.loadApi("keyssi");
-
-        //const [writeFile1, writeFile2] = promisifyDSUs('writeFile', dsu1, dsu2);
-        //const [createFolder1, createFolder2] = promisifyDSUs('createFolder', dsu1, dsu2);
-        //const [deleteFile] = promisifyDSUs('delete', dsu1);
-        //const [renameFile] = promisifyDSUs('rename', dsu2);
-
-        //await deleteFile('a.txt');
-        //await createFolder1('folder/subfolder');
-        //await writeFile1('folder/subfolder/b.txt', 'Test');
-        //await sleep();
-        //console.log('------------------------');
-        ////await renameFile('a.txt', 'b.txt');
-        //await writeFile1('a.txt', 'text 1');
-        //try {
-        //await writeFile2('a.txt', 'text 2');
-        //} catch (e) {
-        //console.log(e.conflicts);
-        //}
-        //callback();
-
-        ////console.log('----------------writing first file');
-        ////await writeFile1('a.txt', 'First text', {encrypt: false});
-        ////console.log('----------------writing second file');
-        ////await writeFile2('a.txt', 'Second text', {encrypt: false});
-
-        ////resolver.invalidateDSUCache(dsuKeySSI);
-
-        ////console.log('-------------loading')
-        ////resolver.loadDSU(dsuKeySSI, (err, dsu) => {
-        ////dsu.readFile('a.txt', (err, data) => {
-        ////console.log(data.toString());
-        ////callback();
-        ////})
-        ////})
-        //}
-
-        //const loadSescondDSU = (keySSI) => {
-        //tir.launchVirtualMQNode(10, testFolder, (err, port) => {
-        //assert.true(err === null || typeof err === "undefined", "Failed to create server");
-
-        //const openDSU = require("opendsu");
-        //const resolver = openDSU.loadApi("resolver");
-        //const keySSISpace = openDSU.loadApi("keyssi");
-
-        //resolver.loadDSU(keySSI, (err, bar) => {
-        //if (err) {
-        //throw err;
-        //}
-        //dsu2 = bar;
-        //triggerConflict();
-        //})
-        //});
-        //}
-
         // Bootstrap test
         tir.launchVirtualMQNode(10, testFolder, async (err, port) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
@@ -182,7 +104,12 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
 
         const runTests = async () => {
             await testOvewriteFileConflict();
-            //await testNewlyAddedFilesAreMerged();
+            await testNewlyAddedFilesAreMerged();
+            await testRemoteDeleteConflict();
+            await testOvewriteFileConflictWhenRenamingFile();
+            await testDeleteFileConflict();
+            await testChangesAreMergedWhenWorkingWithMountedDSU()
+            //await testConflictsWhenWorkingWithMountedDSU();
         };
 
         const testOvewriteFileConflict = async () => {
@@ -197,28 +124,233 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                 conflictsError = e.conflicts;
             }
 
+            /*
+             * conflictsError expected value:
+             *  {
+             *      '/m3.txt': {
+             *          error: 'LOCAL_OVERWRITE',
+             *          message: 'Path /m3.txt will overwrite a previously anchored file or directory',
+             *          remoteHashLinks: [ HashLinkSSI, ... ]
+             *      }
+             *  }
+             */
+
             assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
             assert.true(typeof conflictsError['/m3.txt'] !== 'undefined');
             assert.true(conflictsError['/m3.txt'].error === 'LOCAL_OVERWRITE');
-            assert.true(Array.isArray(conflictsError['/m3.txt'].remoteHashLinks));
+            assert.true(Array.isArray(conflictsError['/m3.txt'].remoteHashLinks) && conflictsError['/m3.txt'].remoteHashLinks.length > 0);
         };
 
         const testNewlyAddedFilesAreMerged = async () => {
-            console.log('--------vlad');
             let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
             await user1DSU.writeFile('m4.txt', 'm4.txt - Wrote by first user');
+
+            // This should merge the m4.txt file from above
             await user2DSU.writeFile('m5.txt', 'm5.txt - Wrote by second user');
 
-            let data = await user1DSU.listFiles('/');
-            console.log(data);
-            data = await user2DSU.listFiles('/');
-            console.log(data);
+            // Check User1 file list
+            let expectedFiles = [
+                'dsu-metadata-log',
+                'm1.txt',
+                'm2.txt',
+                'mfolder/mf1.txt',
+                'mfolder/mf2.txt',
+                'mfolder/msub-folder/msf1.txt',
+                'mfolder/msub-folder/msf2.txt',
+                'm3.txt',
+                'm4.txt',
+            ];
+            let actualFiles = await user1DSU.listFiles('/');
+            assert.true(actualFiles.length === expectedFiles.length, 'user1DSU should have the correct number of files');
+            assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user1DSU should have the correct files');
 
-            //assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
-            //assert.true(typeof conflictsError['/m3.txt'] !== 'undefined');
-            //assert.true(conflictsError['/m3.txt'].error === 'LOCAL_OVERWRITE');
-            //assert.true(Array.isArray(conflictsError['/m3.txt'].remoteHashLinks));
+            // Check User2 file list. We're checking for the 'm4.txt' file to be present
+            actualFiles = await user2DSU.listFiles('/');
+            expectedFiles = [
+                'dsu-metadata-log',
+                'm1.txt',
+                'm2.txt',
+                'mfolder/mf1.txt',
+                'mfolder/mf2.txt',
+                'mfolder/msub-folder/msf1.txt',
+                'mfolder/msub-folder/msf2.txt',
+                'm3.txt',
+                'm4.txt',
+                'm5.txt',
+            ];
+            assert.true(actualFiles.length === expectedFiles.length, 'user2DSU should have the correct number of files');
+            assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user2DSU should have the correct files');
         };
+
+        const testRemoteDeleteConflict  = async () => {
+            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+
+            await user1DSU.delete('m5.txt');
+
+            let conflictsError;
+            try {
+                // This should fail since the m5.txt file was just deleted
+                await user2DSU.rename('m5.txt', 'm6.txt');
+            } catch (e) {
+                conflictsError = e.conflicts;
+            }
+
+            /*
+             * conflictsError expected value:
+             *  {
+             *      '/m5.txt': {
+             *          error: 'REMOTE_DELETE',
+             *          message: 'Unable to copy /m5.txt to /m6.txt. Source was previously deleted'
+             *      }
+             *  }
+             */
+
+            assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
+            assert.true(typeof conflictsError['/m5.txt'] !== 'undefined');
+            assert.true(conflictsError['/m5.txt'].error === 'REMOTE_DELETE');
+        }
+
+        const testOvewriteFileConflictWhenRenamingFile  = async () => {
+            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+
+            await user1DSU.writeFile('m6.txt', 'm6.txt content');
+
+            let conflictsError;
+            try {
+                // This should fail since it would overwrite the m6.txt
+                await user2DSU.rename('m3.txt', 'm6.txt');
+            } catch (e) {
+                conflictsError = e.conflicts;
+            }
+
+            /*
+             * conflictsError expected value:
+             *  {
+             *      '/m6.txt': {
+             *          error: 'LOCAL_OVERWRITE',
+             *          message: 'Unable to copy /m3.txt to /m6.txt. The destination path will overwrite a previously anchored file or directory',
+             *          remoteHashLinks: [ HashLinkSSI, ... ]
+             *      }
+             *  }
+             */
+
+            assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
+            assert.true(typeof conflictsError['/m6.txt'] !== 'undefined');
+            assert.true(conflictsError['/m6.txt'].error === 'LOCAL_OVERWRITE');
+            assert.true(Array.isArray(conflictsError['/m6.txt'].remoteHashLinks) && conflictsError['/m6.txt'].remoteHashLinks.length > 0);
+        }
+
+        const testDeleteFileConflict = async () => {
+            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+
+            await user1DSU.writeFile('m6.txt', 'm6.txt file updated');
+
+            let conflictsError;
+            try {
+                // This should fail since it would delete the newly updated m6.txt
+                await user2DSU.delete('m6.txt');
+            } catch (e) {
+                conflictsError = e.conflicts;
+            }
+
+            /*
+             * conflictsError expected value:
+             *  {
+             *      '/m6.txt': {
+             *          error: 'LOCAL_DELETE',
+             *          message: 'Unable to delete /m6.txt. This will delete a previously anchored file.',
+             *      }
+             *  }
+             */
+
+            assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
+            assert.true(typeof conflictsError['/m6.txt'] !== 'undefined');
+            assert.true(conflictsError['/m6.txt'].error === 'LOCAL_DELETE');
+        }
+
+        /**
+         * @TODO: conflict detection when user1 mounts dsu in /path, and second user tries to write in /path
+         */
+        const testChangesAreMergedWhenWorkingWithMountedDSU = async () => {
+            await mainDSU.mount('/second-dsu', secondaryDSUKeySSI);
+
+            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+
+            await user1DSU.beginBatch();
+            await user1DSU.writeFile('m6.txt', 'New file added to main DSU');
+            await user1DSU.delete('second-dsu/s2.txt');
+            await user1DSU.commitBatch();
+
+            resolver.invalidateDSUCache(secondaryDSUKeySSI);
+
+            await user2DSU.beginBatch();
+            await user2DSU.writeFile('m7.txt', 'm7.txt content');
+            await user2DSU.delete('second-dsu/sfolder/sf2.txt');
+            await user2DSU.writeFile('second-dsu/sfolder/sf3.txt', 'New file added to seconday DSU');
+            await user2DSU.commitBatch();
+
+            // Reload DSUs
+            [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+
+            let expectedFiles =[
+                'dsu-metadata-log',
+                'm1.txt',
+                'm2.txt',
+                'mfolder/mf1.txt',
+                'mfolder/mf2.txt',
+                'mfolder/msub-folder/msf1.txt',
+                'mfolder/msub-folder/msf2.txt',
+                'm3.txt',
+                'm4.txt',
+                'm6.txt',
+                'manifest',
+                'm7.txt',
+                'second-dsu/dsu-metadata-log',
+                'second-dsu/s1.txt',
+                'second-dsu/sfolder/sf1.txt',
+                'second-dsu/sfolder/ssub-folder/ssf1.txt',
+                'second-dsu/sfolder/ssub-folder/ssf2.txt',
+                'second-dsu/sfolder/sf3.txt'
+            ];
+            let actualFiles = await user1DSU.listFiles('/');
+            assert.true(actualFiles.length === expectedFiles.length, 'user1DSU should have the correct number of files');
+            assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user1DSU should have the correct files');
+
+            actualFiles = await user2DSU.listFiles('/');
+            assert.true(actualFiles.length === expectedFiles.length, 'user2DSU should have the correct number of files');
+            assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user2DSU should have the correct files');
+        }
+
+        /**
+         * @TODO: broken
+         * Should find a way to disable caching when testing this
+         */
+        const testConflictsWhenWorkingWithMountedDSU = async () => {
+            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+
+            await user1DSU.listFiles('/');
+            await user2DSU.listFiles('/');
+
+            await user1DSU.beginBatch();
+            await user1DSU.delete('m6.txt');
+            await user1DSU.delete('second-dsu/sfolder/sf3.txt');
+            await user1DSU.writeFile('second-dsu/sfolder/sf4.txt', 'New file added to secondary DSU');
+            await user1DSU.commitBatch();
+
+            await user2DSU.beginBatch();
+            await user2DSU.rename('m6.txt', 'm66.txt');
+            await user2DSU.delete('second-dsu/sfolder/sf3.txt');
+            await user2DSU.writeFile('second-dsu/sfolder/sf4.txt', 'New file added to secondary DSU');
+
+            let conflictsError;
+            try {
+                await user2DSU.commitBatch();
+            } catch (e) {
+                conflictsError = e.previousError.conflicts;
+                console.error(e)
+            }
+            console.log(conflictsError)
+        }
 
 
         // Helper functions
@@ -287,8 +419,12 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
          */
         const loadDSUAs2Users = async (keySSI) => {
             resolver.invalidateDSUCache(keySSI);
+            resolver.invalidateDSUCache(secondaryDSUKeySSI);
+            resolver.invalidateDSUCache(thirdDSUKeySSI);
             const user1DSU = await loadDSU(keySSI);
             resolver.invalidateDSUCache(keySSI);
+            resolver.invalidateDSUCache(secondaryDSUKeySSI);
+            resolver.invalidateDSUCache(thirdDSUKeySSI);
             const user2DSU = await loadDSU(keySSI);
             promisifyDSU(user1DSU, user2DSU);
 
