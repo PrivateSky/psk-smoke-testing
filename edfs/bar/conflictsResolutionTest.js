@@ -109,11 +109,16 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             await testOvewriteFileConflictWhenRenamingFile();
             await testDeleteFileConflict();
             await testChangesAreMergedWhenWorkingWithMountedDSU()
-            //await testConflictsWhenWorkingWithMountedDSU();
+            await testNonBatchAnchoringRaceIsSuccessful();
+            //await testBatchAnchoringRaceIsSuccessful();
         };
 
+        /**
+         * Test that overwriting a file which has been freshly anchored
+         * results in a conflict error
+         */
         const testOvewriteFileConflict = async () => {
-            const [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+            const [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
             await user1DSU.writeFile('m3.txt', 'm3.txt - Wrote by first user');
 
             let conflictsError;
@@ -141,8 +146,12 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             assert.true(Array.isArray(conflictsError['/m3.txt'].remoteHashLinks) && conflictsError['/m3.txt'].remoteHashLinks.length > 0);
         };
 
+        /**
+         * Test that new files added to the same DSU
+         * are merged with the recent anchoring result
+         */
         const testNewlyAddedFilesAreMerged = async () => {
-            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+            let [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
             await user1DSU.writeFile('m4.txt', 'm4.txt - Wrote by first user');
 
             // This should merge the m4.txt file from above
@@ -182,8 +191,12 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user2DSU should have the correct files');
         };
 
+        /**
+         * Test that renaming a file which has been freshly deleted
+         * results in a conflict error
+         */
         const testRemoteDeleteConflict  = async () => {
-            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+            let [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
 
             await user1DSU.delete('m5.txt');
 
@@ -210,8 +223,12 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             assert.true(conflictsError['/m5.txt'].error === 'REMOTE_DELETE');
         }
 
+        /**
+         * Test that renaming a file with the destination the same
+         * as a freshly anchored file results in conflict error
+         */
         const testOvewriteFileConflictWhenRenamingFile  = async () => {
-            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+            let [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
 
             await user1DSU.writeFile('m6.txt', 'm6.txt content');
 
@@ -240,8 +257,12 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             assert.true(Array.isArray(conflictsError['/m6.txt'].remoteHashLinks) && conflictsError['/m6.txt'].remoteHashLinks.length > 0);
         }
 
+        /**
+         * Test that deleting a freshly anchored file
+         * results in conflict error
+         */
         const testDeleteFileConflict = async () => {
-            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+            let [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
 
             await user1DSU.writeFile('m6.txt', 'm6.txt file updated');
 
@@ -269,28 +290,55 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
         }
 
         /**
-         * @TODO: conflict detection when user1 mounts dsu in /path, and second user tries to write in /path
+         * Test that no conflicts occur when woking on the same
+         * DSU with other mounted DSUs
          */
         const testChangesAreMergedWhenWorkingWithMountedDSU = async () => {
             await mainDSU.mount('/second-dsu', secondaryDSUKeySSI);
 
-            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+            let [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
 
+            // Begin batches for both users
             await user1DSU.beginBatch();
+            await user2DSU.beginBatch();
+            // This causes the second DSU to be mounted for user1
+            await user1DSU.listFiles('/');
+
+            // Clear the DSU cache so that the second user will open another instance of
+            // the second dsu
+            resolver.invalidateDSUCache(secondaryDSUKeySSI);
+            // This causes the second DSU to be mounted for user2
+            await user2DSU.listFiles('/');
+
+            // Batch operations for user 1
             await user1DSU.writeFile('m6.txt', 'New file added to main DSU');
             await user1DSU.delete('second-dsu/s2.txt');
-            await user1DSU.commitBatch();
 
-            resolver.invalidateDSUCache(secondaryDSUKeySSI);
-
-            await user2DSU.beginBatch();
+            // Batch operations for user 2
             await user2DSU.writeFile('m7.txt', 'm7.txt content');
             await user2DSU.delete('second-dsu/sfolder/sf2.txt');
             await user2DSU.writeFile('second-dsu/sfolder/sf3.txt', 'New file added to seconday DSU');
-            await user2DSU.commitBatch();
+
+            // Commit both batches concurrently
+            const commitPromise = Promise.all([
+                // Delay the first commit by a few milliseconds
+                new Promise((resolve, reject) => {
+                    setTimeout(async () => {
+                        try {
+                            await user1DSU.commitBatch();
+                        } catch (e) {
+                            return reject(e);
+                        }
+                        resolve();
+                    }, randomInt(10, 25));
+                }),
+
+                user2DSU.commitBatch()
+            ]);
+            await commitPromise;
 
             // Reload DSUs
-            [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+            [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
 
             let expectedFiles =[
                 'dsu-metadata-log',
@@ -322,34 +370,71 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
         }
 
         /**
-         * @TODO: broken
-         * Should find a way to disable caching when testing this
+         * Fire multiple write operations concurrently
+         * and test that no conflicts occur
          */
-        const testConflictsWhenWorkingWithMountedDSU = async () => {
-            let [user1DSU, user2DSU] = await loadDSUAs2Users(mainDSUKeySSI);
+        const testNonBatchAnchoringRaceIsSuccessful = async () => {
+            const usersCount = 5;
+            const sameDSUInstances = await loadDSUAsMultipleUsers(mainDSUKeySSI, usersCount);
 
-            await user1DSU.listFiles('/');
-            await user2DSU.listFiles('/');
+            const currentFiles = await sameDSUInstances[0].listFiles('/');
 
-            await user1DSU.beginBatch();
-            await user1DSU.delete('m6.txt');
-            await user1DSU.delete('second-dsu/sfolder/sf3.txt');
-            await user1DSU.writeFile('second-dsu/sfolder/sf4.txt', 'New file added to secondary DSU');
-            await user1DSU.commitBatch();
+            const operations = [
+                ['writeFile', 'non-batch-race%s.txt', 'non-batch-race%s.txt content'],
+                ['writeFile', 'non-batch-race-to-be-deleted%s.txt', 'non-batch-race-to-be-deleted%s.txt content'],
+                ['writeFile', 'non-batch-race-folder/%s.txt'],
+                ['rename', 'non-batch-race%s.txt', 'renamed-non-batch-race%s.txt'],
+                ['delete', 'non-batch-race-to-be-deleted%s.txt'],
+            ]
 
-            await user2DSU.beginBatch();
-            await user2DSU.rename('m6.txt', 'm66.txt');
-            await user2DSU.delete('second-dsu/sfolder/sf3.txt');
-            await user2DSU.writeFile('second-dsu/sfolder/sf4.txt', 'New file added to secondary DSU');
+            let anchorPromise = Promise.resolve();
+            for (let i = 0; i < usersCount; i++) {
+                for (let j = 0; j < operations.length; j++) {
+                    const [method, ...args] = operations[j].map((item, index) => {
+                        if (!index) {
+                            return item;
+                        }
 
-            let conflictsError;
-            try {
-                await user2DSU.commitBatch();
-            } catch (e) {
-                conflictsError = e.previousError.conflicts;
-                console.error(e)
+                        return item.replace('%s', i + 1);
+                    });
+
+                    const dsu = sameDSUInstances[i];
+                    // There's a bug in the APIHub: The `anchorId` file is not locked for writing
+                    // leading to overwrites, thus we need to simulate a delay between writings
+                    // The test won't be as effective but it will still cover out of sync writes
+                    anchorPromise = anchorPromise.then(() => {
+                        return new Promise((resolve, reject) => {
+                            setTimeout(async () => {
+                                try {
+                                    await dsu[method](...args);
+                                    resolve();
+                                } catch (e) {
+                                    reject(e);
+                                }
+                            }, randomInt(10, 50));
+                        });
+                    })
+                }
             }
-            console.log(conflictsError)
+
+            await anchorPromise;
+
+            // Reload DSUJ
+            resolver.invalidateDSUCache(mainDSUKeySSI);
+            const dsu = await loadDSU(mainDSUKeySSI);
+            promisifyDSU(dsu);
+            const files = await dsu.listFiles('/');
+
+            // Run assertions
+            const expectedFiles = currentFiles;
+            for (let i = 1; i <= usersCount; i++) {
+                expectedFiles.push(`non-batch-race-folder/${i}.txt`);
+                expectedFiles.push(`renamed-non-batch-race${i}.txt`);
+            }
+
+            files.sort();
+            expectedFiles.sort();
+            assert.true(JSON.stringify(files) === JSON.stringify(expectedFiles), 'Non batch raced anchoring DSU should have the correct files');
         }
 
 
@@ -415,23 +500,33 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
         }
 
         /**
-         * Simulate two distinct users loading the same DSU
+         * Simulate distinct users loading the same DSU
+         * @param {string} keySSI
+         * @param {Number} usersNo
+         * @return {Array<Archive>} Array of DSU instances
          */
-        const loadDSUAs2Users = async (keySSI) => {
+        const loadDSUAsMultipleUsers = async (keySSI, usersNo = 2) => {
             resolver.invalidateDSUCache(keySSI);
             resolver.invalidateDSUCache(secondaryDSUKeySSI);
             resolver.invalidateDSUCache(thirdDSUKeySSI);
-            const user1DSU = await loadDSU(keySSI);
-            resolver.invalidateDSUCache(keySSI);
-            resolver.invalidateDSUCache(secondaryDSUKeySSI);
-            resolver.invalidateDSUCache(thirdDSUKeySSI);
-            const user2DSU = await loadDSU(keySSI);
-            promisifyDSU(user1DSU, user2DSU);
 
-            return [user1DSU, user2DSU];
+            const result = [];
+            for (let i = 0; i < usersNo; i++) {
+                const dsu = await loadDSU(keySSI);
+                resolver.invalidateDSUCache(keySSI);
+                resolver.invalidateDSUCache(secondaryDSUKeySSI);
+                resolver.invalidateDSUCache(thirdDSUKeySSI);
+                result.push(dsu);
+            }
+            promisifyDSU(...result);
+            return result;
         }
 
-    }, 20000);
+        const randomInt = (min,max) => {
+            return Math.floor(Math.random()*(max-min+1)+min);
+        }
+
+    }, 200000);
 });
 
 
