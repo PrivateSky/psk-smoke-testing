@@ -109,8 +109,9 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             await testOvewriteFileConflictWhenRenamingFile();
             await testDeleteFileConflict();
             await testChangesAreMergedWhenWorkingWithMountedDSU()
+            await testRemoteDeleteConflictInMountedDSU()
             await testNonBatchAnchoringRaceIsSuccessful();
-            //await testBatchAnchoringRaceIsSuccessful();
+            await testBatchAnchoringRaceIsSuccessful();
         };
 
         /**
@@ -301,6 +302,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             // Begin batches for both users
             await user1DSU.beginBatch();
             await user2DSU.beginBatch();
+
             // This causes the second DSU to be mounted for user1
             await user1DSU.listFiles('/');
 
@@ -312,6 +314,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
 
             // Batch operations for user 1
             await user1DSU.writeFile('m6.txt', 'New file added to main DSU');
+            await user1DSU.writeFile('second-dsu/s20.txt', 'New file added to secondary DSU');
             await user1DSU.delete('second-dsu/s2.txt');
 
             // Batch operations for user 2
@@ -325,7 +328,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                 new Promise((resolve, reject) => {
                     setTimeout(async () => {
                         try {
-                            await user1DSU.commitBatch();
+                            await user2DSU.commitBatch();
                         } catch (e) {
                             return reject(e);
                         }
@@ -333,7 +336,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                     }, randomInt(10, 25));
                 }),
 
-                user2DSU.commitBatch()
+                user1DSU.commitBatch()
             ]);
             await commitPromise;
 
@@ -358,7 +361,8 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                 'second-dsu/sfolder/sf1.txt',
                 'second-dsu/sfolder/ssub-folder/ssf1.txt',
                 'second-dsu/sfolder/ssub-folder/ssf2.txt',
-                'second-dsu/sfolder/sf3.txt'
+                'second-dsu/sfolder/sf3.txt',
+                'second-dsu/s20.txt'
             ];
             let actualFiles = await user1DSU.listFiles('/');
             assert.true(actualFiles.length === expectedFiles.length, 'user1DSU should have the correct number of files');
@@ -367,6 +371,71 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             actualFiles = await user2DSU.listFiles('/');
             assert.true(actualFiles.length === expectedFiles.length, 'user2DSU should have the correct number of files');
             assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user2DSU should have the correct files');
+        }
+
+        /**
+         * Test that a conflict occurs when trying to rename
+         * a previously deleted file in a mounted DSU
+         */
+        const testRemoteDeleteConflictInMountedDSU = async () => {
+            let [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
+
+            // Begin batches for both users
+            await user1DSU.beginBatch();
+            await user2DSU.beginBatch();
+
+            // This causes the second DSU to be mounted for user1
+            await user1DSU.listFiles('/');
+
+            // Clear the DSU cache so that the second user will open another instance of
+            // the second dsu
+            resolver.invalidateDSUCache(secondaryDSUKeySSI);
+            // This causes the second DSU to be mounted for user2
+            await user2DSU.listFiles('/');
+
+            // Batch operations for user 1
+            await user1DSU.delete('second-dsu/s20.txt');
+
+            // Batch operations for user 2
+            await user2DSU.rename('second-dsu/s20.txt', 'second-dsu/something-else.txt');
+            await user2DSU.writeFile('second-dsu/sfolder/sf3.txt', 'New file added to seconday DSU');
+
+            // Commit both batches concurrently
+            const commitPromise = Promise.all([
+                // Delay the first commit by a few milliseconds
+                new Promise((resolve, reject) => {
+                    setTimeout(async () => {
+                        try {
+                            await user2DSU.commitBatch();
+                        } catch (e) {
+                            return reject(e);
+                        }
+                        resolve();
+                    }, randomInt(10, 25));
+                }),
+
+                user1DSU.commitBatch()
+            ]);
+
+            let conflictsError;
+            try {
+                await commitPromise;
+            } catch (e) {
+                conflictsError = e.previousError.previousError.previousError.conflicts;
+            }
+
+            /*
+             * conflictsError expected value:
+             *  {
+             *      '/s30.txt': {
+             *          error: 'REMOTE_DELETE',
+             *          message: 'Unable to copy /s20.txt to /something-else.txt. Source was previously deleted',
+             *      }
+             *  }
+             */
+            assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
+            assert.true(typeof conflictsError['/s20.txt'] !== 'undefined');
+            assert.true(conflictsError['/s20.txt'].error === 'REMOTE_DELETE');
         }
 
         /**
@@ -389,6 +458,8 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
 
             let anchorPromise = Promise.resolve();
             for (let i = 0; i < usersCount; i++) {
+                const dsu = sameDSUInstances[i];
+
                 for (let j = 0; j < operations.length; j++) {
                     const [method, ...args] = operations[j].map((item, index) => {
                         if (!index) {
@@ -397,10 +468,8 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
 
                         return item.replace('%s', i + 1);
                     });
-
-                    const dsu = sameDSUInstances[i];
                     // There's a bug in the APIHub: The `anchorId` file is not locked for writing
-                    // leading to overwrites, thus we need to simulate a delay between writings
+                    // leading to overwrites, thus we need to simulate a delay between anchorings
                     // The test won't be as effective but it will still cover out of sync writes
                     anchorPromise = anchorPromise.then(() => {
                         return new Promise((resolve, reject) => {
@@ -419,7 +488,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
 
             await anchorPromise;
 
-            // Reload DSUJ
+            // Reload DSU
             resolver.invalidateDSUCache(mainDSUKeySSI);
             const dsu = await loadDSU(mainDSUKeySSI);
             promisifyDSU(dsu);
@@ -435,6 +504,77 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             files.sort();
             expectedFiles.sort();
             assert.true(JSON.stringify(files) === JSON.stringify(expectedFiles), 'Non batch raced anchoring DSU should have the correct files');
+        }
+
+        const testBatchAnchoringRaceIsSuccessful = async () => {
+            const usersCount = 5;
+            const sameDSUInstances = await loadDSUAsMultipleUsers(mainDSUKeySSI, usersCount);
+
+            const currentFiles = await sameDSUInstances[0].listFiles('/');
+
+            const operations = [
+                ['writeFile', 'batch-race%s.txt', 'batch-race%s.txt content'],
+                ['writeFile', 'batch-race-to-be-deleted%s.txt', 'batch-race-to-be-deleted%s.txt content'],
+                ['writeFile', 'batch-race-folder/%s.txt'],
+                ['rename', 'batch-race%s.txt', 'renamed-batch-race%s.txt'],
+                ['delete', 'batch-race-to-be-deleted%s.txt'],
+            ];
+
+            let anchorPromise = Promise.resolve();
+            for (let i = 0; i < usersCount; i++) {
+                const dsu = sameDSUInstances[i];
+                anchorPromise = anchorPromise.then(() => {
+                    return dsu.beginBatch();
+                })
+
+                for (let j = 0; j < operations.length; j++) {
+                    const [method, ...args] = operations[j].map((item, index) => {
+                        if (!index) {
+                            return item;
+                        }
+
+                        return item.replace('%s', i + 1);
+                    });
+
+                    anchorPromise = anchorPromise.then(() => {
+                        return dsu[method](...args);
+                    });
+                }
+                // There's a bug in the APIHub: The `anchorId` file is not locked for writing
+                // leading to overwrites, thus we need to simulate a delay between anchorings
+                // The test won't be as effective but it will still cover out of sync writes
+                anchorPromise = anchorPromise.then(() => {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(async () => {
+                            try {
+                                await dsu.commitBatch();
+                                resolve();
+                            } catch (e) {
+                                reject(e);
+                            }
+                        }, randomInt(10, 50));
+                    });
+                })
+            }
+
+            await anchorPromise;
+
+            // Reload DSU
+            resolver.invalidateDSUCache(mainDSUKeySSI);
+            const dsu = await loadDSU(mainDSUKeySSI);
+            promisifyDSU(dsu);
+            const files = await dsu.listFiles('/');
+
+            // Run assertions
+            const expectedFiles = currentFiles;
+            for (let i = 1; i <= usersCount; i++) {
+                expectedFiles.push(`batch-race-folder/${i}.txt`);
+                expectedFiles.push(`renamed-batch-race${i}.txt`);
+            }
+
+            files.sort();
+            expectedFiles.sort();
+            assert.true(JSON.stringify(files) === JSON.stringify(expectedFiles), 'Batch raced anchoring DSU should have the correct files');
         }
 
 
