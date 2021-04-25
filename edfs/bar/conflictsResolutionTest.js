@@ -602,7 +602,6 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
         }
 
         const testBatchOnConflictCallback = async () => {
-            console.log('-------------vlad');
             let [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
 
             // Begin batches for both users
@@ -759,7 +758,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             return Math.floor(Math.random()*(max-min+1)+min);
         }
 
-    }, 5000);
+    }, 10 * 1000);
 });
 
 
