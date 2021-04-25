@@ -112,6 +112,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             await testRemoteDeleteConflictInMountedDSU()
             await testNonBatchAnchoringRaceIsSuccessful();
             await testBatchAnchoringRaceIsSuccessful();
+            await testBatchOnConflictCallback();
         };
 
         /**
@@ -133,18 +134,23 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             /*
              * conflictsError expected value:
              *  {
-             *      '/m3.txt': {
-             *          error: 'LOCAL_OVERWRITE',
-             *          message: 'Path /m3.txt will overwrite a previously anchored file or directory',
-             *          remoteHashLinks: [ HashLinkSSI, ... ]
+             *      files: {
+             *          '/m3.txt': {
+             *              error: 'LOCAL_OVERWRITE',
+             *              message: 'Path /m3.txt will overwrite a previously anchored file or directory',
+             *          },
              *      }
+             *      theirHashLinkSSI: '...',
+             *      ourHashLinkSSI: '...'
              *  }
              */
 
             assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
-            assert.true(typeof conflictsError['/m3.txt'] !== 'undefined');
-            assert.true(conflictsError['/m3.txt'].error === 'LOCAL_OVERWRITE');
-            assert.true(Array.isArray(conflictsError['/m3.txt'].remoteHashLinks) && conflictsError['/m3.txt'].remoteHashLinks.length > 0);
+            assert.true(typeof conflictsError.files['/m3.txt'] !== 'undefined');
+            assert.true(conflictsError.files['/m3.txt'].error === 'LOCAL_OVERWRITE');
+            assert.true(typeof conflictsError.theirHashLinkSSI === 'string' && conflictsError.theirHashLinkSSI.length > 0);
+            assert.true(typeof conflictsError.ourHashLinkSSI === 'string' && conflictsError.ourHashLinkSSI.length > 0);
+            assert.true(conflictsError.theirHashLinkSSI !== conflictsError.ourHashLinkSSI);
         };
 
         /**
@@ -215,13 +221,18 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
              *      '/m5.txt': {
              *          error: 'REMOTE_DELETE',
              *          message: 'Unable to copy /m5.txt to /m6.txt. Source was previously deleted'
+             *          },
              *      }
-             *  }
+             *      theirHashLinkSSI: '...',
+             *      ourHashLinkSSI: '...'
              */
 
             assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
-            assert.true(typeof conflictsError['/m5.txt'] !== 'undefined');
-            assert.true(conflictsError['/m5.txt'].error === 'REMOTE_DELETE');
+            assert.true(typeof conflictsError.files['/m5.txt'] !== 'undefined');
+            assert.true(conflictsError.files['/m5.txt'].error === 'REMOTE_DELETE');
+            assert.true(typeof conflictsError.theirHashLinkSSI === 'string' && conflictsError.theirHashLinkSSI.length > 0);
+            assert.true(typeof conflictsError.ourHashLinkSSI === 'string' && conflictsError.ourHashLinkSSI.length > 0);
+            assert.true(conflictsError.theirHashLinkSSI !== conflictsError.ourHashLinkSSI);
         }
 
         /**
@@ -247,15 +258,18 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
              *      '/m6.txt': {
              *          error: 'LOCAL_OVERWRITE',
              *          message: 'Unable to copy /m3.txt to /m6.txt. The destination path will overwrite a previously anchored file or directory',
-             *          remoteHashLinks: [ HashLinkSSI, ... ]
+             *          },
              *      }
-             *  }
+             *      theirHashLinkSSI: '...',
+             *      ourHashLinkSSI: '...'
              */
 
             assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
-            assert.true(typeof conflictsError['/m6.txt'] !== 'undefined');
-            assert.true(conflictsError['/m6.txt'].error === 'LOCAL_OVERWRITE');
-            assert.true(Array.isArray(conflictsError['/m6.txt'].remoteHashLinks) && conflictsError['/m6.txt'].remoteHashLinks.length > 0);
+            assert.true(typeof conflictsError.files['/m6.txt'] !== 'undefined');
+            assert.true(conflictsError.files['/m6.txt'].error === 'LOCAL_OVERWRITE');
+            assert.true(typeof conflictsError.theirHashLinkSSI === 'string' && conflictsError.theirHashLinkSSI.length > 0);
+            assert.true(typeof conflictsError.ourHashLinkSSI === 'string' && conflictsError.ourHashLinkSSI.length > 0);
+            assert.true(conflictsError.theirHashLinkSSI !== conflictsError.ourHashLinkSSI);
         }
 
         /**
@@ -281,13 +295,18 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
              *      '/m6.txt': {
              *          error: 'LOCAL_DELETE',
              *          message: 'Unable to delete /m6.txt. This will delete a previously anchored file.',
+             *          },
              *      }
-             *  }
+             *      theirHashLinkSSI: '...',
+             *      ourHashLinkSSI: '...'
              */
 
             assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
-            assert.true(typeof conflictsError['/m6.txt'] !== 'undefined');
-            assert.true(conflictsError['/m6.txt'].error === 'LOCAL_DELETE');
+            assert.true(typeof conflictsError.files['/m6.txt'] !== 'undefined');
+            assert.true(conflictsError.files['/m6.txt'].error === 'LOCAL_DELETE');
+            assert.true(typeof conflictsError.theirHashLinkSSI === 'string' && conflictsError.theirHashLinkSSI.length > 0);
+            assert.true(typeof conflictsError.ourHashLinkSSI === 'string' && conflictsError.ourHashLinkSSI.length > 0);
+            assert.true(conflictsError.theirHashLinkSSI !== conflictsError.ourHashLinkSSI);
         }
 
         /**
@@ -430,12 +449,17 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
              *      '/s30.txt': {
              *          error: 'REMOTE_DELETE',
              *          message: 'Unable to copy /s20.txt to /something-else.txt. Source was previously deleted',
+             *          },
              *      }
-             *  }
+             *      theirHashLinkSSI: '...',
+             *      ourHashLinkSSI: '...'
              */
             assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
-            assert.true(typeof conflictsError['/s20.txt'] !== 'undefined');
-            assert.true(conflictsError['/s20.txt'].error === 'REMOTE_DELETE');
+            assert.true(typeof conflictsError.files['/s20.txt'] !== 'undefined');
+            assert.true(conflictsError.files['/s20.txt'].error === 'REMOTE_DELETE');
+            assert.true(typeof conflictsError.theirHashLinkSSI === 'string' && conflictsError.theirHashLinkSSI.length > 0);
+            assert.true(typeof conflictsError.ourHashLinkSSI === 'string' && conflictsError.ourHashLinkSSI.length > 0);
+            assert.true(conflictsError.theirHashLinkSSI !== conflictsError.ourHashLinkSSI);
         }
 
         /**
@@ -577,6 +601,75 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             assert.true(JSON.stringify(files) === JSON.stringify(expectedFiles), 'Batch raced anchoring DSU should have the correct files');
         }
 
+        const testBatchOnConflictCallback = async () => {
+            console.log('-------------vlad');
+            let [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
+
+            // Begin batches for both users
+            await user1DSU.beginBatch();
+            await user2DSU.beginBatch();
+
+            // This causes the second DSU to be mounted for user1
+            await user1DSU.listFiles('/');
+
+            // Clear the DSU cache so that the second user will open another instance of
+            // the second dsu
+            resolver.invalidateDSUCache(secondaryDSUKeySSI);
+            // This causes the second DSU to be mounted for user2
+            await user2DSU.listFiles('/');
+
+            // Batch operations for user 1
+            await user1DSU.delete('second-dsu/sfolder/sf3.txt');
+
+            // Batch operations for user 2
+            await user2DSU.rename('second-dsu/sfolder/sf3.txt', 'second-dsu/sfolder/something-else.txt');
+            await user2DSU.writeFile('second-dsu/sfolder/sf4.txt', 'New file added to seconday DSU');
+
+            // Conflict resolution callback
+            let conflictsError;
+            const onConflict = (conflicts, callback) => {
+                conflictsError = conflicts;
+                callback();
+            }
+
+            // Commit both batches concurrently
+            const commitPromise = Promise.all([
+                // Delay the first commit by a few milliseconds
+                new Promise((resolve, reject) => {
+                    setTimeout(async () => {
+                        try {
+                            await user2DSU.commitBatch(onConflict);
+                        } catch (e) {
+                            return reject(e);
+                        }
+                        resolve();
+                    }, randomInt(10, 25));
+                }),
+
+                user1DSU.commitBatch()
+            ]);
+
+            await commitPromise;
+
+            /*
+             * conflictsError expected value:
+             *  {
+             *      '/s30.txt': {
+             *          error: 'REMOTE_DELETE',
+             *          message: 'Unable to copy /sfolder/sf3.txt to /something-else.txt. Source was previously deleted',
+             *          },
+             *      }
+             *      theirHashLinkSSI: '...',
+             *      ourHashLinkSSI: '...'
+             */
+            assert.true(typeof conflictsError !== 'undefined', 'Conflict error was not triggered');
+            assert.true(typeof conflictsError.files['/sfolder/sf3.txt'] !== 'undefined');
+            assert.true(conflictsError.files['/sfolder/sf3.txt'].error === 'REMOTE_DELETE');
+            assert.true(typeof conflictsError.theirHashLinkSSI === 'string' && conflictsError.theirHashLinkSSI.length > 0);
+            assert.true(typeof conflictsError.ourHashLinkSSI === 'string' && conflictsError.ourHashLinkSSI.length > 0);
+            assert.true(conflictsError.theirHashLinkSSI !== conflictsError.ourHashLinkSSI);
+        }
+
 
         // Helper functions
         const createDSUContent = async (dsu, content, root = '/') => {
@@ -666,7 +759,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             return Math.floor(Math.random()*(max-min+1)+min);
         }
 
-    }, 200000);
+    }, 5000);
 });
 
 
