@@ -1,5 +1,4 @@
 require('../../../../psknode/bundles/testsRuntime');
-require("../../../../psknode/bundles/pskruntime");
 require("../../../../psknode/bundles/pskWebServer");
 
 const double_check = require("double-check");
