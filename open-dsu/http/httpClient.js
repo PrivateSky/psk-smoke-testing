@@ -18,11 +18,11 @@ assert.callback('HTTP test', (callback) => {
         assert.true(typeof http.doPost === 'function');
         assert.true(typeof http.doPut === 'function');
 
-        http.doPut(`http://localhost:${port}/bricking/${domain}/put-brick/${domain}`, { test: 'da' }, (err, response) => {
+        http.doPut(`http://localhost:${port}/bricking/${domain}/put-brick`, { test: 'da' }, (err, response) => {
             const brickHash = JSON.parse(response).message
             assert.true(brickHash === 'wDkQYUMeLGEaaGSwzJm1Xcd8R6eBCyKJiCwxqV3BmNn')
 
-            http.fetch(`http://localhost:${port}/bricking/${domain}/get-brick/${brickHash}/${domain}`).then((responseGetBrick) => {
+            http.fetch(`http://localhost:${port}/bricking/${domain}/get-brick/${brickHash}`).then((responseGetBrick) => {
 
                 assert.true(typeof responseGetBrick.text === 'function');
                 assert.true(typeof responseGetBrick.json === 'function');
@@ -33,7 +33,7 @@ assert.callback('HTTP test', (callback) => {
                 assert.true(typeof responseGetBrick.ok === 'boolean');
                 assert.true(responseGetBrick.ok === true);
 
-                http.fetch(`http://localhost:${port}/bricking/${domain}/downloadMultipleBricks/${domain}/?hashes=${brickHash}`).then((responseMultiple) => {
+                http.fetch(`http://localhost:${port}/bricking/${domain}/downloadMultipleBricks/?hashes=${brickHash}`).then((responseMultiple) => {
                     assert.true(typeof responseMultiple.ok === 'boolean');
                     assert.true(responseMultiple.ok === true);
 
