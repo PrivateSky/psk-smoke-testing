@@ -175,13 +175,13 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                 'mfolder/msub-folder/msf2.txt',
                 'm3.txt',
                 'm4.txt',
-            ];
-            let actualFiles = await user1DSU.listFiles('/');
+            ].sort();
+            let actualFiles = (await user1DSU.listFiles('/')).sort();
             assert.true(actualFiles.length === expectedFiles.length, 'user1DSU should have the correct number of files');
             assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user1DSU should have the correct files');
 
             // Check User2 file list. We're checking for the 'm4.txt' file to be present
-            actualFiles = await user2DSU.listFiles('/');
+            actualFiles = (await user2DSU.listFiles('/')).sort();
             expectedFiles = [
                 'dsu-metadata-log',
                 'm1.txt',
@@ -193,7 +193,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                 'm3.txt',
                 'm4.txt',
                 'm5.txt',
-            ];
+            ].sort();
             assert.true(actualFiles.length === expectedFiles.length, 'user2DSU should have the correct number of files');
             assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user2DSU should have the correct files');
         };
@@ -362,7 +362,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             // Reload DSUs
             [user1DSU, user2DSU] = await loadDSUAsMultipleUsers(mainDSUKeySSI);
 
-            let expectedFiles =[
+            let expectedFiles = [
                 'dsu-metadata-log',
                 'm1.txt',
                 'm2.txt',
@@ -382,12 +382,12 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                 'second-dsu/sfolder/ssub-folder/ssf2.txt',
                 'second-dsu/sfolder/sf3.txt',
                 'second-dsu/s20.txt'
-            ];
-            let actualFiles = await user1DSU.listFiles('/');
+            ].sort();
+            let actualFiles = (await user1DSU.listFiles('/')).sort();
             assert.true(actualFiles.length === expectedFiles.length, 'user1DSU should have the correct number of files');
             assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user1DSU should have the correct files');
 
-            actualFiles = await user2DSU.listFiles('/');
+            actualFiles = (await user2DSU.listFiles('/')).sort();
             assert.true(actualFiles.length === expectedFiles.length, 'user2DSU should have the correct number of files');
             assert.true(JSON.stringify(actualFiles) === JSON.stringify(expectedFiles), 'user2DSU should have the correct files');
         }
@@ -655,7 +655,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
              *  {
              *      '/s30.txt': {
              *          error: 'REMOTE_DELETE',
-             *          message: 'Unable to copy /sfolder/sf3.txt to /something-else.txt. Source was previously deleted',
+             *          message: 'Unable to copy /sfolder/sf3.txt to /sfolder/something-else.txt. Source was previously deleted',
              *          },
              *      }
              *      theirHashLinkSSI: '...',
