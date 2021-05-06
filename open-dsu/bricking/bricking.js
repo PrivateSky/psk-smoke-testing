@@ -20,7 +20,7 @@ assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
         const seedSSI = keyssi.createTemplateSeedSSI('default', 'some string', 'control', 'v0', 'hint');
         const brickData = 'some data';
 
-        bricking.putBrick(seedSSI, brickData, null, (err, brickHash) => {
+        bricking.putBrick('default', brickData, null, (err, brickHash) => {
             if (err) {
                 throw err;
             }
