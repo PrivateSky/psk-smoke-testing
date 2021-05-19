@@ -1,3 +1,5 @@
+'use strict';
+
 const util = require('util');
 require('../../../../psknode/bundles/testsRuntime');
 require("../../../../psknode/bundles/pskWebServer");
@@ -9,8 +11,6 @@ const tir = require("../../../../psknode/tests/util/tir.js");
 
 double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolder) => {
     assert.true(err === null || typeof err === "undefined", "Failed to create test folder");
-
-    const fileData = "Lorem Ipsum is simply dummy text";
 
     assert.callback("ConflictsResolutionTest", (callback) => {
         const openDSU = require("opendsu");
@@ -33,13 +33,9 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
             // Create DSUs
-            try {
-                mainDSU = await createDSU(keySSISpace.createTemplateSeedSSI('default'));
-                secondaryDSU = await createDSU(keySSISpace.createTemplateSeedSSI('default'));
-                thirdDSU = await createDSU(keySSISpace.createTemplateSeedSSI('default'));
-            } catch (e) {
-                throw e;
-            }
+            mainDSU = await createDSU(keySSISpace.createTemplateSeedSSI('default'));
+            secondaryDSU = await createDSU(keySSISpace.createTemplateSeedSSI('default'));
+            thirdDSU = await createDSU(keySSISpace.createTemplateSeedSSI('default'));
 
             promisifyDSU(mainDSU, secondaryDSU, thirdDSU);
 
