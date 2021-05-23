@@ -53,7 +53,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await testSubscriberAutoUpdatesOnMultipleChanges();
             await testSubscriberCanMakeChangesAfterAutoUpdate();
             await testSubscriberAutoUpdatesInBatchMode();
-            //await testMultipleSubscribersAutoUpdatesInBatchMode();
+            await testMultipleSubscribersAutoUpdatesInBatchMode();
         }
 
         const testSubscriberAutoUpdatesOnNewFile = async () => {
@@ -195,8 +195,8 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await delay(250) // wait a bit
             subscriberDSU.enableAutoSync(false);
 
-            // TODO: Fix issue with dirty brickmap not being in sync
-            console.log(await subscriberDSU.listFiles('/'));
+            const actualFilesBeforeCommiting = await subscriberDSU.listFiles('/');
+            actualFilesBeforeCommiting.sort();
 
             // Commit changes in subscriber
             await subscriberDSU.commitBatch();
@@ -215,7 +215,8 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
             await dsu.refresh();
             assert.true(syncListenerCalled, "The sync event lister was called");
-            assert.true(JSON.stringify(expectedFiles) === JSON.stringify(actualFiles), "Subscriber has the correct files");
+            assert.true(JSON.stringify(expectedFiles) === JSON.stringify(actualFilesBeforeCommiting), "Subscriber has the correct files before commiting");
+            assert.true(JSON.stringify(expectedFiles) === JSON.stringify(actualFiles), "Subscriber has the correct files after commiting");
         }
 
         const testMultipleSubscribersAutoUpdatesInBatchMode = async () => {
@@ -243,11 +244,34 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             sub1DSU.enableAutoSync(false);
             sub2DSU.enableAutoSync(false);
 
+            const sub1ActualFilesBeforeCommit = await sub1DSU.listFiles('/');
+            sub1ActualFilesBeforeCommit.sort();
+            const sub2ActualFilesBeforeCommit = await sub2DSU.listFiles('/');
+            sub2ActualFilesBeforeCommit.sort();
 
             // Commit changes in both subscribers
             await sub1DSU.commitBatch();
-            console.log(await sub1DSU.listFiles('/'));
-            //await sub2DSU.commitBatch();
+            await sub2DSU.commitBatch();
+
+            const sub1ActualFiles = await sub1DSU.listFiles('/');
+            sub1ActualFiles.sort();
+
+            let sub2ActualFiles = await sub2DSU.listFiles('/');
+            sub2ActualFiles.sort();
+
+            // Test that before commiting, Sub1 has the new changes merged with his
+            assert.true(sub1ActualFilesBeforeCommit.indexOf('batch-folder/another-test.txt') !== -1, 'Sub1 received main dsu changes');
+            assert.true(sub1ActualFilesBeforeCommit.indexOf('file-in-root.txt') !== -1, 'Sub1 received main dsu changes');
+            assert.true(sub1ActualFilesBeforeCommit.indexOf('batch-folder/sub-folder/subscriber1-file.txt') !== -1, 'Sub1 received main dsu changes');
+
+            // Test that before commiting, Sub2 has the new changes merged with his
+            assert.true(sub2ActualFilesBeforeCommit.indexOf('batch-folder/another-test.txt') !== -1, 'Sub2 received main dsu changes');
+            assert.true(sub2ActualFilesBeforeCommit.indexOf('file-in-root.txt') !== -1, 'Sub2 received main dsu changes');
+            assert.true(sub2ActualFilesBeforeCommit.indexOf('batch-folder/sub-folder/subscriber2-file.txt') !== -1, 'Sub2 received main dsu changes');
+
+            assert.true(JSON.stringify(sub1ActualFilesBeforeCommit) === JSON.stringify(sub1ActualFiles), 'Sub1 has the correct files');
+            assert.true(sub2ActualFiles.indexOf('batch-folder/sub-folder/subscriber1-file.txt') !== -1, 'Sub2 has the file from sub1 after anchoring')
+            assert.true(sub2ActualFiles.indexOf('batch-folder/sub-folder/subscriber2-file.txt') !== -1, 'Sub2 has the correct files');
         }
 
         const promisifyDSU = (...args) => {
