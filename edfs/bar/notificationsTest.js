@@ -45,20 +45,6 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             console.log('Running tests...');
             await runTests();
             callback();
-
-            //await dsu.writeFile('first-file.txt', 'Lorem ipsum');
-            //resolver.invalidateDSUCache(dsuKeySSI);
-
-            //const sameDSU = await loadDSU(dsuKeySSI);
-            //promisifyDSU(sameDSU);
-            //sameDSU.enableAutoSync(true);
-
-            //dsu.writeFile('second-file.txt', 'Lorem ipsum');
-
-            //setTimeout(async () => {
-                //console.log(await sameDSU.listFiles('/'));
-            //}, 1000);
-            //callback();
         });
 
         const runTests = async () => {
@@ -66,6 +52,8 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await testMultipleSubscribersAutoUpdateOnNewFile();
             await testSubscriberAutoUpdatesOnMultipleChanges();
             await testSubscriberCanMakeChangesAfterAutoUpdate();
+            await testSubscriberAutoUpdatesInBatchMode();
+            //await testMultipleSubscribersAutoUpdatesInBatchMode();
         }
 
         const testSubscriberAutoUpdatesOnNewFile = async () => {
@@ -167,21 +155,105 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             const content = await subscriberDSU.readFile('file-for-subscriber.txt');
             let newFileWasDeleted = false;
 
-            console.log('========================');
             try {
-                // TODO: fix alias auto of sync error
                 await subscriberDSU.delete('file-to-be-deleted-by-subscriber.txt');
                 newFileWasDeleted = true;
             } catch (e) {}
+
+            await dsu.refresh();
 
             assert.true(syncListenerCalled, "The sync event listener was called");
             assert.true(newFileWasDeleted, "Subscriber deleted the newly received file");
             assert.true(content.toString() === 'file-for-subscriber.txt New changes', 'Subscriber received file updates');
         }
 
+        const testSubscriberAutoUpdatesInBatchMode = async () => {
+            resolver.invalidateDSUCache(dsuKeySSI);
+            const subscriberDSU = await loadDSU(dsuKeySSI);
+
+            let syncListenerCalled = false;
+            subscriberDSU.enableAutoSync(true, {
+                onError: (err) => {
+                    throw err;
+                },
+                onSync: () => {
+                    syncListenerCalled = true;
+                }
+            });
+
+            // Write some data in batch mode for the subscriberDSU
+            subscriberDSU.beginBatch();
+            await subscriberDSU.writeFile('batch-folder/sub-folder/subscriber-file.txt', 'subscriber-file.txt');
+
+            // Write batch data in main dsu
+            dsu.beginBatch();
+            await dsu.writeFile('batch-folder/test.txt', 'test.txt');
+            await dsu.writeFile('batch-folder/sub-folder/test.txt', 'test.txt');
+            await dsu.delete('folder/sub-folder/nested-file.txt');
+            await dsu.commitBatch();
+
+            await delay(250) // wait a bit
+            subscriberDSU.enableAutoSync(false);
+
+            // TODO: Fix issue with dirty brickmap not being in sync
+            console.log(await subscriberDSU.listFiles('/'));
+
+            // Commit changes in subscriber
+            await subscriberDSU.commitBatch();
+
+            // We test that changes were merged
+            const expectedFiles = [
+                'batch-folder/sub-folder/subscriber-file.txt',
+                'batch-folder/sub-folder/test.txt',
+                'batch-folder/test.txt',
+                'dsu-metadata-log',
+                'file-for-subscriber.txt',
+                'folder/renamed-file.txt'
+            ];
+            const actualFiles = await subscriberDSU.listFiles('/');
+            actualFiles.sort();
+
+            await dsu.refresh();
+            assert.true(syncListenerCalled, "The sync event lister was called");
+            assert.true(JSON.stringify(expectedFiles) === JSON.stringify(actualFiles), "Subscriber has the correct files");
+        }
+
+        const testMultipleSubscribersAutoUpdatesInBatchMode = async () => {
+            resolver.invalidateDSUCache(dsuKeySSI);
+            const sub1DSU = await loadDSU(dsuKeySSI);
+            sub1DSU.enableAutoSync(true);
+
+            resolver.invalidateDSUCache(dsuKeySSI);
+            const sub2DSU = await loadDSU(dsuKeySSI);
+            sub2DSU.enableAutoSync(true);
+
+            sub1DSU.beginBatch();
+            sub2DSU.beginBatch();
+
+            await sub1DSU.writeFile('batch-folder/sub-folder/subscriber1-file.txt', 'subscriber1-file.txt');
+            await sub2DSU.writeFile('batch-folder/sub-folder/subscriber2-file.txt', 'subscriber2-file.txt');
+
+            // Write batch data in main dsu
+            dsu.beginBatch();
+            await dsu.writeFile('batch-folder/another-test.txt', 'another-test.txt');
+            await dsu.writeFile('file-in-root.txt', 'file-in-root.txt');
+            await dsu.commitBatch();
+
+            await delay(250) // wait a bit
+            sub1DSU.enableAutoSync(false);
+            sub2DSU.enableAutoSync(false);
+
+
+            // Commit changes in both subscribers
+            await sub1DSU.commitBatch();
+            console.log(await sub1DSU.listFiles('/'));
+            //await sub2DSU.commitBatch();
+        }
+
         const promisifyDSU = (...args) => {
             // Methods to promisify
             const methodsToPromisify = [
+                'refresh',
                 'getLastHashLinkSSI',
                 'getKeySSI',
                 'getKeySSIAsObject',
@@ -221,5 +293,5 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
                 setTimeout(resolve, delay);
             });
         }
-    }, 3600);
+    }, 36000);
 });
