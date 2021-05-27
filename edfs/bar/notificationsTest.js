@@ -17,29 +17,22 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
         const resolver = openDSU.loadApi("resolver");
         const keySSISpace = openDSU.loadApi("keyssi");
 
-        const createDSU = async (keySSI) => {
-            const create = util.promisify(resolver.createDSU);
-            const dsu = await create(keySSI);
-            promisifyDSU(dsu);
-            return dsu;
-        }
-
-        const loadDSU = async (keySSI) => {
-            const load = util.promisify(resolver.loadDSU);
-            const dsu = await load(keySSI);
-            promisifyDSU(dsu);
-            return dsu;
-        };
-
         let dsu;
         let dsuKeySSI;
+
+        let dsuWithMountPoints;
+        let dsuWithMountPointsKeySSI;
 
         tir.launchVirtualMQNode(10, testFolder, async (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
 
             dsu = await createDSU(keySSISpace.createTemplateSeedSSI('default'));
-            dsu.enableAnchoringNotifications(true);
+            await dsu.enableAnchoringNotifications(true);
             dsuKeySSI = await dsu.getKeySSIAsString();
+
+            dsuWithMountPoints = await createDSUWithMountPoints(keySSISpace.createTemplateSeedSSI('default'));
+            await dsuWithMountPoints.enableAnchoringNotifications(true, { ignoreMounts: false });
+            dsuWithMountPointsKeySSI = await dsuWithMountPoints.getKeySSIAsString();
 
             console.log('------------------');
             console.log('Running tests...');
@@ -54,17 +47,21 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await testSubscriberCanMakeChangesAfterAutoUpdate();
             await testSubscriberAutoUpdatesInBatchMode();
             await testMultipleSubscribersAutoUpdatesInBatchMode();
+            await testMergeConflictOccurs();
+            await testMergeConflictHandlerIsCalled();
+            //await testSubscriberWithMountedPathsAutoUpdates();
         }
 
         const testSubscriberAutoUpdatesOnNewFile = async () => {
+            console.log('Test subscriber auto update on new file');
             resolver.invalidateDSUCache(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
-            subscriberDSU.enableAutoSync(true);
+            await subscriberDSU.enableAutoSync(true);
 
             // Write the file in the main dsu
             await dsu.writeFile('first-file.txt', 'first-file.txt');
             await delay(200) // wait a bit
-            subscriberDSU.enableAutoSync(false);
+            await subscriberDSU.enableAutoSync(false);
 
             // Check that the subscribed DSU merged the latest changes
             const files = await subscriberDSU.listFiles('/');
@@ -77,19 +74,20 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
         }
 
         const testMultipleSubscribersAutoUpdateOnNewFile = async () => {
+            console.log('Test multiple subscribers auto update on new file');
             resolver.invalidateDSUCache(dsuKeySSI);
             const sub1DSU = await loadDSU(dsuKeySSI);
-            sub1DSU.enableAutoSync(true);
+            await sub1DSU.enableAutoSync(true);
 
             resolver.invalidateDSUCache(dsuKeySSI);
             const sub2DSU = await loadDSU(dsuKeySSI);
-            sub2DSU.enableAutoSync(true);
+            await sub2DSU.enableAutoSync(true);
 
             // Write the file in the main dsu
             await dsu.writeFile('file-for-multiple-subscribers.txt', 'file-for-multiple-subscribers.txt');
             await delay(200) // wait a bit
-            sub1DSU.enableAutoSync(false);
-            sub2DSU.enableAutoSync(false);
+            await sub1DSU.enableAutoSync(false);
+            await sub2DSU.enableAutoSync(false);
 
             // Check that the subscribers merged the latest changes
             const sub1Files = await sub1DSU.listFiles('/');
@@ -103,9 +101,10 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
         }
 
         const testSubscriberAutoUpdatesOnMultipleChanges = async () => {
+            console.log('Test subscriber auto updates on multiple changes');
             resolver.invalidateDSUCache(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
-            subscriberDSU.enableAutoSync(true);
+            await subscriberDSU.enableAutoSync(true);
 
             // Make changes on the main dsu
             await dsu.writeFile('file-for-subscriber.txt', 'file-for-subscriber.txt');
@@ -115,7 +114,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await dsu.writeFile('/folder/sub-folder/nested-file.txt', 'nested-file.txt');
 
             await delay(250) // wait a bit
-            subscriberDSU.enableAutoSync(false);
+            await subscriberDSU.enableAutoSync(false);
 
             const actualFiles = await subscriberDSU.listFiles('/');
             actualFiles.sort();
@@ -132,11 +131,12 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
         }
 
         const testSubscriberCanMakeChangesAfterAutoUpdate = async () => {
+            console.log('Test that subscriber can make changes after auto update');
             resolver.invalidateDSUCache(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
 
             let syncListenerCalled = false;
-            subscriberDSU.enableAutoSync(true, {
+            await subscriberDSU.enableAutoSync(true, {
                 onError: (err) => {
                     throw err;
                 },
@@ -150,7 +150,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await dsu.writeFile('file-to-be-deleted-by-subscriber.txt', 'Lorem ipsum');
 
             await delay(250) // wait a bit
-            subscriberDSU.enableAutoSync(false);
+            await subscriberDSU.enableAutoSync(false);
 
             const content = await subscriberDSU.readFile('file-for-subscriber.txt');
             let newFileWasDeleted = false;
@@ -168,11 +168,12 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
         }
 
         const testSubscriberAutoUpdatesInBatchMode = async () => {
+            console.log('Test that subscriber auto updates when in batch mode');
             resolver.invalidateDSUCache(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
 
             let syncListenerCalled = false;
-            subscriberDSU.enableAutoSync(true, {
+            await subscriberDSU.enableAutoSync(true, {
                 onError: (err) => {
                     throw err;
                 },
@@ -193,7 +194,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await dsu.commitBatch();
 
             await delay(250) // wait a bit
-            subscriberDSU.enableAutoSync(false);
+            await subscriberDSU.enableAutoSync(false);
 
             const actualFilesBeforeCommiting = await subscriberDSU.listFiles('/');
             actualFilesBeforeCommiting.sort();
@@ -220,13 +221,14 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
         }
 
         const testMultipleSubscribersAutoUpdatesInBatchMode = async () => {
+            console.log('Test that multiple subscribers auto update when in batch mode');
             resolver.invalidateDSUCache(dsuKeySSI);
             const sub1DSU = await loadDSU(dsuKeySSI);
-            sub1DSU.enableAutoSync(true);
+            await sub1DSU.enableAutoSync(true);
 
             resolver.invalidateDSUCache(dsuKeySSI);
             const sub2DSU = await loadDSU(dsuKeySSI);
-            sub2DSU.enableAutoSync(true);
+            await sub2DSU.enableAutoSync(true);
 
             sub1DSU.beginBatch();
             sub2DSU.beginBatch();
@@ -241,8 +243,8 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await dsu.commitBatch();
 
             await delay(250) // wait a bit
-            sub1DSU.enableAutoSync(false);
-            sub2DSU.enableAutoSync(false);
+            await sub1DSU.enableAutoSync(false);
+            await sub2DSU.enableAutoSync(false);
 
             const sub1ActualFilesBeforeCommit = await sub1DSU.listFiles('/');
             sub1ActualFilesBeforeCommit.sort();
@@ -252,6 +254,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             // Commit changes in both subscribers
             await sub1DSU.commitBatch();
             await sub2DSU.commitBatch();
+            await dsu.refresh();
 
             const sub1ActualFiles = await sub1DSU.listFiles('/');
             sub1ActualFiles.sort();
@@ -272,6 +275,128 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             assert.true(JSON.stringify(sub1ActualFilesBeforeCommit) === JSON.stringify(sub1ActualFiles), 'Sub1 has the correct files');
             assert.true(sub2ActualFiles.indexOf('batch-folder/sub-folder/subscriber1-file.txt') !== -1, 'Sub2 has the file from sub1 after anchoring')
             assert.true(sub2ActualFiles.indexOf('batch-folder/sub-folder/subscriber2-file.txt') !== -1, 'Sub2 has the correct files');
+        }
+
+        const testMergeConflictOccurs = async () => {
+            console.log("Test that a merge conflicts occurs");
+
+            resolver.invalidateDSUCache(dsuKeySSI);
+            const subscriberDSU = await loadDSU(dsuKeySSI);
+
+            let errorHandlerCalled = false;
+            let conflicts;
+            let syncHandlerCalled = false;
+            await subscriberDSU.enableAutoSync(true, {
+                onError: (err) => {
+                    errorHandlerCalled = true;
+                    if (err.previousError && err.previousError.conflicts) {
+                        conflicts = err.previousError.conflicts;
+                    }
+                },
+                onSync: () => {
+                    syncHandlerCalled = true;
+                }
+            });
+
+            // Rename a file in batch mode
+            await subscriberDSU.beginBatch();
+            await subscriberDSU.rename('/file-for-subscriber.txt', '/renamed-file.txt');
+
+            // Delete the file in the publishing DSU
+            await dsu.delete('/file-for-subscriber.txt');
+            await delay(250) // wait a bit
+            await subscriberDSU.enableAutoSync(false);
+
+            // At this point the subscriber should have tried to merge the "delete" operation and
+            // should have failed
+            assert.false(syncHandlerCalled, "The sync event handler shouldn't have been called");
+            assert.true(errorHandlerCalled, "The error handler has been called");
+            assert.true(typeof conflicts.files !== 'undefined', "The error contains conflict details");
+            assert.true(typeof conflicts.files['/file-for-subscriber.txt'] === 'object', "The file in conflict has been correctly identified");
+            assert.true(conflicts.files['/file-for-subscriber.txt'].error === 'REMOTE_DELETE', "The correct conflict type has been identified");
+        }
+
+        const testMergeConflictHandlerIsCalled = async () => {
+            console.log("Test that the merge conflict handler is called");
+
+            resolver.invalidateDSUCache(dsuKeySSI);
+            const subscriberDSU = await loadDSU(dsuKeySSI);
+
+            let conflicts;
+            let errorHandlerCalled = false;
+            let syncHandlerCalled = false;
+            let syncStatus;
+
+            // The merge conflict handler will receive the "conflicts" object
+            // and a callback
+            subscriberDSU.setMergeConflictsHandler((_conflicts, callback) => {
+                conflicts = _conflicts;
+                callback();
+            });
+
+            await subscriberDSU.enableAutoSync(true, {
+                onError: () => {
+                    errorHandlerCalled = true;
+                },
+                onSync: (status) => {
+                    syncHandlerCalled = true;
+                    syncStatus = status;
+                }
+            });
+
+
+            // Rename a file in batch mode
+            await subscriberDSU.beginBatch();
+            await subscriberDSU.rename('/file-in-root.txt', '/renamed-root-file.txt');
+
+            // Delete the file in the publishing DSU
+            await dsu.delete('/file-in-root.txt');
+            await delay(250) // wait a bit
+            await subscriberDSU.enableAutoSync(false);
+
+            // At this point the subscriber should have tried to merge the "delete" operation and
+            // should have failed
+            assert.true(syncHandlerCalled, "The sync event handler has been called");
+            assert.false(syncStatus, "The merge was unsuccessful");
+            assert.false(errorHandlerCalled, "The error handler shouldn't have been called");
+            assert.true(typeof conflicts.files !== 'undefined', "The error contains conflict details");
+            assert.true(typeof conflicts.files['/file-in-root.txt'] === 'object', "The file in conflict has been correctly identified");
+            assert.true(conflicts.files['/file-in-root.txt'].error === 'REMOTE_DELETE', "The correct conflict type has been identified");
+        }
+
+        const testSubscriberWithMountedPathsAutoUpdates = async () => {
+            console.log("Test that mounted DSU in subscriber auto updates on new changes");
+            // TODO: Implement
+        }
+
+        const createDSU = async (keySSI) => {
+            const create = util.promisify(resolver.createDSU);
+            const dsu = await create(keySSI);
+            promisifyDSU(dsu);
+            return dsu;
+        }
+
+        const loadDSU = async (keySSI) => {
+            const load = util.promisify(resolver.loadDSU);
+            const dsu = await load(keySSI);
+            promisifyDSU(dsu);
+            return dsu;
+        };
+
+        const createDSUWithMountPoints = async (keySSI) => {
+            const dsuLevel0 = await createDSU(keySSI);
+            const dsuLevel1 = await createDSU(keySSISpace.createTemplateSeedSSI('default'));
+            const dsuLevel2 = await createDSU(keySSISpace.createTemplateSeedSSI('default'));
+
+            await dsuLevel2.writeFile('/level2-file.txt', 'level2-file.txt');
+
+            await dsuLevel1.writeFile('/level1-file.txt', 'level1-file.txt');
+            await dsuLevel1.mount('/level2', await dsuLevel2.getKeySSIAsString());
+
+            await dsuLevel0.writeFile('/level0-file.txt', 'level0-file.txt');
+            await dsuLevel0.mount('/level1', await dsuLevel1.getKeySSIAsString());
+
+            return dsuLevel0;
         }
 
         const promisifyDSU = (...args) => {
@@ -300,6 +425,8 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
                 'mount',
                 'unmount',
                 'listMountedDSUs',
+                'enableAutoSync',
+                'enableAnchoringNotifications',
                 'commitBatch',
                 'cancelBatch',
                 'batch',
