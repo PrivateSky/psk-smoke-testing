@@ -22,6 +22,10 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         let dsuWithMountPoints;
         let dsuWithMountPointsKeySSI;
+        const mountedDSUsKeys = {
+            level1: null,
+            level2: null
+        };
 
         tir.launchVirtualMQNode(10, testFolder, async (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create server");
@@ -49,7 +53,8 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await testMultipleSubscribersAutoUpdatesInBatchMode();
             await testMergeConflictOccurs();
             await testMergeConflictHandlerIsCalled();
-            //await testSubscriberWithMountedPathsAutoUpdates();
+            await testSubscriberWithMountedPathsAutoUpdates();
+            await testSubscriberWithMountedPathsAutoUpdatesInBatchMode();
         }
 
         const testSubscriberAutoUpdatesOnNewFile = async () => {
@@ -366,7 +371,109 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         const testSubscriberWithMountedPathsAutoUpdates = async () => {
             console.log("Test that mounted DSU in subscriber auto updates on new changes");
-            // TODO: Implement
+            resolver.invalidateDSUCache(dsuWithMountPointsKeySSI);
+            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
+            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+            const subscriberDSU = await loadDSU(dsuWithMountPointsKeySSI);
+
+            let syncHandlerCallCounter = 0;
+            let errorHandlerCalled = false;
+            await subscriberDSU.enableAutoSync(true, {
+                ignoreMounts: false,
+                onError: (err) => {
+                    errorHandlerCalled = true;
+                },
+                onSync: () => {
+                    syncHandlerCallCounter++;
+                }
+            })
+
+            // Cache invalidation is required, or else the next writes
+            // will take place in the cached archives, and the sync handler won't be called
+            // since the DSUs will already be up to date
+            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
+            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+
+            // Write files in each mounted dsu
+            await dsuWithMountPoints.writeFile('/level1/level2/level2-file-for-subscriber.txt', 'level2-file-for-subscriber.txt');
+            await dsuWithMountPoints.writeFile('/level1/level1-file-for-subscriber.txt', 'level1-file-for-subscriber.txt');
+            await dsuWithMountPoints.writeFile('/level0-file-for-subscriber.txt', 'level0-file-for-subscriber.txt');
+            await delay(200) // wait a bit
+            await subscriberDSU.enableAutoSync(false);
+
+            const expectedFiles = await dsuWithMountPoints.listFiles('/');
+            expectedFiles.sort();
+
+            const actualFiles = await subscriberDSU.listFiles('/');
+            actualFiles.sort();
+
+            assert.false(errorHandlerCalled, "No error occured while syncing");
+            assert.true(syncHandlerCallCounter === 3, "The sync handler was called for each mounted DSU");
+            assert.true(JSON.stringify(expectedFiles) === JSON.stringify(actualFiles), 'Subscribed DSU should have the same files');
+            assert.true(actualFiles.indexOf('level1/level2/level2-file-for-subscriber.txt') !== -1, "Level2 file exists")
+            assert.true(actualFiles.indexOf('level1/level1-file-for-subscriber.txt') !== -1, "Level1 file exists")
+            assert.true(actualFiles.indexOf('level0-file-for-subscriber.txt') !== -0, "Level0 file exists")
+        }
+
+        const testSubscriberWithMountedPathsAutoUpdatesInBatchMode = async () => {
+            console.log("Test that mounted DSU in subscriber auto updates on new changes in batch mode");
+            resolver.invalidateDSUCache(dsuWithMountPointsKeySSI);
+            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
+            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+            const subscriberDSU = await loadDSU(dsuWithMountPointsKeySSI);
+
+            let syncHandlerCallCounter = 0;
+            let errorHandlerCalled = false;
+            await subscriberDSU.enableAutoSync(true, {
+                ignoreMounts: false,
+                onError: () => {
+                    errorHandlerCalled = true;
+                },
+                onSync: () => {
+                    syncHandlerCallCounter++;
+                }
+            })
+            await subscriberDSU.beginBatch();
+            await subscriberDSU.writeFile('/file-in-batch-mode.txt', 'file-in-batch-mode.txt');
+
+            await dsuWithMountPoints.beginBatch();
+
+            // Cache invalidation is required, or else the next writes
+            // will take place in the cached archives, and the sync handler won't be called
+            // since the DSUs will already be up to date
+            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
+            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+            // Write files in each mounted dsu
+            await dsuWithMountPoints.writeFile('/level1/level2/level2-file-in-batch-mode.txt', 'level2-file-in-batch-mode.txt');
+            await dsuWithMountPoints.writeFile('/level1/level1-file-in-batch-mode.txt', 'level1-file-in-batch-mode.txt');
+            await dsuWithMountPoints.writeFile('/level0-file-in-batch-mode.txt', 'level0-file-in-batch-mode.txt');
+
+            // Cache invalidation is required, or else the next writes
+            // will take place in the cached archives, and the sync handler won't be called
+            // since the DSUs will already be up to date
+            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
+            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+
+            await dsuWithMountPoints.commitBatch();
+            await delay(200) // wait a bit
+
+            await subscriberDSU.enableAutoSync(false);
+            await subscriberDSU.commitBatch();
+            await dsuWithMountPoints.refresh();
+
+            const expectedFiles = await dsuWithMountPoints.listFiles('/');
+            expectedFiles.sort();
+
+            const actualFiles = await subscriberDSU.listFiles('/');
+            actualFiles.sort();
+
+            assert.false(errorHandlerCalled, "No error occured while syncing");
+            assert.true(syncHandlerCallCounter === 3, "The sync handler was called for each mounted DSU");
+            assert.true(JSON.stringify(expectedFiles) === JSON.stringify(actualFiles), 'Subscribed DSU should have the same files');
+            assert.true(actualFiles.indexOf('level1/level2/level2-file-in-batch-mode.txt') !== -1, "Level2 file exists")
+            assert.true(actualFiles.indexOf('level1/level1-file-in-batch-mode.txt') !== -1, "Level1 file exists")
+            assert.true(actualFiles.indexOf('level0-file-in-batch-mode.txt') !== -0, "Level0 file exists")
+
         }
 
         const createDSU = async (keySSI) => {
@@ -391,10 +498,17 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             await dsuLevel2.writeFile('/level2-file.txt', 'level2-file.txt');
 
             await dsuLevel1.writeFile('/level1-file.txt', 'level1-file.txt');
-            await dsuLevel1.mount('/level2', await dsuLevel2.getKeySSIAsString());
+
+            const level2Key = await dsuLevel2.getKeySSIAsString();
+            await dsuLevel1.mount('/level2', level2Key);
 
             await dsuLevel0.writeFile('/level0-file.txt', 'level0-file.txt');
-            await dsuLevel0.mount('/level1', await dsuLevel1.getKeySSIAsString());
+
+            const level1Key = await dsuLevel1.getKeySSIAsString();
+            await dsuLevel0.mount('/level1', level1Key);
+
+            mountedDSUsKeys.level1 = level1Key;
+            mountedDSUsKeys.level2 = level2Key;
 
             return dsuLevel0;
         }
@@ -444,5 +558,5 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
                 setTimeout(resolve, delay);
             });
         }
-    }, 36000);
+    }, 5000);
 });
