@@ -29,35 +29,60 @@ $$.flows.describe("CreateEmptyFile", {
             }
 
             console.log("Started creating file /fld/somePath");
-            dsu.writeFile("/fld/somePath", (err, result) => {
+            this.writeFiles(dsu, ()=>{
+                this.deleteFiles(dsu);
+            });
+        })
+    },
+
+    writeFiles: function (dsu, callback){
+        dsu.writeFile("/fld/somePath", (err, result) => {
+            if (err) {
+                throw err;
+            }
+            console.log("created file /fld/somePath")
+            console.log("Started creating file /fld/somePath1");
+            dsu.writeFile("/fld/somePath1", (err, result) => {
+                if (err) {
+                    return callback(err);
+                }
+
+                // console.log("created file /fld/somePath1")
+                callback();
+            })
+        })
+    },
+
+    deleteFiles(dsu){
+        dsu.delete("/fld/somePath", (err, result) => {
+            if (err) {
+                throw err;
+            }
+            console.log("deleted file /fld/somePath")
+            dsu.delete("/fld/somePath1", (err, result) => {
                 if (err) {
                     throw err;
                 }
-                console.log("created file /fld/somePath")
-                console.log("Started creating file /fld/somePath1");
-                dsu.writeFile("/fld/somePath1", (err, result) => {
-                    if (err) {
-                        throw err;
-                    }
 
-                    // console.log("created file /fld/somePath1")
-                    this.createDSUCopy(dsu);
-                })
+                // console.log("created file /fld/somePath1")
+                this.createDSUCopy(dsu);
             })
         })
     },
 
     createDSUCopy: function(dsu){
-        dsu.getKeySSIAsObject((err, keySSI) => {
-            if (err) {
-                console.log(err);
-            }
-            resolver.loadDSU(keySSI,(err, copyDSU) => {
+        this.writeFiles(dsu, ()=>{
+            dsu.getKeySSIAsObject((err, keySSI) => {
                 if (err) {
                     console.log(err);
                 }
+                resolver.loadDSU(keySSI,(err, copyDSU) => {
+                    if (err) {
+                        console.log(err);
+                    }
 
-                this.runAssertions(copyDSU);
+                    this.runAssertions(dsu);
+                });
             });
         });
     },
