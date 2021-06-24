@@ -24,42 +24,37 @@ double_check.createTestFolder("bar_delete_content", (err, testFolder) => {
                     throw err;
                 }
 
-
-                // bar.delete("/", (err) => {
-                //     if (err) {
-                //         console.log("Empty bar delete");
-                //         throw err;
-                //     }
-                //     console.log("Finished empty bar delete")
-                //     assert.equal(err, undefined);
-                //
-                // })
+                let counter = 0;
+                bar.delete("/", (err) => {
+                    if (err) {
+                        throw err;
+                    }
+                    console.log("Finished empty bar delete")
+                    assert.equal(err, undefined);
 
 
-                bar.writeFile("a.txt", fileData, (err, brickMapDigest) => {
-                    console.log("Written data");
+                    bar.writeFile("a.txt", fileData, (err, brickMapDigest) => {
+                        console.log("Written data");
+                        counter++;
 
-                    bar.delete("/", (err) => {
-                        if(err){
-                            console.log("First bar delete");
-                            throw err;
-                        }
-                        console.log("Before second deletion")
                         bar.delete("/", (err) => {
+                            assert.equal(counter, 1, "Bar callback was called twice")
 
-                            if(err){
+                            if (err) {
+                                console.log("First bar delete");
                                 throw err;
                             }
+
                         })
                     })
-                })
 
+                })
 
 
 
             })
         });
-    }, 200000000000);
+    }, 2000);
 });
 
 
