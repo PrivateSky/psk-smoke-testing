@@ -24,30 +24,20 @@ double_check.createTestFolder("bar_delete_content", (err, testFolder) => {
                     throw err;
                 }
 
-                let counter = 0;
+                let callbackCallCounter = 0;
                 bar.delete("/", (err) => {
                     if (err) {
                         throw err;
                     }
-                    console.log("Finished empty bar delete")
-                    assert.equal(err, undefined);
+                    assert.equal(err, undefined, 'Bar was emptied');
 
                     bar.writeFile("a.txt", fileData, (err, brickMapDigest) => {
-                        console.log("Written data");
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                        counter++;
+                        assert.equal(err, undefined, 'File was written');
+                        callbackCallCounter++;
 
                         bar.delete("/", (err) => {
-                            assert.equal(counter, 1, "Bar callback was called twice")
-
-                            if (err) {
-                                console.log("First bar delete");
-                                //TODO: Check why writeFile callback function is called two times when throw err is executed
-                                // throw err;
-                            }
+                            assert.equal(callbackCallCounter, 1, "The parent callback was not called a second time");
+                            assert.equal(err, undefined, 'Bar was emptied again')
                             callback();
                         })
                     })
