@@ -558,5 +558,5 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
                 setTimeout(resolve, delay);
             });
         }
-    }, 5000);
+    }, 10000);
 });
