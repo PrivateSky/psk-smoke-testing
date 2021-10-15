@@ -12,12 +12,13 @@ $$.flows.describe("CloneFolder", {
     start: function (callback) {
         this.callback = callback;
 
-        tir.launchApiHubTestNode((err, port) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to create server.");
+        double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+            tir.launchApiHubTestNode(100, folder, async err => {
+                assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-            this.createDSU();
+                this.createDSU();
+            });
         });
-
     },
 
     createDSU: function () {
@@ -82,17 +83,17 @@ $$.flows.describe("CloneFolder", {
             }
 
             dsu.listFiles('root/fld', (err, initialFiles) => {
-            assert.true(files.length === initialFiles.length);
-            assert.true(files.indexOf('file1') !== -1);
-            assert.true(initialFiles.indexOf('file1') !== -1);
-            assert.true(files.indexOf('file2') !== -1);
-            assert.true(initialFiles.indexOf('file2') !== -1);
+                assert.true(files.length === initialFiles.length);
+                assert.true(files.indexOf('file1') !== -1);
+                assert.true(initialFiles.indexOf('file1') !== -1);
+                assert.true(files.indexOf('file2') !== -1);
+                assert.true(initialFiles.indexOf('file2') !== -1);
 
-            dsu.readFile("root/fld2/file1", (err, data) => {
-                assert.true(data.toString(), "some_data");
-                this.callback();
+                dsu.readFile("root/fld2/file1", (err, data) => {
+                    assert.true(data.toString(), "some_data");
+                    this.callback();
+                });
             });
-        });
         });
     }
 });

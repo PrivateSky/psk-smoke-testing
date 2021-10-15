@@ -29,10 +29,12 @@ $$.flows.describe("AddFile", {
                 assert.true(err === null || typeof err === "undefined", "Failed to compute folder hashes.");
 
                 this.initialHash = initialHash;
-                tir.launchVirtualMQNode((err, port) => {
-                    assert.true(err === null || typeof err === "undefined", "Failed to create server.");
+                double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+                    tir.launchApiHubTestNode(100, folder, async err => {
+                        assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                    this.createArchive();
+                        this.createArchive();
+                    });
                 });
             });
         });
@@ -56,7 +58,7 @@ $$.flows.describe("AddFile", {
 
     addFile: function () {
         this.archive.addFile(filePath, barPath, (err, mapDigest) => {
-            if(err){
+            if (err) {
                 throw err;
             }
             let fs = require("fs");
@@ -82,7 +84,7 @@ $$.flows.describe("AddFile", {
             }
 
             archive.extractFile(filePath, barPath, (err) => {
-                if(err){
+                if (err) {
                     throw err;
                 }
 

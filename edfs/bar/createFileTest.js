@@ -13,10 +13,12 @@ $$.flows.describe("CreateEmptyFile", {
     start: function (callback) {
         this.callback = callback;
 
-        tir.launchApiHubTestNode((err, port) => {
-            assert.true(err === null || typeof err === "undefined", "Failed to create server.");
+        double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+            tir.launchApiHubTestNode(100, folder, async err => {
+                assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-            this.createDSU();
+                this.createDSU();
+            });
         });
     },
 
@@ -29,13 +31,13 @@ $$.flows.describe("CreateEmptyFile", {
             }
 
             console.log("Started creating file /fld/somePath");
-            this.writeFiles(dsu, ()=>{
+            this.writeFiles(dsu, () => {
                 this.deleteFiles(dsu);
             });
         })
     },
 
-    writeFiles: function (dsu, callback){
+    writeFiles: function (dsu, callback) {
         dsu.writeFile("/fld/somePath", (err, result) => {
             if (err) {
                 throw err;
@@ -53,7 +55,7 @@ $$.flows.describe("CreateEmptyFile", {
         })
     },
 
-    deleteFiles(dsu){
+    deleteFiles(dsu) {
         dsu.delete("/fld/somePath", (err, result) => {
             if (err) {
                 throw err;
@@ -70,13 +72,13 @@ $$.flows.describe("CreateEmptyFile", {
         })
     },
 
-    createDSUCopy: function(dsu){
-        this.writeFiles(dsu, ()=>{
+    createDSUCopy: function (dsu) {
+        this.writeFiles(dsu, () => {
             dsu.getKeySSIAsObject((err, keySSI) => {
                 if (err) {
                     console.log(err);
                 }
-                resolver.loadDSU(keySSI,(err, copyDSU) => {
+                resolver.loadDSU(keySSI, (err, copyDSU) => {
                     if (err) {
                         console.log(err);
                     }
@@ -87,7 +89,7 @@ $$.flows.describe("CreateEmptyFile", {
         });
     },
     runAssertions: function (dsu) {
-       dsu.listFiles('/fld', (err, files) => {
+        dsu.listFiles('/fld', (err, files) => {
             if (err) {
                 throw err;
             }

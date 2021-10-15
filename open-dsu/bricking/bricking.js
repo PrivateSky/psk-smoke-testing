@@ -1,51 +1,54 @@
 require('../../../../psknode/bundles/testsRuntime');
 
 const tir = require('../../../../psknode/tests/util/tir');
-const assert = require('double-check').assert;
+const double_check = require("double-check");
+const assert = double_check.assert;
 
 assert.callback('Bricking test (GET, PUT bricks)', (callback) => {
-    tir.launchVirtualMQNode((err, port) => {
-        if (err) {
-            throw err;
-        }
-        const openDSU = require('opendsu');
-        const bricking = openDSU.loadApi('bricking');
-        const keyssi = openDSU.loadApi('keyssi');
-        const crypto = openDSU.loadApi('crypto');
-
-        assert.true(typeof bricking.getBrick === 'function');
-        assert.true(typeof bricking.putBrick === 'function');
-        assert.true(typeof bricking.getMultipleBricks === 'function');
-
-        const seedSSI = keyssi.createTemplateSeedSSI('default', 'some string', 'control', 'v0', 'hint');
-        const brickData = 'some data';
-
-        bricking.putBrick('default', brickData, null, (err, brickHash) => {
+    double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+        tir.launchApiHubTestNode(100, folder, async err => {
             if (err) {
                 throw err;
             }
+            const openDSU = require('opendsu');
+            const bricking = openDSU.loadApi('bricking');
+            const keyssi = openDSU.loadApi('keyssi');
+            const crypto = openDSU.loadApi('crypto');
 
-            const hashFn = crypto.getCryptoFunctionForKeySSI(seedSSI, "hash");
-            const hash = hashFn(brickData);
+            assert.true(typeof bricking.getBrick === 'function');
+            assert.true(typeof bricking.putBrick === 'function');
+            assert.true(typeof bricking.getMultipleBricks === 'function');
 
-            assert.true(brickHash === hash);
+            const seedSSI = keyssi.createTemplateSeedSSI('default', 'some string', 'control', 'v0', 'hint');
+            const brickData = 'some data';
 
-            const hashLinkSSI = keyssi.createHashLinkSSI('default', brickHash);
-
-            bricking.getBrick(hashLinkSSI, null, (err, data) => {
+            bricking.putBrick('default', brickData, null, (err, brickHash) => {
                 if (err) {
                     throw err;
                 }
 
-                assert.true(data.toString() === brickData);
+                const hashFn = crypto.getCryptoFunctionForKeySSI(seedSSI, "hash");
+                const hash = hashFn(brickData);
 
-                bricking.getMultipleBricks([hashLinkSSI], null, (err, data) => {
+                assert.true(brickHash === hash);
+
+                const hashLinkSSI = keyssi.createHashLinkSSI('default', brickHash);
+
+                bricking.getBrick(hashLinkSSI, null, (err, data) => {
                     if (err) {
                         throw err;
                     }
 
                     assert.true(data.toString() === brickData);
-                    callback();
+
+                    bricking.getMultipleBricks([hashLinkSSI], null, (err, data) => {
+                        if (err) {
+                            throw err;
+                        }
+
+                        assert.true(data.toString() === brickData);
+                        callback();
+                    });
                 });
             });
         });
