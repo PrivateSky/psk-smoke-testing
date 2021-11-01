@@ -53,29 +53,36 @@ $$.flows.describe("BatchOperationsTest", {
                 throw err;
             }
 
-            assert.true(this.testDSU.hasUnanchoredChanges());
-            this.testDSU.writeFile('f2.txt', text[1], (err) => {
-                if (err) {
-                    throw err;
-                }
-                assert.true(this.testDSU.hasUnanchoredChanges());
-
-                this.testDSU.addFolder(folderPath, 'fld', (err) => {
+            this.testDSU.hasUnanchoredChanges((err, status) => {
+                assert.true(status);
+                this.testDSU.writeFile('f2.txt', text[1], (err) => {
                     if (err) {
                         throw err;
                     }
-                    assert.true(this.testDSU.hasUnanchoredChanges());
+                    this.testDSU.hasUnanchoredChanges((err, status) => {
+                        assert.true(status);
+                        this.testDSU.addFolder(folderPath, 'fld', (err) => {
+                            if (err) {
+                                throw err;
+                            }
+                            this.testDSU.hasUnanchoredChanges((err, status) => {
+                                assert.true(status);
 
-                    this.testDSU.commitBatch((err, result) => {
-                        if (err) {
-                            throw err;
-                        }
-                        assert.false(this.testDSU.hasUnanchoredChanges());
+                                this.testDSU.commitBatch((err, result) => {
+                                    if (err) {
+                                        throw err;
+                                    }
+                                    this.testDSU.hasUnanchoredChanges((err, status) => {
+                                        assert.false(status);
 
-                        this.testBatchWithMountedDSUs();
+                                        this.testBatchWithMountedDSUs();
+                                    });
+                                })
+                            });
+                        })
                     })
-                })
-            });
+                });
+            })
         });
     },
 
@@ -103,34 +110,42 @@ $$.flows.describe("BatchOperationsTest", {
                                 throw err;
                             }
 
-                            assert.true(this.testDSU.hasUnanchoredChanges());
-                            this.testDSU.writeFile('/level1/file2.txt', text[1], (err) => {
-                                if (err) {
-                                    throw err;
-                                }
-                                assert.true(this.testDSU.hasUnanchoredChanges());
-
-                                this.testDSU.writeFile('/root-file.txt', text[0], (err) => {
+                            this.testDSU.hasUnanchoredChanges((err, status) => {
+                                assert.true(status);
+                                this.testDSU.writeFile('/level1/file2.txt', text[1], (err) => {
                                     if (err) {
                                         throw err;
                                     }
-                                    assert.true(this.testDSU.hasUnanchoredChanges());
+                                    this.testDSU.hasUnanchoredChanges((err, status) => {
+                                        assert.true(status);
 
-                                    this.testDSU.commitBatch((err, result) => {
-                                        if (err) {
-                                            throw err;
-                                        }
-                                        assert.false(this.testDSU.hasUnanchoredChanges());
-
-                                        this.testDSU.getKeySSIAsString((err, keySSI) => {
+                                        this.testDSU.writeFile('/root-file.txt', text[0], (err) => {
                                             if (err) {
                                                 throw err;
                                             }
-                                            this.testCommitedBatch(keySSI);
+                                            this.testDSU.hasUnanchoredChanges((err, status) => {
+                                                assert.true(status);
+
+                                                this.testDSU.commitBatch((err, result) => {
+                                                    if (err) {
+                                                        throw err;
+                                                    }
+                                                    this.testDSU.hasUnanchoredChanges((err, status) => {
+                                                        assert.false(status);
+
+                                                        this.testDSU.getKeySSIAsString((err, keySSI) => {
+                                                            if (err) {
+                                                                throw err;
+                                                            }
+                                                            this.testCommitedBatch(keySSI);
+                                                        })
+                                                    });
+                                                })
+                                            });
                                         })
-                                    })
+                                    });
                                 })
-                            })
+                            });
                         })
                     })
                 })
@@ -247,43 +262,49 @@ $$.flows.describe("BatchOperationsTest", {
                                         if (err) {
                                             throw err;
                                         }
-                                        assert.true(dsu.hasUnanchoredChanges());
+                                        dsu.hasUnanchoredChanges((err, status) => {
+                                            assert.true(status);
 
-                                        dsu.writeFile('/level1/level2/file2.txt', text[1], (err) => {
-                                            if (err) {
-                                                throw err;
-                                            }
-                                            assert.true(dsu.hasUnanchoredChanges());
-                                            done();
-                                        })
+                                            dsu.writeFile('/level1/level2/file2.txt', text[1], (err) => {
+                                                if (err) {
+                                                    throw err;
+                                                }
+                                                dsu.hasUnanchoredChanges((err, status) => {
+                                                    assert.true(status);
+                                                    done();
+                                                });
+                                            })
+                                        });
                                     })
 
                                 }, (err, result) => {
                                     if (err) {
                                         throw err;
                                     }
-                                    assert.false(dsu.hasUnanchoredChanges());
+                                    dsu.hasUnanchoredChanges((err, status) => {
+                                        assert.false(status);
 
-                                    dsu.load((err) => {
-                                        if (err) {
-                                            throw err;
-                                        }
-                                        dsu.readFile('/level1/level2/file1.txt', (err, data) => {
+                                        dsu.load((err) => {
                                             if (err) {
                                                 throw err;
                                             }
-                                            assert.true(text[0], data.toString());
-
-                                            dsu.readFile('/level1/level2/file2.txt', (err, data) => {
+                                            dsu.readFile('/level1/level2/file1.txt', (err, data) => {
                                                 if (err) {
                                                     throw err;
                                                 }
-                                                assert.true(text[1], data.toString());
+                                                assert.true(text[0], data.toString());
 
-                                                this.testBatchCancel(dsu);
+                                                dsu.readFile('/level1/level2/file2.txt', (err, data) => {
+                                                    if (err) {
+                                                        throw err;
+                                                    }
+                                                    assert.true(text[1], data.toString());
+
+                                                    this.testBatchCancel(dsu);
+                                                })
                                             })
                                         })
-                                    })
+                                    });
                                 })
                             })
                         })
@@ -303,30 +324,37 @@ $$.flows.describe("BatchOperationsTest", {
             if (err) {
                 throw err;
             }
-            assert.true(dsu.hasUnanchoredChanges());
+            dsu.hasUnanchoredChanges((err, status) => {
+                assert.true(status);
 
-            dsu.writeFile('/level1/tmp.txt', 'this should not be anchored', (err) => {
-                if (err) {
-                    throw err;
-                }
-                assert.true(dsu.hasUnanchoredChanges());
-
-                dsu.writeFile('/tmp.txt', 'this should not be anchored', (err) => {
+                dsu.writeFile('/level1/tmp.txt', 'this should not be anchored', (err) => {
                     if (err) {
                         throw err;
                     }
-                    assert.true(dsu.hasUnanchoredChanges());
+                    dsu.hasUnanchoredChanges((err, status) => {
+                        assert.true(status);
 
-                    dsu.cancelBatch((err) => {
-                        if (err) {
-                            throw err;
-                        }
-                        assert.false(dsu.hasUnanchoredChanges());
+                        dsu.writeFile('/tmp.txt', 'this should not be anchored', (err) => {
+                            if (err) {
+                                throw err;
+                            }
+                            dsu.hasUnanchoredChanges((err, status) => {
+                                assert.true(status);
 
-                        this.callback();
-                    })
+                                dsu.cancelBatch((err) => {
+                                    if (err) {
+                                        throw err;
+                                    }
+                                    dsu.hasUnanchoredChanges((err, status) => {
+                                        assert.false(status);
+                                        this.callback();
+                                    });
+                                })
+                            });
+                        })
+                    });
                 })
-            })
+            });
         })
     }
 });
