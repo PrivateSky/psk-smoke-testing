@@ -20,10 +20,12 @@ $$.flows.describe("AddFolderBatch", {
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
-            tir.launchVirtualMQNode((err, port) => {
-                assert.true(err === null || typeof err === "undefined", "Failed to create server.");
+            double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+                tir.launchApiHubTestNode(100, folder, async err => {
+                    assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                this.createBAR();
+                    this.createBAR();
+                });
             });
         });
 
@@ -39,7 +41,7 @@ $$.flows.describe("AddFolderBatch", {
             }
 
             this.bar = bar;
-            this.addFolder(folderPath, "fld1",  (err, initialHash) => {
+            this.addFolder(folderPath, "fld1", (err, initialHash) => {
                 if (err) {
                     throw err;
                 }

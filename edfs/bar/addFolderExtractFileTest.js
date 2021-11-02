@@ -20,10 +20,12 @@ $$.flows.describe("AddFolderToCSB", {
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
-            tir.launchVirtualMQNode((err, port) => {
+                double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+                    tir.launchApiHubTestNode(100, folder, async err => {
                 assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
                 this.createBAR();
+            });
             });
         });
 

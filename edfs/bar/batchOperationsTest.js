@@ -20,11 +20,13 @@ $$.flows.describe("BatchOperationsTest", {
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
-            tir.launchVirtualMQNode((err, port) => {
-                assert.true(err === null || typeof err === "undefined", "Failed to create server.");
+            double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+                tir.launchApiHubTestNode(100, folder, async err => {
+                    assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                this.createDSU((dsu) => {
-                    this.testBatchIsCommited(dsu);
+                    this.createDSU((dsu) => {
+                        this.testBatchIsCommited(dsu);
+                    });
                 });
             });
         });
@@ -366,6 +368,6 @@ double_check.createTestFolder("batch_op_test_folder", (err, testFolder) => {
     filePath = path.join(testFolder, "test.txt");
     assert.callback("Batch operations", (callback) => {
         $$.flows.start("BatchOperationsTest", "start", callback);
-    //}, 3000 * 1000);
+        //}, 3000 * 1000);
     }, 3000);
 });

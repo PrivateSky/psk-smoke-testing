@@ -15,11 +15,13 @@ require("callflow").initialise();
 $$.flows.describe("TestFlow", {
     start: function (callback) {
         this.callback = callback;
-        tir.launchVirtualMQNode((err, port) => {
-            if (err) {
-                throw err;
-            }
-            this.createRawDossier();
+        double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+            tir.launchApiHubTestNode(100, folder, async err => {
+                if (err) {
+                    throw err;
+                }
+                this.createRawDossier();
+            });
         });
     },
 

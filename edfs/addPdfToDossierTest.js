@@ -2,7 +2,8 @@ require("../../../psknode/bundles/testsRuntime");
 require("../../../psknode/bundles/pskruntime");
 
 const tir = require("../../../psknode/tests/util/tir");
-const assert = require("double-check").assert;
+const double_check = require("double-check");
+const assert = double_check.assert;
 const fs = require("fs");
 
 const file = fs.createWriteStream("./bigFile.pdf");
@@ -13,7 +14,8 @@ for (let i = 0; i <= 1e5; i++) {
 file.end();
 
 assert.callback("Add PDF to dossier test", (testFinishCallback) => {
-    tir.launchVirtualMQNode(function (err, port) {
+    double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+        tir.launchApiHubTestNode(100, folder, async err => {
         if (err) {
             throw err;
         }
@@ -54,6 +56,7 @@ assert.callback("Add PDF to dossier test", (testFinishCallback) => {
                     });
                 });
             });
+        })
         })
     });
 }, 20000);

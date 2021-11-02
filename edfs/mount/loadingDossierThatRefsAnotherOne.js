@@ -1,10 +1,13 @@
 require("../../../../psknode/bundles/testsRuntime");
 
 const tir = require("../../../../psknode/tests/util/tir");
-const assert = require("double-check").assert;
+const double_check = require("double-check");
+const assert = double_check.assert;
+
 
 assert.callback("Load a dossier that was a mount point to a dossier with constitution code.", (testFinishCallback) => {
-    tir.launchVirtualMQNode(function (err, port) {
+    double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+        tir.launchApiHubTestNode(100, folder, async err => {
         if (err) {
             throw err;
         }
@@ -68,6 +71,7 @@ assert.callback("Load a dossier that was a mount point to a dossier with constit
                 })
 
             });
+        })
         })
     });
 }, 10000);

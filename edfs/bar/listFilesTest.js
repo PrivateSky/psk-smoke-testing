@@ -21,30 +21,32 @@ $$.flows.describe("ListFilesTest", {
         double_check.ensureFilesExist([folderPath], files, text, (err) => {
             assert.true(err === null || typeof err === "undefined", "Failed to create folder hierarchy.");
 
-            tir.launchVirtualMQNode((err, port) => {
-                assert.true(err === null || typeof err === "undefined", "Failed to create server.");
+            double_check.createTestFolder('AddFilesBatch', async (err, folder) => {
+                tir.launchApiHubTestNode(100, folder, async err => {
+                    assert.true(err === null || typeof err === "undefined", "Failed to create server.");
 
-                this.createDSU((dsu) => {
-                    dsu.batch((done) => {
-                        dsu.addFolder(folderPath, 'fld1', (err) => {
-                            if (err) {
-                                return done(err);
-                            }
-
-                            dsu.addFolder(folderPath, 'fld1/fld2', (err) => {
+                    this.createDSU((dsu) => {
+                        dsu.batch((done) => {
+                            dsu.addFolder(folderPath, 'fld1', (err) => {
                                 if (err) {
                                     return done(err);
                                 }
-                                done();
-                            })
-                        });
-                    }, (err) => {
-                        if (err) {
-                            throw err;
-                        }
 
-                        this.testListingFilesTopLevel(dsu)
-                    })
+                                dsu.addFolder(folderPath, 'fld1/fld2', (err) => {
+                                    if (err) {
+                                        return done(err);
+                                    }
+                                    done();
+                                })
+                            });
+                        }, (err) => {
+                            if (err) {
+                                throw err;
+                            }
+
+                            this.testListingFilesTopLevel(dsu)
+                        })
+                    });
                 });
             });
         });
