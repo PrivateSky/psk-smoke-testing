@@ -1,3 +1,3 @@
 {
-  "ignore": ["tmp", "builds", "basic", "communication"]
+  "ignore": ["tmp", "builds", "basic", "communication", "conflictsResolutionTest.js", "notificationsTest.js"]
 }
