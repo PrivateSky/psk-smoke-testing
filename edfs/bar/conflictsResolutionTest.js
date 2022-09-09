@@ -348,7 +348,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                             return reject(e);
                         }
                         resolve();
-                    }, randomInt(10, 25));
+                    }, 100);
                 }),
 
                 user1DSU.commitBatch()
@@ -426,7 +426,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                             return reject(e);
                         }
                         resolve();
-                    }, randomInt(10, 25));
+                    }, 100);
                 }),
 
                 user1DSU.commitBatch()
@@ -500,7 +500,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                                 } catch (e) {
                                     reject(e);
                                 }
-                            }, randomInt(10, 50));
+                            }, 100);
                         });
                     })
                 }
@@ -572,7 +572,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                             } catch (e) {
                                 reject(e);
                             }
-                        }, randomInt(10, 50));
+                        }, 100);
                     });
                 })
             }
@@ -638,7 +638,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
                             return reject(e);
                         }
                         resolve();
-                    }, randomInt(10, 25));
+                    }, 100);
                 }),
 
                 user1DSU.commitBatch()
@@ -748,10 +748,6 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             }
             promisifyDSU(...result);
             return result;
-        }
-
-        const randomInt = (min,max) => {
-            return Math.floor(Math.random()*(max-min+1)+min);
         }
 
     }, 10 * 1000);
