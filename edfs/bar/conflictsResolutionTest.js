@@ -87,9 +87,9 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             mainDSUKeySSI = await mainDSU.getKeySSIAsString();
             secondaryDSUKeySSI = await secondaryDSU.getKeySSIAsString();
             thirdDSUKeySSI = await thirdDSU.getKeySSIAsString();
-            resolver.invalidateDSUCache(mainDSUKeySSI);
-            resolver.invalidateDSUCache(secondaryDSUKeySSI);
-            resolver.invalidateDSUCache(thirdDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(mainDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(secondaryDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(thirdDSUKeySSI);
 
             console.log('------------------');
             console.log('Running tests...');
@@ -323,7 +323,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
 
             // Clear the DSU cache so that the second user will open another instance of
             // the second dsu
-            resolver.invalidateDSUCache(secondaryDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(secondaryDSUKeySSI);
             // This causes the second DSU to be mounted for user2
             await user2DSU.listFiles('/');
 
@@ -404,7 +404,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
 
             // Clear the DSU cache so that the second user will open another instance of
             // the second dsu
-            resolver.invalidateDSUCache(secondaryDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(secondaryDSUKeySSI);
             // This causes the second DSU to be mounted for user2
             await user2DSU.listFiles('/');
 
@@ -509,7 +509,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             await anchorPromise;
 
             // Reload DSU
-            resolver.invalidateDSUCache(mainDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(mainDSUKeySSI);
             const dsu = await loadDSU(mainDSUKeySSI);
             promisifyDSU(dsu);
             const files = await dsu.listFiles('/');
@@ -580,7 +580,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
             await anchorPromise;
 
             // Reload DSU
-            resolver.invalidateDSUCache(mainDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(mainDSUKeySSI);
             const dsu = await loadDSU(mainDSUKeySSI);
             promisifyDSU(dsu);
             const files = await dsu.listFiles('/');
@@ -609,7 +609,7 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
 
             // Clear the DSU cache so that the second user will open another instance of
             // the second dsu
-            resolver.invalidateDSUCache(secondaryDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(secondaryDSUKeySSI);
             // This causes the second DSU to be mounted for user2
             await user2DSU.listFiles('/');
 
@@ -734,16 +734,16 @@ double_check.createTestFolder("conflictsresolution_test_folder", (err, testFolde
          * @return {Array<Archive>} Array of DSU instances
          */
         const loadDSUAsMultipleUsers = async (keySSI, usersNo = 2) => {
-            resolver.invalidateDSUCache(keySSI);
-            resolver.invalidateDSUCache(secondaryDSUKeySSI);
-            resolver.invalidateDSUCache(thirdDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(keySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(secondaryDSUKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(thirdDSUKeySSI);
 
             const result = [];
             for (let i = 0; i < usersNo; i++) {
                 const dsu = await loadDSU(keySSI);
-                resolver.invalidateDSUCache(keySSI);
-                resolver.invalidateDSUCache(secondaryDSUKeySSI);
-                resolver.invalidateDSUCache(thirdDSUKeySSI);
+                await $$.promisify(resolver.invalidateDSUCache)(keySSI);
+                await $$.promisify(resolver.invalidateDSUCache)(secondaryDSUKeySSI);
+                await $$.promisify(resolver.invalidateDSUCache)(thirdDSUKeySSI);
                 result.push(dsu);
             }
             promisifyDSU(...result);

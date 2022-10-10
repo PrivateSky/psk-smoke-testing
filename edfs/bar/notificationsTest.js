@@ -59,7 +59,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         const testSubscriberAutoUpdatesOnNewFile = async () => {
             console.log('Test subscriber auto update on new file');
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
             await subscriberDSU.enableAutoSync(true);
 
@@ -80,11 +80,11 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         const testMultipleSubscribersAutoUpdateOnNewFile = async () => {
             console.log('Test multiple subscribers auto update on new file');
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const sub1DSU = await loadDSU(dsuKeySSI);
             await sub1DSU.enableAutoSync(true);
 
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const sub2DSU = await loadDSU(dsuKeySSI);
             await sub2DSU.enableAutoSync(true);
 
@@ -107,7 +107,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         const testSubscriberAutoUpdatesOnMultipleChanges = async () => {
             console.log('Test subscriber auto updates on multiple changes');
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
             await subscriberDSU.enableAutoSync(true);
 
@@ -137,7 +137,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         const testSubscriberCanMakeChangesAfterAutoUpdate = async () => {
             console.log('Test that subscriber can make changes after auto update');
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
 
             let syncListenerCalled = false;
@@ -174,7 +174,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         const testSubscriberAutoUpdatesInBatchMode = async () => {
             console.log('Test that subscriber auto updates when in batch mode');
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
 
             let syncListenerCalled = false;
@@ -227,11 +227,11 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         const testMultipleSubscribersAutoUpdatesInBatchMode = async () => {
             console.log('Test that multiple subscribers auto update when in batch mode');
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const sub1DSU = await loadDSU(dsuKeySSI);
             await sub1DSU.enableAutoSync(true);
 
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const sub2DSU = await loadDSU(dsuKeySSI);
             await sub2DSU.enableAutoSync(true);
 
@@ -285,7 +285,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
         const testMergeConflictOccurs = async () => {
             console.log("Test that a merge conflicts occurs");
 
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
 
             let errorHandlerCalled = false;
@@ -324,7 +324,7 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
         const testMergeConflictHandlerIsCalled = async () => {
             console.log("Test that the merge conflict handler is called");
 
-            resolver.invalidateDSUCache(dsuKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuKeySSI);
             const subscriberDSU = await loadDSU(dsuKeySSI);
 
             let conflicts;
@@ -371,9 +371,9 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         const testSubscriberWithMountedPathsAutoUpdates = async () => {
             console.log("Test that mounted DSU in subscriber auto updates on new changes");
-            resolver.invalidateDSUCache(dsuWithMountPointsKeySSI);
-            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
-            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuWithMountPointsKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level1);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level2);
             const subscriberDSU = await loadDSU(dsuWithMountPointsKeySSI);
 
             let syncHandlerCallCounter = 0;
@@ -391,8 +391,8 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             // Cache invalidation is required, or else the next writes
             // will take place in the cached archives, and the sync handler won't be called
             // since the DSUs will already be up to date
-            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
-            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level1);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level2);
 
             // Write files in each mounted dsu
             await dsuWithMountPoints.writeFile('/level1/level2/level2-file-for-subscriber.txt', 'level2-file-for-subscriber.txt');
@@ -417,9 +417,9 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
 
         const testSubscriberWithMountedPathsAutoUpdatesInBatchMode = async () => {
             console.log("Test that mounted DSU in subscriber auto updates on new changes in batch mode");
-            resolver.invalidateDSUCache(dsuWithMountPointsKeySSI);
-            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
-            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+            await $$.promisify(resolver.invalidateDSUCache)(dsuWithMountPointsKeySSI);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level1);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level2);
             const subscriberDSU = await loadDSU(dsuWithMountPointsKeySSI);
 
             let syncHandlerCallCounter = 0;
@@ -441,8 +441,8 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             // Cache invalidation is required, or else the next writes
             // will take place in the cached archives, and the sync handler won't be called
             // since the DSUs will already be up to date
-            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
-            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level1);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level2);
             // Write files in each mounted dsu
             await dsuWithMountPoints.writeFile('/level1/level2/level2-file-in-batch-mode.txt', 'level2-file-in-batch-mode.txt');
             await dsuWithMountPoints.writeFile('/level1/level1-file-in-batch-mode.txt', 'level1-file-in-batch-mode.txt');
@@ -451,8 +451,8 @@ double_check.createTestFolder("notifications_test_folder", (err, testFolder) => 
             // Cache invalidation is required, or else the next writes
             // will take place in the cached archives, and the sync handler won't be called
             // since the DSUs will already be up to date
-            resolver.invalidateDSUCache(mountedDSUsKeys.level1);
-            resolver.invalidateDSUCache(mountedDSUsKeys.level2);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level1);
+            await $$.promisify(resolver.invalidateDSUCache)(mountedDSUsKeys.level2);
 
             await dsuWithMountPoints.commitBatch();
             await delay(200) // wait a bit
